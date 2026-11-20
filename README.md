@@ -28,6 +28,24 @@ Start a session in the target project. Use `$nikomu` in Codex or `/nikomu` in Cl
 
 Use `shikomu` to write a system overview, or `saguru` to explore a problem before deciding what to change.
 
+## Build the first feature in a new project
+
+This example builds the first feature of a notes app in a Git repository where the skills are installed. Enter these lines one at a time in a Codex session. In Claude Code, replace the leading `$` with `/`.
+
+```text
+$shikomu Build an app for saving work notes and finding them in a list.
+$nikomu Let users save a note with a title and body and see its title in the list. If the title is empty, prompt for it and leave the note unsaved.
+$shitagaki
+$dandori
+$yonabe
+$yonabe e2e
+$osameru Use "Add note creation" as the change reason.
+```
+
+Use `nikomu` to agree on the specification and acceptance criteria, then review `nikomi.md` and continue on the same work branch. Before implementing, review `shitagaki.md`, `dandori.md`, and the E2E test specification `e2e.md` under `specs/<change>/`.
+
+Run `osameru` once all required E2E tests pass and the reviewer's confirmation is recorded in `e2e.md`. Review the implementation and design in the same PR and merge it to update the canonical design.
+
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
