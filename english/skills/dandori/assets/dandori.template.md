@@ -1,3 +1,4 @@
+<!-- dandori-plan: pending -->
 # Implementation plan
 
 Specification — [nikomi.md](./nikomi.md)
@@ -8,10 +9,10 @@ Specification — [nikomi.md](./nikomi.md)
 
 ## Tasks
 
-<!-- List tasks in execution order. Reference earlier tasks when there are dependencies. Repeat this block for each task.
+<!-- List tasks in the execution order derived from the graph. Refer to acceptance criteria by ID. Repeat this block for each task.
 
 - [ ] T-01 Task description
-  - Depends on
+  - Depends on: IDs and reasons for direct prerequisites, or None
   - Related acceptance criteria
   - Completion check
 
@@ -19,7 +20,7 @@ Specification — [nikomi.md](./nikomi.md)
 
 ## Acceptance checks
 
-<!-- Add one row per acceptance criterion in nikomi.md. Start with Pending. During implementation, record what was run or checked and the observed result. -->
+<!-- Add one row per acceptance criterion in nikomi.md. In the verification method, record the required task IDs, setup, test or manual check, and expected result. Start with Pending. During implementation, record what was run or checked and the observed result. -->
 
 | Criterion ID | Verification method | Result | Evidence |
 | --- | --- | --- | --- |
