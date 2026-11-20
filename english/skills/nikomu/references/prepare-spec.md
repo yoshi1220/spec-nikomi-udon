@@ -16,7 +16,7 @@ For a new `nikomi.md`, start with the [specification template](../assets/nikomi.
 - **Agreed design decisions.** Record established choices and their reasons. Refer to relevant constraints in the system overview, current specifications, and similar implementations.
 - **Acceptance criteria.** State the precondition, action, and observable result. Give each criterion a unique ID such as `AC-01` and preserve previously assigned IDs.
 
-Record sources and unresolved decisions affecting the implementation approach or acceptance criteria when relevant. When modifying an existing system, distinguish observed behavior from behavior the user has agreed to preserve.
+Record the sources. Use “Record unresolved points” in [Save decisions in nikomi.md](record-decisions.md) to capture relevant gaps or discrepancies in the draft. Keep unsupported classifications, relationships, and unagreed behavior out of the confirmed specification. If an acceptance criterion needs an unconfirmed precondition or result, record what is missing and leave the value or behavior open. When modifying an existing system, distinguish observed behavior from behavior the user has agreed to preserve.
 
 Preserve the original request under **Original request**, keeping the user’s wording for the requested capabilities, constraints, and exclusions. When the primary input is a document, preserve its stated goals with references to the relevant sections.
 

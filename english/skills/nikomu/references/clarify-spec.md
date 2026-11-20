@@ -27,6 +27,8 @@ Whenever candidates are added to the question candidate pool, apply the **fact g
 3. Keep a candidate whose factual investigation depends on an unresolved decision or cannot finish during the current round in the pool as "awaiting research." Do not add it to the frontier or turn it into a user question. Reapply the fact gate after its dependency is settled or the research is complete.
 4. Reclassify a candidate as a decision only if, after exhausting available sources, it becomes clear that new project policy or requirements must be chosen. If a factual answer exists externally but simply cannot be obtained, do not treat it as a decision. Mark it Outstanding if it has no impact on implementation or validation strategy. Otherwise mark it Deferred and record why it could not be investigated.
 
+Keep unresolved points in `nikomi.md` as described in [Record unresolved points](record-decisions.md#record-unresolved-points). If the user needs to supply missing material, explain what it will help verify. Keep the fact unconfirmed until the evidence is available.
+
 Apply the threshold at its current stage (see the threshold definition in Step 5) to every candidate that remains a decision after passing the fact gate. A core decision always passes it. Remove any candidate that does not pass it—at stage 1, one whose answer, regardless of the outcome, would not change implementation, data model, task breakdown, test design, UX behavior, operations, or compliance validation. Settle a removed candidate by consequence where the rule allows. Otherwise change the corresponding point to Outstanding or Deferred, record it under Out of Scope and Limitations when it leaves a stated goal's behavior undefined, and recalculate aggregate category status.
 
 Associate each remaining decision candidate with the design-tree node it will settle and, through the request map, with its stated goal and depth. Move candidates with **no unresolved prerequisites** from the pool to the frontier, leaving all others in the pool. Sort the frontier as the interview discipline requires: core decisions first across all stated goals—decisions that constrain several others ahead of the rest, then by impact × uncertainty—followed by derived decisions by depth and then by the impact of their stated goal. Number it according to the Question format.
@@ -80,7 +82,7 @@ Before leaving Step 5, review the request map together with the Acceptance Crite
 
 ### Step 6. Satisfaction gate
 
-If an Outstanding point would alter a stated goal's managed quantities, states, allowed operations, or required data freshness, reopen it as core and return to Step 2. Record holds and relevant unasked situations that leave behavior unspecified in Out of Scope and Limitations under Step 4C. Summarize category statuses, six-facet coverage per goal, holds and their reasons, unasked situations, derived requirements and their grounds, and changed sections. Count saved entries in the file. Say whether any unresolved point prevents implementation or acceptance verification.
+If an Outstanding point would alter a stated goal's managed quantities, states, allowed operations, or required data freshness, reopen it as core and return to Step 2. Record holds and relevant unasked situations that leave behavior unspecified in Out of Scope and Limitations under Step 4C. Summarize category statuses, six-facet coverage per goal, holds and their reasons, unasked situations, derived requirements and their grounds, and changed sections. Count saved entries in the file. Identify any unconfirmed fact or pending decision that prevents implementation or acceptance verification and say what would resolve it.
 
 Use an interactive question tool when available, or show the same choices in chat, and wait for the user's answer. Always offer these three choices and accept a free-form reply identifying additional concerns or asking to stop.
 
@@ -88,7 +90,7 @@ Use an interactive question tool when available, or show the same choices in cha
 2. **Explore an area further.** Ask what area and concern unless the user already specified it. Reopen the affected point as Partial or add a new one, update both maps, and return to Step 2.
 3. **Stop here with concerns remaining.** Record the concerns the user named and follow the interrupted completion path. Honor an immediate stop without asking for more details.
 
-Run the final validation from Step 4C before changing the review marker. Set `<!-- nikomi-review: confirmed -->` only when the user explicitly confirms the current file and no unresolved decision blocks the implementation approach or acceptance verification. Otherwise keep it at `<!-- nikomi-review: pending -->`. A terminal interview state does not establish an unresolved product rule or cover a missing acceptance scenario.
+Run the final validation from Step 4C before changing the review marker. Set `<!-- nikomi-review: confirmed -->` only when the user explicitly confirms the current file and no unconfirmed fact or unresolved decision blocks the implementation approach or acceptance verification. Otherwise keep it at `<!-- nikomi-review: pending -->`. A terminal interview state does not establish an unresolved product rule or cover a missing acceptance scenario.
 
 ### Interrupted completion path
 
@@ -106,7 +108,7 @@ Report the following.
 - Completion type (normal / user interruption). For an interruption, include where it occurred and that no post-interruption question or answer was incorporated.
 - Number of rounds, questions presented, and accepted answers. Count this session’s accepted answers from the saved Clarifications entries added since the baseline, and state separately any question that was skipped, deferred, or asked again as a follow-up. Optionally include a per-round breakdown. The question-and-answer list may refer to Clarifications. List requirements settled by consequence separately.
 - Path to the updated specification and the sections changed.
-- Readiness for planning. Name each blocking decision and what would settle it. Recommend `dandori` only when the file is confirmed and ready. Otherwise propose resuming the interview later.
+- Readiness for planning. Distinguish remaining unconfirmed facts from choices the user needs to make. State the evidence needed or the choice to make and how each affects planning. Recommend `dandori` only when the file is confirmed and ready. Otherwise propose resuming the interview later.
 - Coverage table: show every category's aggregate status as **Resolved** / **Clear** / **Deferred** / **Outstanding**, with a per-point status breakdown. Show categories with no relevant points as not applicable. Do not proceed to the completion report if even one Partial / Missing point remains.
 - Request map table: every stated goal with the status of each of its six core facets, the acceptance scenarios (for an exclusion, the Out of Scope line) that verify it, and any agreed extension or recorded limitation attached to it.
 

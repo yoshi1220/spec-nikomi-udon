@@ -17,6 +17,15 @@ Step 4 does not run sequentially after Step 3. Invoke Step 4A from Step 3 whenev
 3. Incorporate, save, and validate each verified fact separately.
 4. After it has been saved and validated successfully, change the point resolved by that fact to Resolved and recalculate aggregate category status.
 
+## Record unresolved points
+
+For each unresolved point relevant to the change, make the next action clear to a reader of the specification.
+
+- **Unconfirmed**. Use for facts with insufficient or conflicting evidence. State what is known and cite the sources. For a conflict, retain both accounts and state what to investigate or what evidence would settle it.
+- **User decision required**. Use when the user needs to choose a requirement or policy. State what to decide, why, and which specification, work, or verification it affects. Keep a fact marked Unconfirmed when the user needs to supply evidence for it.
+
+Say when a point blocks the implementation approach or acceptance verification. Keep active points under Open questions. If an existing specification has no equivalent section, add Open questions when needed. When the interview ends, move blocking points and any holds that Step 4C requires you to record to Out of Scope and Limitations, with the Undecided label and the relevant label above. Update any existing entry for the same point so that only one remains. Remove a resolved entry once the specification records the outcome and its basis.
+
 ## Step 4C. Shared incorporation and validation rules
 
 1. Incorporate content into the best section:
@@ -36,6 +45,7 @@ Step 4 does not run sequentially after Step 3. Invoke Step 4A from Step 3 whenev
    - Ensure requirement and scenario identifiers are unique within the spec and increase within their section, that no requirement is overridden by a requirement in another section, and that a superseded decision's requirements and scenarios were updated in the same operation.
    - When event order affects an outcome, check that the spec states the ordering rule and that an acceptance scenario covers the outcome. If rules differ across records, check how they interact.
    - Ensure no ambiguous text or placeholder that the incorporation should resolve remains.
+   - For each remaining open point, check that the fact to verify or the decision the user must make and its impact are clear. Check that the specification and acceptance criteria leave the point open.
    - Ensure no invalidated option or conflicting obsolete text remains.
    - Ensure Markdown structure is valid. Keep existing headings. Add only relevant standard sections, the Clarifications headings from Step 4A, and acceptance criterion headings.
    - Ensure every new requirement is a numbered statement, each scenario cites its originating requirement, accepted decision, or applicable confirmed rule and uses no unaccepted value, and no Clarifications line contradicts the main text without a supersession note.
