@@ -301,14 +301,19 @@ def start_e2e(root, change, policy):
     print(run["id"])
 
 
-def review_e2e(root, change, policy, run_id, reviewer):
-    path, text, _, checks = read_e2e(change)
-    block = one_block(REVIEW, text, "review")
-    run = read_run(block.group(1))
+def require_current_run(root, change, policy, checks, review, run_id):
+    run = read_run(review)
     if run_id != run["id"]:
         raise WorkflowError("The run ID does not match the current E2E run")
     if run["snapshot"] != test_snapshot(root, change, policy, checks):
         raise WorkflowError("The tested worktree, test definition or project settings have changed")
+    return run
+
+
+def review_e2e(root, change, policy, run_id, reviewer):
+    path, text, _, checks = read_e2e(change)
+    block = one_block(REVIEW, text, "review")
+    run = require_current_run(root, change, policy, checks, block.group(1), run_id)
     if not reviewer.strip() or any(ord(character) < 32 for character in reviewer) or "-->" in reviewer:
         raise WorkflowError("Provide the name of the person who confirmed the execution and results")
     receipt = {
@@ -466,6 +471,8 @@ def make_parser():
     configure.add_argument("--screenshots", choices=("on", "off"))
     commands.add_parser("settings")
     commands.add_parser("start-e2e")
+    check_run = commands.add_parser("check-e2e-run")
+    check_run.add_argument("--tested", required=True)
     review = commands.add_parser("review-e2e")
     review.add_argument("--tested", required=True)
     review.add_argument("--reviewer", required=True)
@@ -496,6 +503,11 @@ def main():
             change = change_directory(root, args.change, applying=args.command == "apply")
             if args.command == "start-e2e":
                 start_e2e(root, change, policy)
+            elif args.command == "check-e2e-run":
+                _, text, _, checks = read_e2e(change)
+                review = one_block(REVIEW, text, "review").group(1)
+                require_current_run(root, change, policy, checks, review, args.tested)
+                print("E2E run matches current inputs")
             elif args.command == "review-e2e":
                 review_e2e(root, change, policy, args.tested, args.reviewer)
             elif args.command == "verify-e2e":

@@ -11,20 +11,22 @@ SIer や日本の伝統的な企業の開発チームを想定しています。
 1. **仕様を詰める**。要件やプロダクトバックログ項目（PBI）から始めるときは `nikomu`、既存資料から始めるときは `torikomu` を使います。対象範囲、振る舞い、受け入れ条件を一問ずつ確認し、`nikomi.md` に残します。
 2. **基本設計を下書きする**。担当者が `nikomi.md` を確認し、必要に応じて修正します。保存した仕様をもとに、`shitagaki` で機能ごとの基本設計書案を `shitagaki.md` に作ります。
 3. **計画する**。`dandori` で作業と確認方法を `dandori.md` にまとめ、振る舞いごとの手順と期待結果を E2E テスト仕様書の `e2e.md` に記します。
-4. **実装して検証する**。`yonabe` で実装し、`yonabe e2e` で計画した動作確認を進めます。担当者は E2E テストの実施内容と結果を確認し、同じ仕様書に記録を残します。
+4. **実装して検証する**。`yonabe` で実装した後、`ajimi`（味見）で E2E テストを実施します。不合格の原因に応じて実装または計画からやり直し、一度再テストしても解決しなければ利用者に対応を求めます。担当者はテストの実施内容と結果を確認し、同じ仕様書に記録を残します。
 5. **正本に納める**。`osameru` で合格と担当者の確認を照合し、作業ブランチの `designs/specifications/` に設計書と改訂履歴の更新を用意します。実装と同じ PR でレビューし、マージ時に正本を更新します。
 
 PBI ごとの成果物とその状況は、変更用ディレクトリの `oshinagaki.md`（お品書き）で確認できます。
 
 ## 導入方法
 
-Git 2.23 以降と Python 3.8 以降を使えるプロジェクトに、[日本語版](japanese/skills/)か[英語版](english/skills/)のいずれかから、8つのスキルをまとめてコピーします。配置先は Codex では `.agents/skills/`、Claude Code では `.claude/skills/` です。共有する手順とスクリプトを参照できるよう、すべて同じ親ディレクトリに置きます。
+Git 2.23 以降と Python 3.8 以降を使えるプロジェクトに、[日本語版](japanese/skills/)か[英語版](english/skills/)のいずれかから、9つのスキルをまとめてコピーします。配置先は Codex では `.agents/skills/`、Claude Code では `.claude/skills/` です。共有する手順とスクリプトを参照できるよう、すべて同じ親ディレクトリに置きます。
+
+すでに導入している場合は、同じ言語版の `dandori`、`yonabe`、`osameru` を更新し、`ajimi` を追加します。
 
 導入先のリポジトリで `python3 .agents/skills/osameru/scripts/osameru.py setup` を実行し、Playwright、Chrome 拡張、手動テストから一つ選びます。Claude Code の場合はパスの `.agents/skills/` を `.claude/skills/` に置き換えます。画面キャプチャと画面項目定義書の作成は既定で無効です。テスト方法や有効にする成果物は、導入後も設定を変更できます。 [設定と記録の手順](japanese/skills/osameru/references/format.md)
 
 Playwright または Chrome 拡張を選ぶ場合は、導入先に期待結果を判定できるテストランナーや拡張を用意します。
 
-導入先のプロジェクトでセッションを始めます。たとえば `nikomu` は、Codex では `$nikomu`、Claude Code では `/nikomu` と入力します。E2E テストを実施するときは、同じ要領で `$yonabe e2e` または `/yonabe e2e` と入力します。
+導入先のプロジェクトでセッションを始めます。たとえば `nikomu` は、Codex では `$nikomu`、Claude Code では `/nikomu` と入力します。E2E テストでは `$ajimi` または `/ajimi` を使います。
 
 システム全体の指針を作るには `shikomu`、何を変えるか相談するには `saguru` を使います。
 
@@ -38,7 +40,7 @@ $nikomu タイトルと本文を入力してメモを登録し、一覧にタイ
 $shitagaki
 $dandori
 $yonabe
-$yonabe e2e
+$ajimi
 $osameru 変更理由は「メモ登録機能を追加するため」です。
 ```
 

@@ -10,4 +10,5 @@
 
 - Read the relevant project instructions, system guidance, existing specifications, code, and tests. Inspect the worktree to identify partially implemented work, completed changes, and unrelated edits. Preserve existing work and ask if overlapping edits cannot be reconciled safely.
 - Read completed tasks and recorded passes. Check whether the code, prerequisite results, and verification procedures behind them still apply. If a later change affects the evidence or its validity cannot be established, update the record as described in [Recover and finish](recover-and-finish.md) and re-run the affected checks.
+- When `ajimi` reports a failure, treat the behavior ID, expected result, and observation as current evidence. Identify affected tasks and acceptance criteria, including completed work, and update their records using the preceding guidance.
 - Carry forward valid results and resume with the first unfinished task whose prerequisites are satisfied. For partial implementation, use the task's completion check to determine what remains. Continue verifying pending or reopened acceptance criteria even when every task is checked off.

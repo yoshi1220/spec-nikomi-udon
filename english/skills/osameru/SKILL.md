@@ -5,7 +5,7 @@ description: Validate required E2E passes and human confirmation, then apply the
 
 # Apply the canonical design
 
-Use this skill after implementation with `yonabe` and E2E verification. Follow the [handoff format and CLI reference](references/format.md) to prepare canonical design and history updates on the work branch.
+Use this skill after implementation with `yonabe` and after `ajimi` records the E2E passes and reviewer confirmation. Follow the [handoff format and CLI reference](references/format.md) to prepare canonical design and history updates on the work branch.
 
 1. Use the specified `specs/<change>/` directory, or resolve it from the current `feature/<change>` branch. Check that the branch matches the change and that `nikomi.md` and `shitagaki.md` exist.
 2. Compare `nikomi.md`, `shitagaki.md`, and `e2e.md`. Check required design content, open items, and E2E coverage. Show any gaps or mismatches between the requirements, design and implementation. Ask the user one question at a time when a decision is needed.

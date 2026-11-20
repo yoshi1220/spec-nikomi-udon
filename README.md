@@ -11,20 +11,22 @@ It is intended for systems integrators and teams at established Japanese compani
 1. **Clarify the specification.** Use `nikomu` for requirements or a product backlog item (PBI) and `torikomu` for existing documents. Agree on scope, behavior, and acceptance criteria one question at a time, and record them in `nikomi.md`.
 2. **Draft the basic design.** Review `nikomi.md` and make any needed edits. Use `shitagaki` to turn the saved specification into a functional basic design in `shitagaki.md`.
 3. **Plan implementation and testing.** Use `dandori` to record tasks and verification methods in `dandori.md`. It also prepares `e2e.md` with steps and expected results for each behavior under test.
-4. **Implement and verify.** Use `yonabe` to implement the change, then `yonabe e2e` to verify the planned behavior. A reviewer confirms what was tested and the results in the same test specification.
+4. **Implement and verify.** Use `yonabe` to implement the change, then `ajimi` to run E2E tests. If a test fails, `ajimi` returns to implementation or planning as needed and retests once. If the issue persists, it asks the user to intervene. A reviewer confirms what was tested and the results in the same test specification.
 5. **Apply the canonical design.** Use `osameru` to verify the passes and reviewer confirmation and prepare the design and revision history under `designs/specifications/` on the work branch. Review the implementation and design in the same PR. The merge updates the canonical design.
 
 Each PBI has an `oshinagaki.md` in its change directory that lists deliverables and their statuses.
 
 ## Installation
 
-In a project using Git 2.23 or later and Python 3.8 or later, copy all eight skill directories from either the [English](english/skills/) or [Japanese](japanese/skills/) edition into `.agents/skills/` for Codex or `.claude/skills/` for Claude Code. Keep them under the same parent directory so the skills can access shared instructions and scripts.
+In a project using Git 2.23 or later and Python 3.8 or later, copy all nine skill directories from either the [English](english/skills/) or [Japanese](japanese/skills/) edition into `.agents/skills/` for Codex or `.claude/skills/` for Claude Code. Keep them under the same parent directory so the skills can access shared instructions and scripts.
+
+For an existing installation, update `dandori`, `yonabe`, and `osameru`, and add `ajimi` from the same language edition.
 
 From the target repository, run `python3 .agents/skills/osameru/scripts/osameru.py setup` and choose Playwright, a Chrome extension, or manual testing. For Claude Code, replace `.agents/skills/` with `.claude/skills/` in the path. Screenshots and screen item definitions are off by default. You can change the method and options after installation. [Settings and recording instructions](english/skills/osameru/references/format.md)
 
 For Playwright or the Chrome extension, set up a test runner or extension that can evaluate the expected results in the target project.
 
-Start a session in the target project. Use `$nikomu` in Codex or `/nikomu` in Claude Code. To run E2E tests, use `$yonabe e2e` or `/yonabe e2e`, respectively.
+Start a session in the target project. Use `$nikomu` in Codex or `/nikomu` in Claude Code. To run E2E tests, use `$ajimi` or `/ajimi`, respectively.
 
 Use `shikomu` to write a system overview, or `saguru` to explore a problem before deciding what to change.
 
@@ -38,7 +40,7 @@ $nikomu Let users save a note with a title and body and see its title in the lis
 $shitagaki
 $dandori
 $yonabe
-$yonabe e2e
+$ajimi
 $osameru Use "Add note creation" as the change reason.
 ```
 

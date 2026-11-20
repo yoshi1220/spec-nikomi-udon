@@ -33,6 +33,6 @@ When screen item definitions are enabled, put one `<!-- screen-items: applicable
 
 To withdraw confirmation, restore the contents between the `e2e:review` markers to “Pending.” Use `start-e2e` to begin a new run before confirming again. To correct the change reason, pass the corrected text to `apply` to update the same PBI's history entry.
 
-When resuming result entry or review for a completed run, keep the `id` in the `e2e-run` comment in `e2e.md`.
+When resuming result entry or review for a completed run, keep the `id` in the `e2e-run` comment in `e2e.md`. Run `python3 <osameru.py> check-e2e-run --tested <run-id>` to verify the run ID and tested inputs. The command leaves results and reviewer confirmation untouched.
 
 Preserve the `e2e:checks` and `e2e:review` boundaries. Keep the table columns in the template's order, starting with the behavior ID and ending with the evidence. Use `<br>` for line breaks and `\|` for a literal pipe inside a cell. Record completed verdicts as `OK` or `NG`.
