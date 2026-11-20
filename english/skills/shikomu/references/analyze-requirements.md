@@ -26,9 +26,10 @@ Assess the capability tree and relationship graph independently. Build each from
 
 ## Check and save the overview
 
-- When sources disagree with each other or with an existing document, record the conflicting claims and both locators, and mark the point as unconfirmed. Leave disputed branches or edges out of confirmed additions. Preserve existing text until the user resolves the conflict and point from the affected entry to the unresolved issue. Ask one consequential decision at a time. Continue documenting supported parts while awaiting a decision.
+- When sources disagree with each other or with an existing document, record the conflicting claims and both locators, and mark the point as unconfirmed. Leave disputed branches or edges out of confirmed additions. Preserve existing text until the user resolves the conflict and point from the affected entry to the unresolved issue. Ask one consequential confirmation question at a time. Continue documenting supported parts while awaiting an answer.
 - Before saving, check that each branch and edge is traceable to evidence, each edge has identifiable endpoints, type, and direction, and open points are visible in prose.
-- Collect points that need user action under “Open questions and decisions.” Label a point that more evidence can settle as “Unconfirmed” and state what to verify. Label a choice as “User decision required” and state what to decide, why, and what it affects. Keep capabilities whose parent is unknown in the list and mark the parent as unconfirmed. Confirm classifications and relationships only when supported by evidence.
+- After reviewing the available material, label remaining unknowns “Unconfirmed” and collect them under “Points for user confirmation.” State what evidence, factual confirmation, or choice you need from the user, why, and what it affects. Keep capabilities whose parent is unknown in the list and mark the parent as unconfirmed. Confirm classifications and relationships only when supported by evidence.
+- When updating an existing overview, reuse any “Open questions and decisions” section and bring its heading and labels into line with the current format. After saving, tell the user what needs confirmation. If several points remain, point to the recorded list and ask one question at a time, starting with the point that has the greatest impact.
 
 ## Example with partial input
 

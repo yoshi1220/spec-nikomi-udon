@@ -20,9 +20,9 @@
 
 <!-- Record organization-wide or system-wide rules that affect individual changes. Mark relevant unknowns as unconfirmed. -->
 
-## Open questions and decisions
+## Points for user confirmation
 
-<!-- For Unconfirmed items, state what evidence is needed. For User decision required items, state what to decide, why, and what it affects. Omit this section if there are no such items. -->
+<!-- Label unknowns Unconfirmed. State what evidence, factual confirmation, or choice you need from the user, why, and what it affects. Omit this section if there are no such items. -->
 
 ## Sources
 

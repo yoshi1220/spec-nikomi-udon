@@ -32,11 +32,11 @@
 
 ## Open questions
 
-<!-- For Unconfirmed facts, state what evidence is needed. For User decision required items, state what to decide and why. Describe the effect on planning or verification. Incorporate resolved points in the relevant section. Move holds that need to remain visible after the interview to Out of Scope and Limitations. -->
+<!-- Label unknowns Unconfirmed (user confirmation required). State what evidence, factual confirmation, or choice you need from the user and why. Describe the effect on planning or verification. Incorporate resolved points in the relevant section. Move holds that need to remain visible after the interview to Out of Scope and Limitations. -->
 
 ## Out of Scope and Limitations
 
-<!-- Separate agreed exclusions or limitations from Undecided items. Label each Undecided item Unconfirmed or User decision required, and state the reason, what would resolve it, and the effect on planning or verification. -->
+<!-- Keep agreed exclusions and limitations separate from items labeled Unconfirmed (user confirmation required). State what to confirm, why, and how it affects planning or verification. -->
 
 ## Verified Premises
 
