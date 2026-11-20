@@ -1,15 +1,16 @@
 ---
 name: shikomu
-description: Prepare a system overview and a repository structure document from requirements material or a short description. Use nikomu or torikomu to start an individual change.
+description: Analyze requirements material or a short description to prepare a system overview with an evidence-backed capability tree and directed relationship graph where possible. Document program directories separately. Use nikomu or torikomu to start an individual change.
 ---
 
 # Prepare the system-wide guidance
 
 Read the requirements material specified with `--file <path>`, or use the description supplied in the conversation. If the user specifies a file you cannot read, explain the problem and ask for the input needed to proceed.
 
-- Use the [system overview template](assets/system-overview.template.md) to write the purpose, scope, main capabilities, system structure, external integrations, and shared constraints in `designs/system-overview.md`. Cite the input file if one was used. Mark information that is needed but not yet established as unconfirmed.
+Read any existing output documents before starting the analysis. Apply the requested updates and retain existing information when the new input is silent about it.
+
+- Follow the [requirements analysis procedure](references/analyze-requirements.md) to build the capability tree and relationship graph independently, as far as the evidence supports them. Use the [system overview template](assets/system-overview.template.md) to record the purpose, scope, main capabilities, system structure, external integrations, shared constraints, and supporting sources in `designs/system-overview.md`.
 - Use the [directory structure template](assets/repository-structure.template.md) for `designs/repository-structure.md`. Replace the instructions with the documented directory tree and known directory responsibilities when the input provides them. If there is no layout in the input and the document is new, keep the template's instructions for the user to fill in.
-- If either file already exists, read it and apply the requested updates. Where an input conflicts with existing text, mark the issue as unconfirmed and retain the existing information until the user resolves it.
 
 Ask one decision at a time. Normally offer three viable options in recommendation order, explain your first choice, and accept free-form input. Ask an open question when you cannot provide viable options.
 
