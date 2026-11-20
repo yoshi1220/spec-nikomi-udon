@@ -92,6 +92,8 @@ Use an interactive question tool when available, or show the same choices in cha
 
 Run the final validation from Step 4C before changing the review marker. Set `<!-- nikomi-review: confirmed -->` only when the user explicitly confirms the current file and no unconfirmed point blocks the implementation approach or acceptance verification. Otherwise keep it at `<!-- nikomi-review: pending -->`. A terminal interview state does not establish an unresolved product rule or cover a missing acceptance scenario.
 
+Update the change specification's status in `oshinagaki.md` if present. After handing the confirmed specification to the user, point them to `shitagaki` to draft the basic design.
+
 ### Interrupted completion path
 
 If the user asks to stop after the draft has been loaded, stop asking immediately.

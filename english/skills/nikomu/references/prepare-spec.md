@@ -24,4 +24,6 @@ If an existing specification has no Original request section, reconstruct the st
 
 ## Begin the interview
 
+After saving a new `nikomi.md`, create `oshinagaki.md` in the same directory from the [deliverable index template](../../shitagaki/assets/oshinagaki.template.md). Use the saved index if it already exists.
+
 Once the draft is saved, follow the required [clarification workflow](clarify-spec.md). On resumption, read the existing specification and its decisions before rebuilding the interview state.

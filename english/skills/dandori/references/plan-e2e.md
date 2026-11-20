@@ -1,0 +1,5 @@
+# Plan E2E in an integration test specification
+
+1. Read the basic design in `shitagaki.md` and the acceptance criteria in `nikomi.md`. Identify the behaviors being changed and those affected by the change. Cover relevant normal and failure paths. Connect any required environments or test data to the work needed to prepare them.
+2. Create `e2e.md` in the change directory from the [E2E test specification template](../assets/e2e.template.md). Give each behavior under test a unique ID and reference the relevant design and any corresponding acceptance criteria. Fill in the preconditions, steps, and expected result, starting with pending verdicts. When project settings enable screenshots, specify the points that need screen evidence. Preserve the [CLI handoff format](../../osameru/references/format.md).
+3. When revising the plan, read the existing `e2e.md` and preserve IDs for the same behaviors. Revise affected steps, expectations and results, and identify results that need rechecking. Verify coverage and ensure the expected result of each ID can be evaluated, then return to [checking the implementation plan](write-plan.md#check-the-plan-before-and-after-saving).
