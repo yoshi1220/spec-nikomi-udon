@@ -20,7 +20,7 @@ Each PBI has an `oshinagaki.md` in its change directory that lists deliverables 
 
 In a project using Git 2.23 or later and Python 3.8 or later, copy all nine skill directories from either the [English](english/skills/) or [Japanese](japanese/skills/) edition into `.agents/skills/` for Codex or `.claude/skills/` for Claude Code. Keep them under the same parent directory so the skills can access shared instructions and scripts.
 
-For an existing installation, update `dandori`, `yonabe`, and `osameru`, and add `ajimi` from the same language edition.
+For an existing installation, update `nikomu`, `shitagaki`, `dandori`, `yonabe`, and `osameru`, and add `ajimi` from the same language edition.
 
 From the target repository, run `python3 .agents/skills/osameru/scripts/osameru.py setup` and choose Playwright, a Chrome extension, or manual testing. For Claude Code, replace `.agents/skills/` with `.claude/skills/` in the path. Screenshots and screen item definitions are off by default. You can change the method and options after installation. [Settings and recording instructions](english/skills/osameru/references/format.md)
 
@@ -30,9 +30,25 @@ Start a session in the target project. Use `$nikomu` in Codex or `/nikomu` in Cl
 
 Use `shikomu` to write a system overview, or `saguru` to explore a problem before deciding what to change.
 
+### Design approval before planning
+
+`dandori` requires a confirmed `nikomi.md` and uses `shitagaki.md` when available. Choose the approval mode for the project. For example, to enable PR review in a Codex installation, run the following command in the target repository.
+
+```sh
+python3 .agents/skills/osameru/scripts/osameru.py setup --design-approval pr
+```
+
+| Setting | When planning can begin |
+| --- | --- |
+| `none` (default) | Proceed once the specification is confirmed. The team can review the design alongside the implementation in the final PR. |
+| `operational` | The operator obtains design approval through the project’s process, then invokes `dandori`. Invocation counts as confirmation. |
+| `pr` | `dandori` checks the design PR. Planning can begin before merge when the local draft matches the approved design. |
+
+If `dandori` cannot verify PR approval, it explains why and asks whether to continue. If the operator continues, it records the unconfirmed item and the decision in the PBI’s `dandori.md`. For an exception such as an emergency change, obtain authorization from the project’s designated role and record the reason and confirmation in the same file. [Selecting the design PR and handling exceptions](english/skills/dandori/references/design-approval.md)
+
 ## Build the first feature in a new project
 
-This example builds the first feature of a notes app in a Git repository where the skills are installed. Enter these lines one at a time in a Codex session. In Claude Code, replace the leading `$` with `/`.
+This example builds the first feature of a notes app in a Git repository with the skills installed and design approval set to the default (`none`). Enter these lines one at a time in a Codex session. In Claude Code, replace the leading `$` with `/`.
 
 ```text
 $shikomu Build an app for saving work notes and finding them in a list.

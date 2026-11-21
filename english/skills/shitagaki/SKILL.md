@@ -13,4 +13,6 @@ Use the specified `specs/<change>/` directory. Otherwise map the current `featur
 4. On reruns, read the current `shitagaki.md` and update the parts affected by the change. Rework the structure when the underlying specification changes substantially. Preserve applicable manual edits and review decisions. If the canonical file has changed, reconcile the draft with that version before refreshing the recorded base.
 5. Verify purpose and scope, business rules, inputs and outputs, and normal and error behavior. Include applicable permissions and external integrations. Ensure the preconditions, actions, and observable results support test expectations for the main cases. Record the sources and update the affected rows in `oshinagaki.md`, creating it from the [deliverable index template](assets/oshinagaki.template.md) if needed. Report the draft path and open review items. Use `osameru` to apply the draft to the canonical design.
 
+At handoff, use the project’s `design_approval` setting. For `pr`, direct the user to PR review of the draft. For `operational`, direct them to the project’s approval process. In these modes, invoke `dandori` after approval. In `none` mode, proceed to `dandori` once the draft is ready.
+
 Ask one question at a time. For decisions with multiple options, number them in recommended order and allow free-form answers.

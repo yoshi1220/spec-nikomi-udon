@@ -18,7 +18,8 @@ from uuid import uuid4
 CONFIG = "designs/nikomi-udon.json"
 CANONICAL = "designs/specifications"
 METHODS = ("playwright", "chrome-extension", "manual")
-DEFAULTS = {"e2e_method": "manual", "screen_items": False, "screenshots": False}
+APPROVALS = ("none", "operational", "pr")
+DEFAULTS = {"design_approval": "none", "e2e_method": "manual", "screen_items": False, "screenshots": False}
 CHECKS = re.compile(r"(?ms)^<!-- e2e:checks -->\n(.*?)^<!-- /e2e:checks -->$")
 REVIEW = re.compile(r"(?ms)^<!-- e2e:review -->\n(.*?)^<!-- /e2e:review -->$")
 DOCUMENT = re.compile(
@@ -95,9 +96,12 @@ def settings(root):
     if not path.exists():
         return DEFAULTS.copy()
     value = json.loads(read(path))
+    if isinstance(value, dict):
+        value.setdefault("design_approval", "none")
     if (
         not isinstance(value, dict)
         or value.keys() != DEFAULTS.keys()
+        or value["design_approval"] not in APPROVALS
         or value["e2e_method"] not in METHODS
         or type(value["screen_items"]) is not bool
         or type(value["screenshots"]) is not bool
@@ -149,6 +153,8 @@ def setup(root, args):
         args.method = METHODS[int(choice) - 1]
     if args.method is not None:
         value["e2e_method"] = args.method
+    if args.design_approval is not None:
+        value["design_approval"] = args.design_approval
     for key in ("screen_items", "screenshots"):
         option = getattr(args, key)
         if option is not None:
@@ -159,7 +165,7 @@ def setup(root, args):
 
 def one_block(pattern, text, label):
     matches = list(pattern.finditer(text))
-    if len(matches) != 1:
+    if len(matches) != 1 or matches[0]["isCrossRepository"]:
         raise WorkflowError(f"Expected one {label} block in e2e.md")
     return matches[0]
 
@@ -216,8 +222,12 @@ def test_snapshot(root, change, policy, checks):
     exclude = {f"{change_name}/e2e.md", f"{change_name}/oshinagaki.md"}
     generated = (f"{CANONICAL}/", f"{change_name}/evidence/")
     files = git(root, "ls-files", "--cached", "--others", "--exclude-standard", "-z")
+    # Keep snapshots from projects configured before design approval was introduced.
+    snapshot_policy = policy.copy()
+    if snapshot_policy["design_approval"] == "none":
+        del snapshot_policy["design_approval"]
     state = hashlib.sha256(
-        json_text([change_name, policy, [row[:6] for row in checks.values()]]).encode()
+        json_text([change_name, snapshot_policy, [row[:6] for row in checks.values()]]).encode()
     )
     for raw in sorted(set(files.split(b"\0")) - {b""}):
         name = os.fsdecode(raw)
@@ -461,15 +471,76 @@ def apply_documents(root, change, policy, reason):
         print("Already applied")
 
 
+def gh_json(root, *args):
+    result = subprocess.run(["gh", *args], cwd=root, capture_output=True, text=True)
+    if result.returncode:
+        raise WorkflowError(result.stderr.strip() or "Unable to read the design PR")
+    return json.loads(result.stdout)
+
+
+def design_blob(root, commit, draft_path):
+    if not re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", commit):
+        raise WorkflowError("Unable to identify the design revision")
+    result = subprocess.run(
+        ["git", "rev-parse", "--verify", f"{commit}:{draft_path}"],
+        cwd=root, capture_output=True, text=True,
+    )
+    if result.returncode == 0:
+        return result.stdout.strip()
+    # Review commits can be absent from shallow or squash-merged checkouts.
+    endpoint = "repos/{owner}/{repo}/contents/" + quote(draft_path) + "?ref=" + commit
+    return gh_json(root, "api", endpoint).get("sha")
+
+
+def check_design_review(root, change, pr_number):
+    draft = managed_path(change, "shitagaki.md")
+    if not draft.is_file():
+        raise WorkflowError(f"Design draft missing: {draft}")
+    if pr_number is None:
+        branch = f"feature/{change.name}"
+        matches = gh_json(root, "pr", "list", "--head", branch, "--state", "open",
+                          "--limit", "2", "--json", "number,isCrossRepository")
+        if len(matches) != 1 or matches[0]["isCrossRepository"]:
+            raise WorkflowError(f"Unable to identify one same-repository PR for {branch}. Specify the design PR with --pr.")
+        pr_number = matches[0]["number"]
+    review = gh_json(root, "pr", "view", str(pr_number), "--json",
+                     "url,state,files,headRefOid,reviewDecision,reviews,latestReviews")
+    draft_path = draft.relative_to(root).as_posix()
+    if not any(entry["path"] == draft_path for entry in review["files"]):
+        raise WorkflowError(f"Unable to confirm {draft_path} in {review['url']}")
+    decision = review["reviewDecision"]
+    if review["state"] not in ("OPEN", "MERGED") or decision not in ("APPROVED", "", None):
+        raise WorkflowError(f"{review['url']}: {review['state']}, {decision}")
+    latest = review["latestReviews"]
+    if not decision and (len(latest) >= 100 or any(r["state"] == "CHANGES_REQUESTED" for r in latest)):
+        raise WorkflowError(f"Unable to establish approval for {review['url']}")
+    local_blob = git(root, "hash-object", "--", draft_path).decode().strip()
+    head = review["headRefOid"]
+    if design_blob(root, head, draft_path) != local_blob:
+        raise WorkflowError(f"The local draft differs from {review['url']}")
+    # latestReviews identifies active approvals. reviews supplies their commits.
+    approvals = {(r["author"]["login"], r["submittedAt"]) for r in latest if r["state"] == "APPROVED"}
+    for entry in reversed(review["reviews"]):
+        if entry["state"] == "APPROVED" and (entry["author"]["login"], entry["submittedAt"]) in approvals:
+            commit = (entry.get("commit") or {}).get("oid")
+            if commit and (commit == head or design_blob(root, commit, draft_path) == local_blob):
+                print(f"Design review approved: {review['url']}")
+                return
+    raise WorkflowError(f"No current approval confirmed for this design revision: {review['url']}")
+
+
 def make_parser():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--change", help="PBI directory relative to the repository root")
     commands = parser.add_subparsers(dest="command", required=True)
     configure = commands.add_parser("setup")
+    configure.add_argument("--design-approval", choices=APPROVALS)
     configure.add_argument("--method", choices=METHODS)
     configure.add_argument("--screen-items", choices=("on", "off"))
     configure.add_argument("--screenshots", choices=("on", "off"))
     commands.add_parser("settings")
+    design = commands.add_parser("check-design-review")
+    design.add_argument("--pr", type=int, help="Design PR number in the target repository")
     commands.add_parser("start-e2e")
     check_run = commands.add_parser("check-e2e-run")
     check_run.add_argument("--tested", required=True)
@@ -494,6 +565,9 @@ def main():
             return 0
         if args.command == "settings":
             print(json_text(settings(root)))
+            return 0
+        if args.command == "check-design-review":
+            check_design_review(root, change_directory(root, args.change), args.pr)
             return 0
         if args.command == "base":
             print(base_stamp(document_path(root, args.path)))

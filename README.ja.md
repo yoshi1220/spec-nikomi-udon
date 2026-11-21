@@ -20,7 +20,7 @@ PBI ごとの成果物とその状況は、変更用ディレクトリの `oshin
 
 Git 2.23 以降と Python 3.8 以降を使えるプロジェクトに、[日本語版](japanese/skills/)か[英語版](english/skills/)のいずれかから、9つのスキルをまとめてコピーします。配置先は Codex では `.agents/skills/`、Claude Code では `.claude/skills/` です。共有する手順とスクリプトを参照できるよう、すべて同じ親ディレクトリに置きます。
 
-すでに導入している場合は、同じ言語版の `dandori`、`yonabe`、`osameru` を更新し、`ajimi` を追加します。
+すでに導入している場合は、同じ言語版の `nikomu`、`shitagaki`、`dandori`、`yonabe`、`osameru` を更新し、`ajimi` を追加します。
 
 導入先のリポジトリで `python3 .agents/skills/osameru/scripts/osameru.py setup` を実行し、Playwright、Chrome 拡張、手動テストから一つ選びます。Claude Code の場合はパスの `.agents/skills/` を `.claude/skills/` に置き換えます。画面キャプチャと画面項目定義書の作成は既定で無効です。テスト方法や有効にする成果物は、導入後も設定を変更できます。 [設定と記録の手順](japanese/skills/osameru/references/format.md)
 
@@ -30,9 +30,25 @@ Playwright または Chrome 拡張を選ぶ場合は、導入先に期待結果�
 
 システム全体の指針を作るには `shikomu`、何を変えるか相談するには `saguru` を使います。
 
+### 計画前の設計承認
+
+`dandori` は確認済みの `nikomi.md` を必須とし、`shitagaki.md` があれば計画に使います。計画に進む前の承認方式はプロジェクト単位で選びます。たとえば、Codex の導入先で PR レビューを使うには、次のコマンドを実行します。
+
+```sh
+python3 .agents/skills/osameru/scripts/osameru.py setup --design-approval pr
+```
+
+| 設定値 | 計画に進むタイミング |
+| --- | --- |
+| `none`（既定） | 仕様の確認が済めば計画に進めます。設計レビューは実装と一緒に最終 PR で行えます。 |
+| `operational` | 利用者が案件の手続きで設計承認を得てから `dandori` を起動します。起動時に承認を再確認する操作はありません。 |
+| `pr` | `dandori` が設計レビュー用 PR を照会し、手元の設計書案が承認済みの内容と一致すれば、マージ前でも計画に進めます。 |
+
+`pr` で承認を確認できない場合、`dandori` は理由を示して続行するか尋ねます。続行を選ぶと、確認できなかった項目と判断を対象 PBI の `dandori.md` に記録します。緊急対応などで事前承認を省く場合は、プロジェクトが指定した担当者から例外の承認を得て、省略理由と承認を得た旨を同じファイルに残します。 [設計レビュー用 PR の指定と例外の手順](japanese/skills/dandori/references/design-approval.md)
+
 ## 新規開発で最初の機能を作る
 
-導入を済ませた Git リポジトリで、メモアプリの最初の機能を作る例です。Codex のセッションに上から一行ずつ入力します。Claude Code では先頭の `$` を `/` に置き換えます。
+既定の承認方式（`none`）で、メモアプリの最初の機能を作る例です。Codex のセッションに上から一行ずつ入力します。Claude Code では先頭の `$` を `/` に置き換えます。
 
 ```text
 $shikomu 作業メモを保存し、一覧から見返せるアプリを作りたいです。

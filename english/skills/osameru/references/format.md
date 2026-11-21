@@ -8,6 +8,8 @@ During installation, run `python3 <osameru.py> setup` and choose Playwright, a C
 
 Use the current settings when running and reviewing tests. After changing the settings, run and review E2E under the new configuration before applying the design.
 
+Use the `--design-approval` option of `setup` to select `none` (default), `operational`, or `pr`.
+
 ## Draft blocks
 
 Place one complete basic design per affected function inside `shitagaki.md`.

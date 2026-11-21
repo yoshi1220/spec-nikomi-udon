@@ -92,7 +92,7 @@ Use an interactive question tool when available, or show the same choices in cha
 
 Run the final validation from Step 4C before changing the review marker. Set `<!-- nikomi-review: confirmed -->` only when the user explicitly confirms the current file and no unconfirmed point blocks the implementation approach or acceptance verification. Otherwise keep it at `<!-- nikomi-review: pending -->`. A terminal interview state does not establish an unresolved product rule or cover a missing acceptance scenario.
 
-Update the change specification's status in `oshinagaki.md` if present. After handing the confirmed specification to the user, point them to `shitagaki` to draft the basic design.
+Update the change specification's status in `oshinagaki.md` if present. Hand the confirmed specification to the user. If the project workflow calls for a basic design draft, direct them to `shitagaki`.
 
 ### Interrupted completion path
 
@@ -110,7 +110,7 @@ Report the following.
 - Completion type (normal / user interruption). For an interruption, include where it occurred and that no post-interruption question or answer was incorporated.
 - Number of rounds, questions presented, and accepted answers. Count this session’s accepted answers from the saved Clarifications entries added since the baseline, and state separately any question that was skipped, deferred, or asked again as a follow-up. Optionally include a per-round breakdown. The question-and-answer list may refer to Clarifications. List requirements settled by consequence separately.
 - Path to the updated specification and the sections changed.
-- Readiness for planning. For each remaining unconfirmed point, state what the user needs to confirm and how it affects planning. Recommend `dandori` only when the file is confirmed and ready. Otherwise propose resuming the interview later.
+- Readiness for planning. For each remaining unconfirmed point, state what the user needs to confirm and how it affects planning. When the file is confirmed and ready, follow the project workflow. For advance design approval, route to `shitagaki` and the configured approval step before `dandori`. If unresolved decisions block planning, propose resuming the interview.
 - Coverage table: show every category's aggregate status as **Resolved** / **Clear** / **Deferred** / **Outstanding**, with a per-point status breakdown. Show categories with no relevant points as not applicable. Do not proceed to the completion report if even one Partial / Missing point remains.
 - Request map table: every stated goal with the status of each of its six core facets, the acceptance scenarios (for an exclusion, the Out of Scope line) that verify it, and any agreed extension or recorded limitation attached to it.
 
