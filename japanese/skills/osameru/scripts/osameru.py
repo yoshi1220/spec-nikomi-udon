@@ -165,7 +165,7 @@ def setup(root, args):
 
 def one_block(pattern, text, label):
     matches = list(pattern.finditer(text))
-    if len(matches) != 1 or matches[0]["isCrossRepository"]:
+    if len(matches) != 1:
         raise WorkflowError(f"Expected one {label} block in e2e.md")
     return matches[0]
 

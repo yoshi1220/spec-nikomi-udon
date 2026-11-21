@@ -18,9 +18,9 @@ Each PBI has an `oshinagaki.md` in its change directory that lists deliverables 
 
 ## Installation
 
-In a project using Git 2.23 or later and Python 3.8 or later, copy all nine skill directories from either the [English](english/skills/) or [Japanese](japanese/skills/) edition into `.agents/skills/` for Codex or `.claude/skills/` for Claude Code. Keep them under the same parent directory so the skills can access shared instructions and scripts.
+In a project using Git 2.23 or later and Python 3.8 or later, copy all ten skill directories from either the [English](english/skills/) or [Japanese](japanese/skills/) edition into `.agents/skills/` for Codex or `.claude/skills/` for Claude Code. Keep them under the same parent directory so the skills can access shared instructions and scripts.
 
-For an existing installation, update `nikomu`, `shitagaki`, `dandori`, `yonabe`, and `osameru`, and add `ajimi` from the same language edition.
+For an existing installation, add `okosu` and update `osameru` from the same language edition. If you are upgrading from a version before `ajimi`, copy the full set from that edition.
 
 From the target repository, run `python3 .agents/skills/osameru/scripts/osameru.py setup` and choose Playwright, a Chrome extension, or manual testing. For Claude Code, replace `.agents/skills/` with `.claude/skills/` in the path. Screenshots and screen item definitions are off by default. You can change the method and options after installation. [Settings and recording instructions](english/skills/osameru/references/format.md)
 
@@ -45,6 +45,14 @@ python3 .agents/skills/osameru/scripts/osameru.py setup --design-approval pr
 | `pr` | `dandori` checks the design PR. Planning can begin before merge when the local draft matches the approved design. |
 
 If `dandori` cannot verify PR approval, it explains why and asks whether to continue. If the operator continues, it records the unconfirmed item and the decision in the PBI’s `dandori.md`. For an exception such as an emergency change, obtain authorization from the project’s designated role and record the reason and confirmation in the same file. [Selecting the design PR and handling exceptions](english/skills/dandori/references/design-approval.md)
+
+## Document the current design of an existing project
+
+In the existing repository, invoke `$okosu` in Codex or `/okosu` in Claude Code. New onboarding work starts from the current commit by default. You can also name a branch, tag, or commit to analyze. [okosu workflow](english/skills/okosu/SKILL.md)
+
+1. Review the system-wide function inventory and relationships in `designs/system-overview.md`. The same file records the confirmation state, selected scope, and analyzed commit so you can resume in another session.
+2. Choose the functions being changed and those affected, or the entire system. The skill drafts the current basic designs under `designs/specifications/`.
+3. Review the documentation-only onboarding PR against the code, configuration, and existing tests at the analyzed revision. Points that can only be established at runtime remain marked as unverified. After the merge, use the designs on the shared branch as the canonical reference for the first change.
 
 ## Build the first feature in a new project
 

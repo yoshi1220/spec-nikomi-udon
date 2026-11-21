@@ -18,9 +18,9 @@ PBI ごとの成果物とその状況は、変更用ディレクトリの `oshin
 
 ## 導入方法
 
-Git 2.23 以降と Python 3.8 以降を使えるプロジェクトに、[日本語版](japanese/skills/)か[英語版](english/skills/)のいずれかから、9つのスキルをまとめてコピーします。配置先は Codex では `.agents/skills/`、Claude Code では `.claude/skills/` です。共有する手順とスクリプトを参照できるよう、すべて同じ親ディレクトリに置きます。
+Git 2.23 以降と Python 3.8 以降を使えるプロジェクトに、[日本語版](japanese/skills/)か[英語版](english/skills/)のいずれかから、10 個のスキルをまとめてコピーします。配置先は Codex では `.agents/skills/`、Claude Code では `.claude/skills/` です。共有する手順とスクリプトを参照できるよう、すべて同じ親ディレクトリに置きます。
 
-すでに導入している場合は、同じ言語版の `nikomu`、`shitagaki`、`dandori`、`yonabe`、`osameru` を更新し、`ajimi` を追加します。
+すでに導入している場合は、同じ言語版の `okosu` を追加し、`osameru` を更新します。`ajimi` の導入前の版から更新する場合は、同じ言語版の一式をコピーしてください。
 
 導入先のリポジトリで `python3 .agents/skills/osameru/scripts/osameru.py setup` を実行し、Playwright、Chrome 拡張、手動テストから一つ選びます。Claude Code の場合はパスの `.agents/skills/` を `.claude/skills/` に置き換えます。画面キャプチャと画面項目定義書の作成は既定で無効です。テスト方法や有効にする成果物は、導入後も設定を変更できます。 [設定と記録の手順](japanese/skills/osameru/references/format.md)
 
@@ -45,6 +45,14 @@ python3 .agents/skills/osameru/scripts/osameru.py setup --design-approval pr
 | `pr` | `dandori` が設計レビュー用 PR を照会し、手元の設計書案が承認済みの内容と一致すれば、マージ前でも計画に進めます。 |
 
 `pr` で承認を確認できない場合、`dandori` は理由を示して続行するか尋ねます。続行を選ぶと、確認できなかった項目と判断を対象 PBI の `dandori.md` に記録します。緊急対応などで事前承認を省く場合は、プロジェクトが指定した担当者から例外の承認を得て、省略理由と承認を得た旨を同じファイルに残します。 [設計レビュー用 PR の指定と例外の手順](japanese/skills/dandori/references/design-approval.md)
+
+## 既存案件で現行の設計書を起こす
+
+既存リポジトリで Codex なら `$okosu`、Claude Code なら `/okosu` を使います。初回は現在のコミットから始めます。調べるブランチ、タグ、コミットを指定することもできます。 [okosu の手順](japanese/skills/okosu/SKILL.md)
+
+1. `designs/system-overview.md` でシステム全体の機能と関係を確認します。確認状態、選んだ範囲、調査に使ったコミットも同じファイルに残るため、別セッションで再開できます。
+2. 改修対象と影響する機能、またはシステム全体を選ぶと、現行の基本設計書が `designs/specifications/` に作られます。
+3. 導入専用の文書 PR で、対象版のコード・設定・既存テストと文書を照合します。実動作でしか分からない箇所は未確認として残します。マージ後、共有ブランチの設計書を正本として参照し、最初の改修を起票します。
 
 ## 新規開発で最初の機能を作る
 
