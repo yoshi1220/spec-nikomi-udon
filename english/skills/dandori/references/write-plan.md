@@ -5,6 +5,7 @@
 - Keep the link to `nikomi.md`. Describe the affected areas, implementation patterns to follow, and code to reuse.
 - List tasks in the order produced by the helper. For each task, record a checkbox, task ID, the result it provides, IDs and reasons for direct prerequisites, related acceptance criterion IDs, and a completion check. Use “None” for a task without prerequisites.
 - Give each acceptance criterion one row with the required task IDs, test or manual setup and steps, and expected result. If existing behavior suffices, name the existing test or procedure. Mark new results as pending.
+- Use the acceptance criteria, specification text, and existing design to identify behavior that changes and existing behavior the change could break. Choose setup and inputs that would produce an observable difference if that behavior broke, then record them alongside the expected result in the verification method. For example, for an inclusive upper limit, check acceptance at the limit and rejection at the next representable value. If a check has no direct acceptance criterion, record it in the related task’s completion check.
 - Readers can follow the graph through the prerequisites in the task list. A separate dependency document is unnecessary.
 
 ## Update an existing plan
@@ -16,7 +17,7 @@ Compare it with the previous plan. Keep completion and verification evidence whe
 ## Check the plan before and after saving
 
 1. The task list follows the helper's output and contains every task exactly once. For each task, check that its prerequisite IDs have no duplicates, match the direct prerequisite IDs in the graph passed to the helper, and all refer to earlier tasks in the list.
-2. Every criterion in `nikomi.md` has a concrete verification method and expected result. All required tasks are present, and the IDs in the task list and verification table agree.
+2. Every criterion in `nikomi.md` has a concrete verification method and expected result. Check that the plan, including task completion checks, pairs inputs with expected results that reveal breaks in the behavior under test. All required tasks are present, and the IDs in the task list and verification table agree.
 3. Every task supports agreed behavior, a constraint, or verification. For preparation without a direct acceptance criterion, identify the downstream task or constraint that requires it. Check that the plan stays within the specification's scope.
 4. If the project workflow includes E2E testing (including `pr` and `operational` design approval), or the PBI already has a basic design draft or `e2e.md`, [plan E2E tests](plan-e2e.md) and link to `e2e.md` from `dandori.md`. Save the plan with the marker still pending. Re-read it and check items 1–3. Once all checks pass and no prerequisite blocks execution, save the first-line marker as `<!-- dandori-plan: ready -->`.
 5. If the deliverable index exists, update the plan and E2E specification links and statuses in `oshinagaki.md` based on the saved files. Report the plan's location and whether it is ready to execute.
