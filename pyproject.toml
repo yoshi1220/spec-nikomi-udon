@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "spec-nikomi-udon"
+version = "0.1.0"
+description = "Project installer for Spec Nikomi Udon"
+requires-python = ">=3.8"
+dependencies = ["tomli>=1.1; python_version < '3.11'"]
+
+[project.scripts]
+spec-nikomi-udon = "nikomi_installer.cli:main"
+
+[tool.setuptools]
+packages = ["nikomi_installer", "nikomi_installer.japanese", "nikomi_installer.english"]
+include-package-data = false
+
+[tool.setuptools.package-dir]
+"nikomi_installer.japanese" = "japanese/skills"
+"nikomi_installer.english" = "english/skills"
+
+[tool.setuptools.package-data]
+"nikomi_installer.japanese" = ["*/SKILL.md", "*/assets/*.md", "*/references/*.md", "*/scripts/*.py"]
+"nikomi_installer.english" = ["*/SKILL.md", "*/assets/*.md", "*/references/*.md", "*/scripts/*.py"]

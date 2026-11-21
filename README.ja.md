@@ -18,13 +18,40 @@ PBI ごとの成果物とその状況は、変更用ディレクトリの `oshin
 
 ## 導入方法
 
-Git 2.23 以降と Python 3.8 以降を使えるプロジェクトに、[日本語版](japanese/skills/)か[英語版](english/skills/)のいずれかから、10 個のスキルをまとめてコピーします。配置先は Codex では `.agents/skills/`、Claude Code では `.claude/skills/` です。共有する手順とスクリプトを参照できるよう、すべて同じ親ディレクトリに置きます。
+### `init` の前に
 
-すでに導入している場合は、同じ言語版から `dandori` と `yonabe` のディレクトリをコピーして更新します。`okosu` の導入前の版から更新する場合は、`okosu` も追加し、`osameru` を更新します。`ajimi` の導入前の版から更新する場合は、同じ言語版の一式をコピーしてください。
+対象の Git リポジトリで Git 2.23 以降、Python 3.8 以降、`uvx`、使用する Codex または Claude Code を準備します。対象 OS は macOS、Linux、WSL です。macOS と Linux で導入と更新を検証済みです。Windows では WSL のターミナルから実行してください。WSL 実機での確認は未完了です。 [uv のインストール](https://docs.astral.sh/uv/getting-started/installation/)
 
-導入先のリポジトリで `python3 .agents/skills/osameru/scripts/osameru.py setup` を実行し、Playwright、Chrome 拡張、手動テストから一つ選びます。Claude Code の場合はパスの `.agents/skills/` を `.claude/skills/` に置き換えます。画面キャプチャと画面項目定義書の作成は既定で無効です。テスト方法や有効にする成果物は、導入後も設定を変更できます。 [設定と記録の手順](japanese/skills/osameru/references/format.md)
+手動配置した同名スキルがある場合は、事前にスキルのディレクトリを別の場所へ移動します。既存の案件設定 `designs/nikomi-udon.json` は引き継がれます。
 
-Playwright または Chrome 拡張を選ぶ場合は、導入先に期待結果を判定できるテストランナーや拡張を用意します。
+### 案件に導入する
+
+以下は公開タグから実行する書式です。`vX.Y.Z` をインストーラを含む公開タグに置き換え、導入先のターミナルで実行します。
+
+```sh
+uvx --from git+https://github.com/yoshi1220/spec-nikomi-udon.git@vX.Y.Z spec-nikomi-udon init
+```
+
+タグを公開する前にローカルの配布元から試す場合は、導入先で `uvx --from /path/to/spec-nikomi-udon spec-nikomi-udon init` を実行します。
+
+言語と Codex・Claude Code・両方のいずれかを選びます。Codex には `.agents/skills/`、Claude Code には `.claude/skills/` に同じ版の10スキルを配置します。案件設定がなければ E2E 方式、計画前の承認、画面キャプチャ、画面項目定義書を選びます。準備が残る場合もスキルと設定は保存されます。同じ版の `init` で環境準備の再開やエージェントの追加ができます。
+
+新版への更新は、新しいタグを指定し、上のコマンドの末尾を `update` に変更します。配置したスキル、案件設定 `designs/nikomi-udon.json`、導入記録 `designs/nikomi-udon-install.json` を案件の Git に含め、チームで共有します。Git の除外設定に該当するファイルがあれば、インストーラが件数とパスの例を表示します。`git check-ignore -v -- <パス>` で該当ルールを確認し、共有する配布ファイルが Git に含まれるようにします。独自の編集は退避して元の配布状態に戻し、更新後に必要な変更を再反映します。
+
+### `init` の後に
+
+設定を変更するときは、案件内で `python3 .agents/skills/osameru/scripts/osameru.py setup` に変更したい項目のオプションを付けます。Claude Code のみの場合は `.claude/skills/` を使います。 [設定オプション](japanese/skills/osameru/references/format.md)
+
+| 選んだ方式 | 必要な準備と確認 |
+| --- | --- |
+| Playwright | 既存のランナーを優先します。準備が必要なら表示されるコマンドを確認して実行を選びます。OS 依存や対象プロジェクトの追加設定が必要な場合は整備後に同じ版の `init` を再実行します。初期確認は Chromium で行います。たとえば npm 案件では `npm install -D @playwright/test` と `npx playwright install chromium`、uv 管理の Python 案件では `uv add --dev pytest-playwright` と `uv run playwright install chromium` を使います。 [ブラウザの準備](https://playwright.dev/docs/browsers) |
+| エージェントのブラウザ操作 | Codex デスクトップでは内蔵ブラウザを利用できる状態にします。Claude Code では公式 Chrome 拡張を設定し、`/chrome` で接続を確認します。必要なサイト権限を許可し、対象環境へログインします。両エージェントを使った実案件での通し検証は未完了です。利用するセッションで対象画面を操作し、期待値を読み取れることを確かめてください。WSL で Claude Code を使う場合は Playwright または手動など利用可能な方式を選びます。 [Codex](https://learn.chatgpt.com/docs/browser)／[Claude Code](https://code.claude.com/docs/en/chrome) |
+| Chrome 拡張 | 案件の期待結果を判定できる拡張を導入し、テスト対象のサイトへのアクセスを設定します。 |
+| 手動テスト | 担当者がテスト対象の環境にアクセスし、指定データを使って、観測結果と合否を記録できるようにします。 [E2E 手順](japanese/skills/ajimi/references/run-e2e.md) |
+
+Playwright の依存管理方式が特定できない場合は、案件の管理ツールでランナーと Chromium を準備します。Python の `requirements.txt` を使う案件でランナーの導入が必要な場合は、環境構築を選ぶと、そのファイルの依存関係と `pytest-playwright` をまとめて `.venv` にインストールします。既存のバージョン指定や制約も適用されます。ランナーを新しく追加した場合は、ほかの開発者も再構築できるよう、案件のテスト依存一覧に記録してください。
+
+計画前の設計承認に `pr` を選び、GitHub CLI で照会する場合は、`gh` を用意し、対象リポジトリと PR を参照できるよう認証します。 [PR の照会手順](japanese/skills/dandori/references/design-approval.md)
 
 導入先のプロジェクトでセッションを始めます。たとえば `nikomu` は、Codex では `$nikomu`、Claude Code では `/nikomu` と入力します。E2E テストでは `$ajimi` または `/ajimi` を使います。
 

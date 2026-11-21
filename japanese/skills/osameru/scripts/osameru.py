@@ -17,7 +17,7 @@ from uuid import uuid4
 
 CONFIG = "designs/nikomi-udon.json"
 CANONICAL = "designs/specifications"
-METHODS = ("playwright", "chrome-extension", "manual")
+METHODS = ("playwright", "chrome-extension", "manual", "agent-browser")
 APPROVALS = ("none", "operational", "pr")
 DEFAULTS = {"design_approval": "none", "e2e_method": "manual", "screen_items": False, "screenshots": False}
 CHECKS = re.compile(r"(?ms)^<!-- e2e:checks -->\n(.*?)^<!-- /e2e:checks -->$")
@@ -146,10 +146,10 @@ def setup(root, args):
     if args.method is None and not (root / CONFIG).exists():
         if not sys.stdin.isatty():
             raise WorkflowError("Choose an E2E method with --method")
-        print("1. Playwright\n2. Chrome extension\n3. Manual")
-        choice = input("E2E method [1-3]: ").strip()
-        if choice not in {"1", "2", "3"}:
-            raise WorkflowError("Choose 1, 2, or 3")
+        print("1. Playwright\n2. Chrome extension\n3. Manual\n4. Agent browser")
+        choice = input("E2E method [1-4]: ").strip()
+        if choice not in {"1", "2", "3", "4"}:
+            raise WorkflowError("Choose 1 through 4")
         args.method = METHODS[int(choice) - 1]
     if args.method is not None:
         value["e2e_method"] = args.method

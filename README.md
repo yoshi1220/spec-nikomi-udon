@@ -18,13 +18,40 @@ Each PBI has an `oshinagaki.md` in its change directory that lists deliverables 
 
 ## Installation
 
-In a project using Git 2.23 or later and Python 3.8 or later, copy all ten skill directories from either the [English](english/skills/) or [Japanese](japanese/skills/) edition into `.agents/skills/` for Codex or `.claude/skills/` for Claude Code. Keep them under the same parent directory so the skills can access shared instructions and scripts.
+### Before `init`
 
-For an existing installation, update the `dandori` and `yonabe` directories by copying them from the same language edition. If your installation predates `okosu`, also add `okosu` and update `osameru`. If you are upgrading from a version before `ajimi`, copy the full set from that edition.
+Prepare the target Git repository, Git 2.23+, Python 3.8+, `uvx`, and Codex or Claude Code. The installer targets macOS, Linux, and WSL. Installation and update have been verified on macOS and Linux. On Windows, run it in a WSL terminal. WSL testing is pending. [Install uv](https://docs.astral.sh/uv/getting-started/installation/)
 
-From the target repository, run `python3 .agents/skills/osameru/scripts/osameru.py setup` and choose Playwright, a Chrome extension, or manual testing. For Claude Code, replace `.agents/skills/` with `.claude/skills/` in the path. Screenshots and screen item definitions are off by default. You can change the method and options after installation. [Settings and recording instructions](english/skills/osameru/references/format.md)
+Move any manually installed skill directories with matching names out of the destination. The installer reads existing project settings from `designs/nikomi-udon.json`.
 
-For Playwright or the Chrome extension, set up a test runner or extension that can evaluate the expected results in the target project.
+### Initialize the project
+
+Run this command in the target project's terminal. Replace `vX.Y.Z` with a published release tag containing the installer.
+
+```sh
+uvx --from git+https://github.com/yoshi1220/spec-nikomi-udon.git@vX.Y.Z spec-nikomi-udon init
+```
+
+To try a local checkout before publishing a tag, run `uvx --from /path/to/spec-nikomi-udon spec-nikomi-udon init` from the target project.
+
+Select a language and Codex, Claude Code, or both. The same ten skills go into `.agents/skills/` for Codex and `.claude/skills/` for Claude Code. For new projects, choose the E2E method, design approval mode, screenshots, and screen item definitions. Skills and settings are saved even if E2E preparation is pending. Rerun `init` with the same release to resume preparation or add the other agent.
+
+To upgrade, select the new tag and replace the final `init` with `update`. Track the installed skills, project settings (`designs/nikomi-udon.json`), and installation record (`designs/nikomi-udon-install.json`) together in the project repository. If Git ignores any of these files, the installer reports the count and an example path. Use `git check-ignore -v -- <path>` to find the rule and include the distribution files you intend to share. Save local edits, restore the installed files to their original state, and reapply the edits you need after updating.
+
+### After `init`
+
+To change project settings, run `python3 .agents/skills/osameru/scripts/osameru.py setup` with the options you want to change. For a Claude-only installation, use `.claude/skills/`. [Settings and options](english/skills/osameru/references/format.md)
+
+| Selected method | Preparation and verification |
+| --- | --- |
+| Playwright | Reuse the project's runner. If additional setup is needed, review the displayed commands and choose whether to run them. Install any missing OS dependencies or project-specific prerequisites and rerun the same `init`. The setup probe uses Chromium. For example, an npm project uses `npm install -D @playwright/test` and `npx playwright install chromium`. A uv-managed Python project uses `uv add --dev pytest-playwright` and `uv run playwright install chromium`. [Browser setup](https://playwright.dev/docs/browsers) |
+| Agent browser | Enable the built-in browser in Codex desktop, or configure the official Chrome extension for Claude Code and check its connection with `/chrome`. Grant access to the test site and sign in where needed. End-to-end testing on a real project is pending for both integrations. In the session you will use, operate the target screen and check that you can observe the expected value. For Claude Code on WSL, use an available method such as Playwright or manual testing. [Codex](https://learn.chatgpt.com/docs/browser) / [Claude Code](https://code.claude.com/docs/en/chrome) |
+| Chrome extension | Install the project's extension that can evaluate expected results and configure access to the test site. |
+| Manual testing | Give the tester access to the target environment so they can use the specified test data and record observed results and verdicts. [E2E workflow](english/skills/ajimi/references/run-e2e.md) |
+
+If the installer cannot identify the dependency manager, use the project’s own tooling to prepare the runner and Chromium. If a Python project uses `requirements.txt` and needs a runner, accepting setup installs the listed dependencies together with `pytest-playwright` into `.venv`. Existing version pins and constraints apply. When adding the runner for the first time, record it in the project’s test requirements so teammates can recreate the environment.
+
+If you choose `pr` for design approval and use GitHub CLI to check reviews, install `gh` and authenticate with access to the target repository and pull request. [Checking design PR reviews](english/skills/dandori/references/design-approval.md)
 
 Start a session in the target project. Use `$nikomu` in Codex or `/nikomu` in Claude Code. To run E2E tests, use `$ajimi` or `/ajimi`, respectively.
 

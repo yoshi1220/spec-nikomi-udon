@@ -4,7 +4,7 @@
 
 ## プロジェクトの設定
 
-導入時に `python3 <osameru.py> setup` で、Playwright、Chrome 拡張、手動テストのいずれかを選びます。非対話では `--method playwright`、`--method chrome-extension`、`--method manual` を使います。`--screen-items on` と `--screenshots on` は、必要な場合に指定します。どちらも初期値は `off` です。`setup` を再実行すると指定した設定だけを更新します。`settings` は有効な設定を表示します。設定ファイルは `designs/nikomi-udon.json` です。設定ファイルがない場合は手動テストを使います。
+初回の `init` で案件の初期値を選びます。導入後は、リポジトリ内で `python3 <osameru.py> setup --method agent-browser` のように指定すると、選んだ項目だけを変更できます。`--method` の値は `playwright`、`chrome-extension`、`manual`、`agent-browser` です。画面項目定義書と画面キャプチャは既定で無効です。必要に応じて `--screen-items on`、`--screenshots on` を指定します。`settings` は `designs/nikomi-udon.json` の有効な設定を表示します。設定ファイルがない案件では手動テストを使います。
 
 現在の設定でテストを実施し、結果の確認を記録します。設定を変更した後の反映には、新しい設定での実施と確認が必要です。
 

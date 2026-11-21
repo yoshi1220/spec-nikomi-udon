@@ -4,7 +4,7 @@ Run the bundled [osameru.py](../scripts/osameru.py) with Python 3.8 or later fro
 
 ## Project settings
 
-During installation, run `python3 <osameru.py> setup` and choose Playwright, a Chrome extension, or manual testing. Use `--method playwright`, `--method chrome-extension`, or `--method manual` for noninteractive setup. Enable `--screen-items on` or `--screenshots on` when needed. Both default to `off`. Rerun `setup` to change the options you specify. `settings` prints the effective configuration. The settings file is `designs/nikomi-udon.json`. Projects without that file use manual testing.
+Choose project defaults during the first `init`. After installation, run a command such as `python3 <osameru.py> setup --method agent-browser` in the repository to change the specified options. The accepted `--method` values are `playwright`, `chrome-extension`, `manual`, and `agent-browser`. Screen item definitions and screenshots are off by default. Enable them with `--screen-items on` and `--screenshots on` as needed. Use `settings` to read the effective settings from `designs/nikomi-udon.json`. Projects without the file use manual testing.
 
 Use the current settings when running and reviewing tests. After changing the settings, run and review E2E under the new configuration before applying the design.
 
