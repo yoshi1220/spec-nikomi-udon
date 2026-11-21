@@ -26,13 +26,13 @@ PBI ごとの成果物とその状況は、変更用ディレクトリの `oshin
 
 ### 案件に導入する
 
-以下は公開タグから実行する書式です。`vX.Y.Z` をインストーラを含む公開タグに置き換え、導入先のターミナルで実行します。
+導入先の Git リポジトリで、次のコマンドを実行して v0.0.1 をインストールします。
 
 ```sh
-uvx --from git+https://github.com/yoshi1220/spec-nikomi-udon.git@vX.Y.Z spec-nikomi-udon init
+uvx --from git+https://github.com/yoshi1220/spec-nikomi-udon.git@v0.0.1 spec-nikomi-udon init
 ```
 
-タグを公開する前にローカルの配布元から試す場合は、導入先で `uvx --from /path/to/spec-nikomi-udon spec-nikomi-udon init` を実行します。
+ローカルの配布元から試す場合は、導入先で `uvx --from /path/to/spec-nikomi-udon spec-nikomi-udon init` を実行します。
 
 言語と Codex・Claude Code・両方のいずれかを選びます。Codex には `.agents/skills/`、Claude Code には `.claude/skills/` に同じ版の10スキルを配置します。案件設定がなければ E2E 方式、計画前の承認、画面キャプチャ、画面項目定義書を選びます。準備が残る場合もスキルと設定は保存されます。同じ版の `init` で環境準備の再開やエージェントの追加ができます。
 

@@ -26,13 +26,13 @@ Move any manually installed skill directories with matching names out of the des
 
 ### Initialize the project
 
-Run this command in the target project's terminal. Replace `vX.Y.Z` with a published release tag containing the installer.
+Run this command in the target Git repository to install v0.0.1.
 
 ```sh
-uvx --from git+https://github.com/yoshi1220/spec-nikomi-udon.git@vX.Y.Z spec-nikomi-udon init
+uvx --from git+https://github.com/yoshi1220/spec-nikomi-udon.git@v0.0.1 spec-nikomi-udon init
 ```
 
-To try a local checkout before publishing a tag, run `uvx --from /path/to/spec-nikomi-udon spec-nikomi-udon init` from the target project.
+To try a local checkout, run `uvx --from /path/to/spec-nikomi-udon spec-nikomi-udon init` from the target project.
 
 Select a language and Codex, Claude Code, or both. The same ten skills go into `.agents/skills/` for Codex and `.claude/skills/` for Claude Code. For new projects, choose the E2E method, design approval mode, screenshots, and screen item definitions. Skills and settings are saved even if E2E preparation is pending. Rerun `init` with the same release to resume preparation or add the other agent.
 
