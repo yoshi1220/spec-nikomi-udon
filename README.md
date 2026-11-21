@@ -48,15 +48,28 @@ If `dandori` cannot verify PR approval, it explains why and asks whether to cont
 
 ## Build the first feature in a new project
 
-This example builds the first feature of a notes app in a Git repository with the skills installed and design approval set to the default (`none`). Enter these lines one at a time in a Codex session. In Claude Code, replace the leading `$` with `/`.
+This example builds the first feature of a notes app in a Git repository with the skills installed and design approval set to the default (`none`). In Codex, enter each line starting with `$`, one at a time. The `#` lines explain each skill. In Claude Code, replace the leading `$` with `/`.
 
 ```text
+# Outline the app’s purpose and main features in designs/system-overview.md.
 $shikomu Build an app for saving work notes and finding them in a list.
-$nikomu Let users save a note with a title and body and see its title in the list. If the title is empty, prompt for it and leave the note unsaved.
+
+# Create a work branch and agree on the acceptance criteria in nikomi.md.
+$nikomu Save the title and body. List titles. If untitled, prompt for a title and skip saving.
+
+# Draft the design for note creation in shitagaki.md from the agreed specification.
 $shitagaki
+
+# Put tasks in execution order in dandori.md and E2E steps and expectations in e2e.md.
 $dandori
+
+# Implement the plan and record progress and verification results in dandori.md.
 $yonabe
+
+# Try saving a note with and without a title. Record the E2E results in e2e.md.
 $ajimi
+
+# Verify test passes and reviewer confirmation. Update the design and history on the work branch.
 $osameru Use "Add note creation" as the change reason.
 ```
 
