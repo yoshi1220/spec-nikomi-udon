@@ -545,7 +545,15 @@ def design_blob(root, commit, draft_path):
     return gh_json(root, "api", endpoint).get("sha")
 
 
-def check_design_review(root, change, pr_number):
+def approval_identity(review):
+    login = (review.get("author") or {}).get("login")
+    submitted = review.get("submittedAt")
+    if review["state"] == "APPROVED" and login and submitted:
+        return login, submitted
+    return None
+
+
+def check_design_review(root, change, pr_number, approver=None, approved_date=None):
     draft = managed_path(change, "shitagaki.md")
     if not draft.is_file():
         raise WorkflowError(f"Design draft missing: {draft}")
@@ -567,18 +575,26 @@ def check_design_review(root, change, pr_number):
     latest = review["latestReviews"]
     if not decision and (len(latest) >= 100 or any(r["state"] == "CHANGES_REQUESTED" for r in latest)):
         raise WorkflowError(f"Unable to establish approval for {review['url']}")
-    local_blob = git(root, "hash-object", "--", draft_path).decode().strip()
     head = review["headRefOid"]
-    if design_blob(root, head, draft_path) != local_blob:
-        raise WorkflowError(f"The local draft differs from {review['url']}")
+    head_blob = design_blob(root, head, draft_path)
     # latestReviews identifies active approvals. reviews supplies their commits.
-    approvals = {(r["author"]["login"], r["submittedAt"]) for r in latest if r["state"] == "APPROVED"}
+    approvals = {approval_identity(review) for review in latest}
     for entry in reversed(review["reviews"]):
-        if entry["state"] == "APPROVED" and (entry["author"]["login"], entry["submittedAt"]) in approvals:
-            commit = (entry.get("commit") or {}).get("oid")
-            if commit and (commit == head or design_blob(root, commit, draft_path) == local_blob):
-                print(f"Design review approved: {review['url']}")
-                return
+        identity = approval_identity(entry)
+        if identity is None or identity not in approvals:
+            continue
+        login, submitted = identity
+        day = submitted[:10]
+        if approver and login.casefold() != approver.casefold():
+            continue
+        if approved_date and day != approved_date:
+            continue
+        commit = (entry.get("commit") or {}).get("oid")
+        if commit and (commit == head or design_blob(root, commit, draft_path) == head_blob):
+            local_blob = git(root, "hash-object", "--", draft_path).decode().strip()
+            if local_blob != head_blob:
+                raise WorkflowError(f"The local draft differs from {review['url']}")
+            return login, day, review["url"]
     raise WorkflowError(f"No current approval confirmed for this design revision: {review['url']}")
 
 
@@ -620,7 +636,8 @@ def main():
             print(json_text(settings(root)))
             return 0
         if args.command == "check-design-review":
-            check_design_review(root, change_directory(root, args.change), args.pr)
+            _, _, url = check_design_review(root, change_directory(root, args.change), args.pr)
+            print(f"Design review approved: {url}")
             return 0
         if args.command == "base":
             print(base_stamp(document_path(root, args.path)))

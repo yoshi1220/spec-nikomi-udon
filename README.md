@@ -9,7 +9,7 @@ It is intended for systems integrators and teams at established Japanese compani
 ## The development workflow
 
 1. **Clarify the specification.** Use `shikomi` for requirements or a product backlog item (PBI) and `torikomu` for existing documents. Agree on scope, behavior, and acceptance criteria one question at a time, and record them in `shikomi.md`.
-2. **Draft the basic design.** Review `shikomi.md` and make any needed edits. Use `shitagaki` to turn the saved specification into a functional basic design in `shitagaki.md`.
+2. **Draft the basic design.** Review `shikomi.md` and make any needed edits. Use `shitagaki` to turn the saved specification into a functional basic design in `shitagaki.md`. If the project requires design approval, record it with `osumitsuki` before planning.
 3. **Plan implementation and testing.** Use `dandori` to record tasks and verification methods in `dandori.md`. For changed behavior and existing behavior the change could affect, pair each input with an expected result that would reveal a defect. Use `e2e.md` to record E2E steps and expected results for each behavior under test.
 4. **Implement and verify.** Use `nikomu` to implement the change and check that new or reused tests and manual checks can detect the failures identified in the plan. Then use `ajimi` to run E2E tests. If a test fails, `ajimi` returns to implementation or planning as needed and retests once. If the issue persists, it asks the user to intervene. A reviewer confirms what was tested and the results in the same test specification.
 5. **Apply the canonical design.** Use `osameru` to verify the passes and reviewer confirmation and prepare the design and revision history under `designs/specifications/` on the work branch. Review the implementation and design in the same PR. The merge updates the canonical design.
@@ -26,19 +26,23 @@ Move any manually installed skill directories with matching names out of the des
 
 ### Initialize the project
 
-Run this command in the target Git repository for a fresh installation of v0.0.3.
+Run this command in the target Git repository for a fresh installation of v0.0.4.
 
 ```sh
-uvx --from git+https://github.com/yoshi1220/spec-nikomi-udon.git@v0.0.3 spec-nikomi-udon init
+uvx --from git+https://github.com/yoshi1220/spec-nikomi-udon.git@v0.0.4 spec-nikomi-udon init
 ```
 
-To use the development version (`0.0.4.dev0`) with the updated `saguru` skill, replace `@v0.0.3` with `@main` in the command above. To upgrade an existing v0.0.3 installation to the development version, also replace `init` with `update`.
+v0.0.4 includes the new `osumitsuki` design approval skill and the revised `saguru` skill. To upgrade a v0.0.3 installation and retain its project settings, run:
 
-Migration from v0.0.2 is manual. In v0.0.3, use `shikomi` and `shikomi.md` for the change specification and `nikomu` for implementation.
+```sh
+uvx --from git+https://github.com/yoshi1220/spec-nikomi-udon.git@v0.0.4 spec-nikomi-udon update
+```
+
+Migration from v0.0.2 is manual. In v0.0.3 and later, use `shikomi` and `shikomi.md` for the change specification and `nikomu` for implementation.
 
 Select a language and Codex, Claude Code, or both. The same skills go into `.agents/skills/` for Codex and `.claude/skills/` for Claude Code. For new projects, choose the E2E method, design approval mode, screenshots, and screen item definitions. Skills and settings are saved even if E2E preparation is pending. Rerun `init` with the same release to resume preparation or add the other agent.
 
-To update an installation of this edition, use the same command with `update` in place of `init`. Track the installed skills, project settings (`designs/nikomi-udon.json`), and installation record (`designs/nikomi-udon-install.json`) together in the project repository. If Git ignores any of these files, the installer reports the count and an example path. Use `git check-ignore -v -- <path>` to find the rule and include the distribution files you intend to share. If you edited the distributed skills directly, save those edits, restore the installed files to their original state, and reapply the edits you need after updating.
+Track the installed skills, project settings (`designs/nikomi-udon.json`), and installation record (`designs/nikomi-udon-install.json`) together in the project repository. If Git ignores any of these files, the installer reports the count and an example path. Use `git check-ignore -v -- <path>` to find the rule and include the distribution files you intend to share. If you edited the distributed skills directly, save those edits, restore the installed files to their original state, and reapply the edits you need after updating.
 
 ### After `init`
 
@@ -53,7 +57,7 @@ To change project settings, run `python3 .agents/skills/osameru/scripts/osameru.
 
 If the installer cannot identify the dependency manager, use the project’s own tooling to prepare the runner and Chromium. If a Python project uses `requirements.txt` and needs a runner, accepting setup installs the listed dependencies together with `pytest-playwright` into `.venv`. Existing version pins and constraints apply. When adding the runner for the first time, record it in the project’s test requirements so teammates can recreate the environment.
 
-If you choose `pr` for design approval and use GitHub CLI to check reviews, install `gh` and authenticate with access to the target repository and pull request. [Checking design PR reviews](english/skills/dandori/references/design-approval.md)
+If you choose `pr` for design approval and use GitHub CLI to check reviews, install `gh` and authenticate with access to the target repository and pull request. [Recording design PR approval](english/skills/osumitsuki/SKILL.md)
 
 Start a session in the target project. To specify one change, use `$shikomi` in Codex or `/shikomi` in Claude Code. To run E2E tests, use `$ajimi` or `/ajimi`, respectively.
 
@@ -69,13 +73,17 @@ When you are still deciding what to change, `saguru` explores a real or anticipa
 python3 .agents/skills/osameru/scripts/osameru.py setup --design-approval pr
 ```
 
-| Setting | When planning can begin |
-| --- | --- |
-| `none` (default) | Proceed once the specification is confirmed. The team can review the design alongside the implementation in the final PR. |
-| `operational` | The operator obtains design approval through the project’s process, then invokes `dandori`. Invocation counts as confirmation. |
-| `pr` | `dandori` checks the design PR. Planning can begin before merge when the local draft matches the approved design. |
+PBIs get a design approval section in `oshinagaki.md` when their project uses approval.
 
-If `dandori` cannot verify PR approval, it explains why and asks whether to continue. If the operator continues, it records the unconfirmed item and the decision in the PBI’s `dandori.md`. For an exception such as an emergency change, obtain authorization from the project’s designated role and record the reason and confirmation in the same file. [Selecting the design PR and handling exceptions](english/skills/dandori/references/design-approval.md)
+| Initial setting | Before planning |
+| --- | --- |
+| `none` (default) | Proceed after confirming the specification. The index has no approval section. |
+| `operational` | Obtain approval through the project's process, then invoke e.g. `$osumitsuki The design lead approved on 2026-11-20`. Both the approval date and approver are required. |
+| `pr` | Once the design has PR approval, invoke `$osumitsuki`. It verifies the revision and records the approval date and reviewer in the index. |
+
+`dandori` proceeds from the approved index. When `shitagaki` starts a redesign, it returns a normal approval to pending and puts the existing plan on hold. The plan keeps its recorded work for `dandori` to review. For an authorized emergency, invoke e.g. `$dandori --emergency Restore production service`. The emergency and reason stay with the PBI, including after a redesign. Resume with a normal `dandori` invocation. Use `/` in place of `$` in Claude Code.
+
+An in-progress PBI is migrated when next handling design, approval or planning. Its existing records can establish approval of the current design with a date and approver, or a PBI emergency with its reason. If the records establish neither, the design and any existing plan go on hold. The plan retains its tasks and results. [Record approval](english/skills/osumitsuki/SKILL.md) · [Migrate the index](english/skills/osumitsuki/references/index.md)
 
 ## Use a project basic design template
 

@@ -15,7 +15,7 @@ from pathlib import Path
 from .environment import prepare
 
 AGENTS = {"codex": ".agents/skills", "claude": ".claude/skills"}
-SKILLS = "ajimi dandori kondate koromogae nikomu okosu osameru saguru shikomi shitagaki torikomu".split()
+SKILLS = "ajimi dandori kondate koromogae nikomu okosu osameru osumitsuki saguru shikomi shitagaki torikomu".split()
 RECORD = "designs/nikomi-udon-install.json"
 CONFIG = "designs/nikomi-udon.json"
 DESIGN_TEMPLATE = "designs/basic-design.template.md"
@@ -228,6 +228,9 @@ def install(root, work, action):
             raise ValueError("Run update with the desired release tag")
         language = old["language"]
         expected = {f"{AGENTS[a]}/{s}" for a in agents for s in SKILLS}
+        legacy = expected - {f"{AGENTS[a]}/osumitsuki" for a in agents}
+        if action == "update" and old["version"] != release and set(old["files"]) == legacy:
+            expected = legacy
         if set(old["files"]) != expected:
             raise ValueError("Installation record does not match the expected skill set")
         converted = clean_crlf_paths(root, expected)

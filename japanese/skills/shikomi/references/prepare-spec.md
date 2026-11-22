@@ -25,6 +25,6 @@
 
 ## 面談を始める
 
-新しい `shikomi.md` を保存したら、同じディレクトリに [お品書きのテンプレート](../../shitagaki/assets/oshinagaki.template.md) から `oshinagaki.md` を置く。すでに存在する場合は保存済みの内容を使う。
+新しい `shikomi.md` の初回保存後に [お品書きの準備手順](../../osumitsuki/references/index.md) の `init` を実行し、案件設定に沿った `oshinagaki.md` を用意する。既存PBIは次の設計・承認・計画時に同手順で移行する。
 
 たたき台を保存したら、必ず [明確化の手順](clarify-spec.md) に進む。再開時には、既存の仕様とそこで確定した判断を読んでから、面談の状態を組み直す。

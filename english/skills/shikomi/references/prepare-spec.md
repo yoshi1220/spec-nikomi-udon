@@ -25,6 +25,6 @@ If an existing specification has no Original request section, reconstruct the st
 
 ## Begin the interview
 
-After saving a new `shikomi.md`, create `oshinagaki.md` in the same directory from the [deliverable index template](../../shitagaki/assets/oshinagaki.template.md). Use the saved index if it already exists.
+After the first save of a new `shikomi.md`, run `init` from the [index procedure](../../osumitsuki/references/index.md) to prepare `oshinagaki.md` with the project settings. Migrate existing PBIs when next handling design, approval or planning.
 
 Once the draft is saved, follow the required [clarification workflow](clarify-spec.md). On resumption, read the existing specification and its decisions before rebuilding the interview state.
