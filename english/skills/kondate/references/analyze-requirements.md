@@ -2,6 +2,8 @@
 
 Assess the capability tree and relationship graph independently. Build each from the parts the input supports. Keep a locator for the evidence, such as a section, page, table row, diagram, or the user's description. Record constraints and users in the relevant overview sections even when they do not belong in the tree or graph.
 
+As branches or relationships emerge, use the [temporary GraphML operations](../../dandori/references/work-graph.md) to record capabilities and systems as nodes and attach a type and evidence to each edge. Use parent-to-child `contains` and check for hierarchy cycles with `order FILE contains`. Preserve each integration’s documented type and direction. Use `show FILE ID` to check parents, integrations and evidence against the overview.
+
 ## Decide what to produce from the evidence
 
 | Evidence in the input | What to record in the system overview |

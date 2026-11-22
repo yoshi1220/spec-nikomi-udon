@@ -12,4 +12,6 @@ Treat the feature first suggested by the user as a candidate solution. When ther
 
 Group questions under the goals they serve. For each, identify the evidence (a source passage or a user's example), what remains unknown, and which decision depends on the answer. Trace prerequisites to dependent decisions so that options sharing a premise can be reconsidered together. Check facts available in the project before asking. Implementation details that cannot change the direction can wait for specification.
 
+When several choices share a premise, use the [temporary GraphML operations](../../dandori/references/work-graph.md) to link the premise to dependent options or success criteria with evidenced `requires` edges. If an observation or answer changes the premise, run `affected FILE premise-ID --via requires` to find decisions to revisit. Clean up the working file even when the handoff is conversational.
+
 For example, if someone asks for application reminders, a useful first question is “What happened the last time an application stalled?” If the approver knew about it but nobody could approve on their behalf, revisit the missed-notification hypothesis. Explore what the cases that needed a substitute approver had in common. Discuss reminder timing once there is evidence that timing could help the work move forward.

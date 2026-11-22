@@ -6,6 +6,8 @@
 - Start from entry points such as screens, APIs, and batch jobs to identify functions users or external systems can observe. Trace configuration, data flow, calls, and existing tests. Record relationships whose endpoints, type, and direction can be established, with their sources. Add a functional hierarchy where there is evidence of a business grouping. When entry points or integrations cannot be fully investigated, state the limits and remaining work.
 - Identify sources by repository-relative paths and symbols or configuration keys, with line numbers at the selected revision when useful. When effective runtime settings or external behavior cannot be established, record the known conditions and what remains unknown. If existing documents disagree, show both sources and record the user's decision before treating the discrepancy as resolved.
 
+Use the [temporary GraphML operations](../../dandori/references/work-graph.md) for evidenced containment, calls and data transfers at the inspected revision. Attach source paths and symbols to edges. Check containment alone with `order FILE contains`. Follow each relation in its relevant direction when a change or new revision affects scope. For a changed callee contract, use `affected FILE callee-ID --via calls --reverse` to find candidate callers and verify them against that revision before updating scope.
+
 ## Save decisions and resume
 
 Keep one “Existing project onboarding” section in `designs/system-overview.md`. Update it in place when it already exists.

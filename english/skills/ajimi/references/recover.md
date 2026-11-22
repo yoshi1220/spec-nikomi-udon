@@ -9,6 +9,8 @@
 
 Use the results for the current run in `e2e.md`. Compare the expected and observed results for the affected behavior IDs with the agreed `shikomi.md`, `dandori.md`, and current implementation. Determine whether correctly executing the existing plan would satisfy the specification, then choose the next step.
 
+When several behaviors, acceptance criteria and tasks share verification, use the [temporary GraphML operations](../../dandori/references/work-graph.md). From the current tables link required task to criterion (`verifies`) and criterion to E2E behavior (`exercises`). Run `affected FILE failed-behavior-ID --via exercises verifies --reverse` to identify candidates for investigation. Compare them with the expected and observed results to choose the recovery step. Use the current run record to determine retest scope and verdicts.
+
 | Confirmed cause | Next step |
 | --- | --- |
 | The specification and plan are sound, and the implementation misses the planned behavior | Use [nikomu](../../nikomu/SKILL.md) to revisit the affected tasks and acceptance criteria, correct the implementation, and verify it. |

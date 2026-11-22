@@ -6,6 +6,8 @@
 2. If the plan has a status marker, require exactly one marker on the first line, `<!-- dandori-plan: ready -->`. Return to planning if it is pending or invalid. For a legacy plan without a marker, use the same content checks below to establish whether it is ready.
 3. Check that the plan matches the current specification. Look for duplicate task or criterion IDs, unknown references, tasks listed before their prerequisites, and criteria without a verification method. If the order, task scope, or verification method needs revision, identify the affected IDs and return to planning.
 
+Load tasks from the current plan in recorded order with `tasks FILE --print-order` in the [temporary GraphML operations](../../dandori/references/work-graph.md), then compare its output with the plan order before adding other nodes. Add acceptance criteria from the verification table and link each required task to its criterion with `verifies`. Rebuild from the current plan and verification table on resume.
+
 ## Resume a change in progress
 
 - Read the relevant project instructions, system guidance, existing specifications, code, and tests. Inspect the worktree to identify partially implemented work, completed changes, and unrelated edits. Preserve existing work and ask if overlapping edits cannot be reconciled safely.

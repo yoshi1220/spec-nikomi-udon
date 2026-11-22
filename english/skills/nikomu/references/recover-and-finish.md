@@ -13,6 +13,8 @@ When offering choices, normally give three viable options in recommendation orde
 
 ## Update affected records
 
+In the working graph prepared at startup, run `affected FILE failed-task-ID --via requires verifies`. Check the starting task itself and the returned downstream tasks and criteria against the plan before updating their records.
+
 1. Clear the checkbox of a task that failed re-verification or whose previous check no longer holds. Follow the plan's dependency edges downstream and reopen each task that relies on that result directly or indirectly.
 2. For affected acceptance criteria, record a failure if the criterion's own check failed, or mark the previous pass as awaiting re-verification if its evidence is invalid. Preserve unaffected records.
 3. Save the changes to `dandori.md` with the originating task ID and reason before continuing. Once the prerequisite is fixed, re-check affected tasks and criteria before restoring completion or a pass.
