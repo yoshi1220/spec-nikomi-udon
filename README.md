@@ -38,7 +38,7 @@ v0.0.4 includes the new `osumitsuki` design approval skill and the revised `sagu
 uvx --from git+https://github.com/yoshi1220/spec-nikomi-udon.git@v0.0.4 spec-nikomi-udon update
 ```
 
-The 0.0.5.dev0 development version includes the workflow for creating automated PBI E2E tests in `nikomu`. To try it, run the appropriate `init` or `update` command above in the target project, passing the directory of your development checkout to `--from`.
+Development version 0.0.5.dev1 includes automated PBI E2E authoring and the `moritsuke` and `shishoku` system-test workflows. To try it, run the appropriate `init` or `update` command above in the target project, passing the directory of your development checkout to `--from`.
 
 Migration from v0.0.2 is manual. In v0.0.3 and later, use `shikomi` and `shikomi.md` for the change specification and `nikomu` for implementation.
 
@@ -135,6 +135,12 @@ Use `shikomi` to agree on the specification and acceptance criteria, then review
 For automated PBI E2E tests, `nikomu` prepares tests in `specs/<change>/e2e/` and runs them during implementation. `ajimi` reruns the same tests and records the integration test results in that PBI’s `e2e.md`. These results correspond to the acceptance criteria at the time of testing. Keep system tests for ongoing verification of end-to-end workflows in the repository’s top-level `e2e/` directory and update them as the system specification changes.
 
 Run `osameru` once all required E2E tests pass and the reviewer's confirmation is recorded in `e2e.md`. Review the implementation and design in the same PR and merge it to update the canonical design.
+
+## Create and run system E2E tests
+
+In development version 0.0.5.dev1, use `$moritsuke` to compare current `designs/specifications/` with existing assertions and prepare workflows and missing tests in the root `e2e/`. Run `$shishoku` for the full root suite or use a selection such as `$shishoku order lookup`. In Claude Code use `/moritsuke` and `/shishoku`.
+
+PBI and root tests wait for the expected visible value, then save the specified checkpoints when captures are enabled. Root E2E reports and images are saved under `evidence/system/<run-id>/` by default. Each test result links to its checkpoint images. Claude Code installations receive `.claude/rules/nikomi-e2e.md` scoped to the two E2E paths. Both Codex authoring workflows consult the shared skill before writing tests and add a pointer to instructions inside the target `e2e/`. [E2E authoring rules](english/skills/e2e-authoring/SKILL.md)
 
 ## License
 

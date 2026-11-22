@@ -17,6 +17,8 @@ from uuid import uuid4
 
 CONFIG = "designs/nikomi-udon.json"
 CANONICAL = "designs/specifications"
+SNAPSHOT_VERSION = 2
+INSTRUCTION_FILES = {"AGENTS.md", "AGENTS.override.md"}
 METHODS = ("playwright", "chrome-extension", "manual", "agent-browser")
 APPROVALS = ("none", "operational", "pr")
 DEFAULTS = {"design_approval": "none", "e2e_method": "manual", "screen_items": False, "screenshots": False}
@@ -233,6 +235,7 @@ def file_hash(path):
 def suite_inputs(root, suite):
     """Collect test inputs, including ignored fixtures reached through worktree links."""
     paths = set()
+    candidates = set()
     pending = [suite]
     scanned = set()
     while pending:
@@ -247,6 +250,7 @@ def suite_inputs(root, suite):
             if not raw:
                 continue
             paths.add(raw)
+            candidate = raw
             path = root / os.fsdecode(raw)
             if path.is_symlink():
                 try:
@@ -259,22 +263,28 @@ def suite_inputs(root, suite):
                 if resolved.is_dir():
                     pending.append(target.as_posix())
                 elif resolved.is_file():
-                    paths.add(os.fsencode(target))
+                    candidate = os.fsencode(target)
+                    paths.add(candidate)
                 elif resolved.exists():
                     raise WorkflowError(f"Unsupported E2E input: {os.fsdecode(raw)}")
-    return paths, scanned
+            # A shared instruction target is still hashed. Only test entries establish suite presence.
+            if path.name not in INSTRUCTION_FILES:
+                candidates.add(candidate)
+    return paths, candidates, scanned
 
 
-def test_snapshot(root, change, policy, checks, text, *, starting=False):
+def test_snapshot(root, change, policy, checks, text, *, starting=False, snapshot_version=SNAPSHOT_VERSION):
     change_name = change.relative_to(root).as_posix()
     report_name = f"{change_name}/e2e.md"
     index_name = f"{change_name}/oshinagaki.md"
-    generated = (f"{CANONICAL}/", f"{change_name}/evidence/")
+    generated = (f"{CANONICAL}/", f"{change_name}/evidence/", "evidence/system/")
     suite = f"{change_name}/e2e"
-    tests, directories = suite_inputs(root, suite)
+    tests, candidates, directories = suite_inputs(root, suite)
     remaining = [f":(top,exclude,literal){directory}" for directory in sorted(directories)]
-    files = git(root, "ls-files", "--cached", "--others", "--exclude-standard", "-z",
-                "--", *remaining)
+    # The original snapshot included untracked caches created by application imports.
+    cache_excludes = ("--exclude=__pycache__/", "--exclude=.pytest_cache/") if snapshot_version != 1 else ()
+    files = git(root, "ls-files", "--cached", "--others", "--exclude-standard", *cache_excludes,
+                "-z", "--", *remaining)
     paths = tests.union(files.split(b"\0"))
     paths.discard(b"")
     # A project's ignore rules may also cover the PBI documents.
@@ -309,11 +319,11 @@ def test_snapshot(root, change, policy, checks, text, *, starting=False):
             raise WorkflowError(f"Symlink enclosing a worktree file: {name}")
         elif path.is_file():
             stamp = ["file", file_hash(path), bool(path.stat().st_mode & 0o111)]
-            if raw in tests:
+            if raw in candidates and path.name not in INSTRUCTION_FILES:
                 has_suite_file = True
         elif (path / ".git").exists():
             stamp = ["submodule", git(path, "rev-parse", "HEAD").decode().strip()]
-            if raw in tests:
+            if raw in candidates:
                 has_suite_file = True
             if git(path, "status", "--porcelain"):
                 raise WorkflowError(f"Commit or clean changes in submodule before testing: {name}")
@@ -327,32 +337,72 @@ def test_snapshot(root, change, policy, checks, text, *, starting=False):
     return state.hexdigest()
 
 
-def evidence_links(cell):
-    # Markdown destinations can enclose a path in <> or balance parentheses in a filename.
+def link_destination(cell, start, angled):
+    # Accept the inline destinations documented for evidence cells, including optional titles.
     closing = re.compile(r"""(?:\s+(?:"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|\((?:\\.|[^()\\])*\)))?\s*\)""")
-    for match in re.finditer(r"\]\(\s*(<)?(?:\./)*(?=evidence/)", cell):
-        start = match.end()
-        if match[1]:
-            end = cell.find(">", start)
-            if end == -1 or not closing.match(cell, end + 1):
-                raise WorkflowError("Unclosed evidence link in the E2E table")
-        else:
-            depth = 0
-            for token in re.finditer(r"\\.|[()]|\s+", cell[start:]):
-                end = start + token.start()
-                if depth == 0 and closing.match(cell, end):
-                    break
-                if token[0] == "(":
-                    depth += 1
-                elif token[0] == ")":
-                    depth -= 1
-            else:
-                raise WorkflowError("Unclosed evidence link in the E2E table")
+    if angled:
+        end = cell.find(">", start)
+        finish = closing.match(cell, end + 1) if end >= 0 else None
+    else:
+        depth = 0
+        finish = None
+        for token in re.finditer(r"\\.|[()]|\s+", cell[start:]):
+            end = start + token.start()
+            if token[0] == "(":
+                depth += 1
+            elif token[0] == ")" and depth:
+                depth -= 1
+            elif token[0] == ")" or token[0].isspace():
+                if depth == 0:
+                    finish = closing.match(cell, end)
+                break
+    if finish:
         destination = re.sub(r"\\([()|])", r"\1", cell[start:end])
-        yield unquote(urlsplit(destination).path)
+        return destination, finish.end()
+    return None
 
 
-def result_digest(change, policy, checks, run_id, report):
+def evidence_links(cell):
+    tokens = re.compile(r"\\.|`+|<!--.*?(?:-->|$)|\[|\]")
+    opening = re.compile(r"\(\s*(<)?")
+    brackets = []
+    pos = 0
+    while (token := tokens.search(cell, pos)) is not None:
+        pos = token.end()
+        if token[0].startswith("`"):
+            # A code span ends at a run of exactly as many backticks.
+            end = re.search(r"(?<!`)" + token[0] + r"(?!`)", cell[pos:])
+            if end:
+                pos += end.end()
+        elif token[0] == "[":
+            brackets.append(pos)
+        elif token[0] == "]" and brackets:
+            label = cell[brackets.pop():token.start()]
+            match = opening.match(cell, pos)
+            if match:
+                dest = link_destination(cell, match.end(), match[1])
+                if dest:
+                    target, pos = dest
+                    if re.match(r"(?:\./)*evidence/", target):
+                        yield label, unquote(urlsplit(re.sub(r"^(\./)+", "", target)).path)
+                elif re.match(r"(?:\./)*evidence/", cell[match.end():]):
+                    raise WorkflowError("Invalid or unclosed inline evidence link in the E2E table")
+
+
+def capture_problems(key, points_cell, images):
+    points = [part.strip() for part in re.split(r"<br\s*/?>", points_cell, flags=re.I) if part.strip()]
+    if len(points) < 2 or not all(point.startswith("- ") for point in points):
+        return
+    assigned = set()
+    for point in points:
+        name = point[2:].strip()
+        matched = images.get(name, set())
+        if not matched or assigned.intersection(matched):
+            yield f"{key}: link a separate image using the checkpoint name [{name}]"
+        assigned.update(matched)
+
+
+def result_digest(change, policy, checks, run_id, report, *, confirming=True):
     evidence = {}
     problems = []
     notes = EXECUTION.search(report)
@@ -361,20 +411,27 @@ def result_digest(change, policy, checks, run_id, report):
     for key, row in checks.items():
         if row[7] != "OK" or row[6] in {"", "-"}:
             problems.append(f"{key}: expected an observed result and OK")
-        links = list(evidence_links(row[8]))
-        if policy["screenshots"] and row[5] not in {"", "-"}:
-            image_types = {".png", ".jpg", ".jpeg", ".webp", ".gif", ".avif"}
-            if not any(PurePosixPath(link).suffix.lower() in image_types for link in links):
-                problems.append(f"{key}: link the requested screenshots under evidence/")
-        for link in links:
+        images = {}
+        for label, link in evidence_links(row[8]):
             if not link.startswith(f"evidence/{run_id}/"):
                 problems.append(f"{key}: evidence must come from the current run")
                 continue
             path = managed_path(change, link)
             if path.is_file():
                 evidence[link] = file_hash(path)
+                if path.suffix.lower() in {".png", ".jpg", ".jpeg", ".webp", ".gif", ".avif"}:
+                    stat = path.stat()
+                    if stat.st_size:
+                        images.setdefault(label, set()).add((stat.st_dev, stat.st_ino))
+                    else:
+                        problems.append(f"{key}: empty evidence image: {link}")
             else:
                 problems.append(f"{key}: evidence file missing: {link}")
+        if policy["screenshots"] and row[5] not in {"", "-"}:
+            if not images:
+                problems.append(f"{key}: link the requested screenshot from this run")
+            elif confirming:
+                problems.extend(capture_problems(key, row[5], images))
     if problems:
         raise WorkflowError("\n".join(problems))
     return digest(json_text([report, evidence]).encode())
@@ -393,11 +450,13 @@ def read_run(review):
     if len(markers) != 1:
         raise WorkflowError("Start a run with start-e2e before recording confirmation")
     run = json.loads(markers[0])
-    if not isinstance(run, dict) or set(run) != {"id", "snapshot"} or not all(
-        isinstance(run[key], str) and re.fullmatch(pattern, run[key])
+    if not isinstance(run, dict) or set(run) - {"id", "snapshot", "version"} or not all(
+        isinstance(run.get(key), str) and re.fullmatch(pattern, run[key])
         for key, pattern in (("id", r"[0-9a-f]{32}"), ("snapshot", r"[0-9a-f]{64}"))
     ):
         raise WorkflowError("Invalid E2E run record")
+    if "version" in run and (type(run["version"]) is not int or run["version"] != SNAPSHOT_VERSION):
+        raise WorkflowError("Unsupported E2E run record version")
     return run
 
 
@@ -412,7 +471,7 @@ def start_e2e(root, change, policy):
     else:
         updated = updated.rstrip("\n") + "\n\n" + EMPTY_EXECUTION + "\n"
     snapshot = test_snapshot(root, change, policy, checks, updated, starting=True)
-    run = {"id": uuid4().hex, "snapshot": snapshot}
+    run = {"id": uuid4().hex, "snapshot": snapshot, "version": SNAPSHOT_VERSION}
     updated = REVIEW.sub(
         lambda _: f"<!-- e2e:review -->\n{review_record(run)}<!-- /e2e:review -->", updated, count=1
     )
@@ -420,11 +479,12 @@ def start_e2e(root, change, policy):
     print(run["id"])
 
 
-def require_current_run(root, change, policy, checks, text, review, run_id):
+def require_current_run(root, change, policy, checks, text, review, run_id=None):
     run = read_run(review)
-    if run_id != run["id"]:
+    if run_id is not None and run_id != run["id"]:
         raise WorkflowError("The run ID does not match the current E2E run")
-    if run["snapshot"] != test_snapshot(root, change, policy, checks, text):
+    snapshot = test_snapshot(root, change, policy, checks, text, snapshot_version=run.get("version", 1))
+    if run["snapshot"] != snapshot:
         raise WorkflowError("The tested worktree, test definition or project settings have changed")
     return run
 
@@ -451,18 +511,19 @@ def verify_e2e(root, change, policy):
     _, text, blocks, checks = read_e2e(change)
     block = blocks["review"]
     review = block.group(1)
-    run = read_run(review)
+    run = require_current_run(root, change, policy, checks, text, review)
     receipts = re.findall(r"(?m)^<!-- e2e-receipt: (\{[^\n]+\}) -->$", review)
     if len(receipts) != 1:
         raise WorkflowError("Confirmation of the E2E execution and results is missing")
-    results = result_digest(change, policy, checks, run["id"], text[:block.start()] + text[block.end():])
+    # Existing receipts bind the complete table and evidence bytes, including older link labels.
+    results = result_digest(change, policy, checks, run["id"],
+                            text[:block.start()] + text[block.end():], confirming=False)
     value = json.loads(receipts[0])
     if (
         not isinstance(value, dict)
         or not isinstance(value.get("reviewer"), str)
         or not value["reviewer"].strip()
         or value.get("run_id") != run["id"]
-        or run["snapshot"] != test_snapshot(root, change, policy, checks, text)
         or value.get("results") != results
         or value.get("method") != policy["e2e_method"]
         or review != review_record(run, value)

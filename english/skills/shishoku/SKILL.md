@@ -1,0 +1,11 @@
+---
+name: shishoku
+description: Run system tests in the root e2e/ directory and record observations, verdicts and screen evidence. Run the full suite by default or only the scenarios matching a given ID, feature or other selection.
+---
+
+# Run the system E2E scenarios
+
+1. Read the scenarios and execution instructions under the root `e2e/`. With no selection, use every root scenario. For a specified ID, feature, file or other scope, resolve the request to matching scenario IDs and select only those. Report an empty match and stop. If interpretations select different scopes, show the candidates and clarify. Refer missing scenarios or tests to [moritsuke](../moritsuke/SKILL.md).
+2. Read the E2E method and screenshot setting with the `osameru` skill’s `scripts/osameru.py settings`. Check the environment and data, and assign a new, unique run ID for each execution. Store reports and evidence under `evidence/system/<run-id>/` at the repository root by default. Any project-specific location must also be outside directories the runner cleans (such as Playwright’s `outputDir`), test collection, and PBI input snapshots. Pass this run’s evidence directory only when captures are enabled and the selected scenarios request them. Otherwise unset the capture environment variable for the run. Apply the [screen checks and capture conditions](../e2e-authoring/SKILL.md).
+3. For automation, verify that runner collection matches the intended IDs, then run with the same selection. Even a full root run selects only system tests. For manual or agent-driven browser tests, follow the selected scenarios and compare expectations with observations. Mark cases interrupted or skipped as unexecuted or unverified.
+4. In the run report (default `results.md` in the output directory), record the run ID, selected scope, environment, method, and each selected case ID with its expected result, observation, verdict, and links to evidence from this attempt. Record mismatches as NG. If a required capture fails, record why and leave that case unverified until the required evidence is available. Record an abnormal command exit as a run failure. For affected IDs (all executed IDs if the scope is unclear), retain observations and known failures and mark inconclusive results unverified. Identify the selected scope and its results on partial runs.

@@ -10,6 +10,8 @@
 
 ## Prepare and run the PBI’s automated E2E tests
 
+Before writing the first test, read the [E2E authoring rules](../../e2e-authoring/SKILL.md). Implement the checkpoints and observable readiness conditions from `e2e.md`. For a development run, pass a temporary evidence directory only when screenshots are enabled and the selected cases specify checkpoints. Otherwise unset the capture setting. Record how to pass a new evidence directory with the command in `dandori.md` so `ajimi` can supply its own destination for the formal run.
+
 When `e2e.md` exists and the configured method uses test code, create or update tests in the current PBI’s `specs/<change>/e2e/`. Identify each behavior ID in the test name or another traceable location. Exercise its specified steps and assert the expected result. Reuse existing tests and shared helpers where appropriate.
 
 During implementation, run the project’s runner against this PBI’s tests. Check that the runner collected only this PBI’s cases and ran the required IDs with the expected results. Verify that the full command exited successfully. Record the command and results in `dandori.md` so `ajimi` can rerun the same tests.

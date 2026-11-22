@@ -38,9 +38,9 @@ v0.0.4 には設計承認を記録する `osumitsuki` と改訂した `saguru` �
 uvx --from git+https://github.com/yoshi1220/spec-nikomi-udon.git@v0.0.4 spec-nikomi-udon update
 ```
 
-PBI の自動 E2E を `nikomu` で作成する手順は、開発版 0.0.5.dev0 で使えます。この版を試すには、導入先で上記の `init` または `update` を実行する際に、`--from` に開発版をチェックアウトしたディレクトリを指定します。
+PBI の自動 E2E とシステム全体の `moritsuke`・`shishoku` は、開発版 0.0.5.dev1 で使えます。この版を試すには、導入先で上記の `init` または `update` を実行する際に、`--from` に開発版をチェックアウトしたディレクトリを指定します。
 
-v0.0.2 からの移行は手動です。この版では、変更仕様に `shikomi` と `shikomi.md`、実装に `nikomu` を使います。
+v0.0.2 からの移行は手動です。v0.0.3 以降では、変更仕様に `shikomi` と `shikomi.md`、実装に `nikomu` を使います。
 
 言語と Codex・Claude Code・両方のいずれかを選びます。Codex には `.agents/skills/`、Claude Code には `.claude/skills/` に同じ版のスキルを配置します。案件設定がなければ E2E 方式、計画前の承認、画面キャプチャ、画面項目定義書を選びます。準備が残る場合もスキルと設定は保存されます。同じ版の `init` で環境準備の再開やエージェントの追加ができます。
 
@@ -135,6 +135,12 @@ $osameru 変更理由は「メモ登録機能を追加するため」です。
 PBI の自動 E2E は、`nikomu` が `specs/<変更名>/e2e/` に用意して実装中に実行します。`ajimi` は同じテストを再実行し、その PBI の `e2e.md` に結合テストの結果を記録します。結果は検証時点の受け入れ条件に対応します。仕様が変わった後も業務の流れを継続して検証するシステムテストは、リポジトリ直下の `e2e/` に置き、現行仕様に合わせて更新します。
 
 必須 E2E テストがすべて合格し、担当者の確認が `e2e.md` に記録されたら `osameru` を実行します。実装と設計書を同じ PR でレビューし、マージすると正本が更新されます。
+
+## システム全体の E2E を作成・実行する
+
+開発版 0.0.5.dev1 の `$moritsuke`（盛りつけ）は、現在の `designs/specifications/` と既存のアサーションを照合し、ルート `e2e/` に業務シナリオと不足しているテストを用意します。`$shishoku`（試食）でルートの全件、たとえば `$shishoku 受注照会` で該当シナリオだけを実行します。Claude Code では `/moritsuke` と `/shishoku` を使います。
+
+PBI とルートのテストは、画面に今回の期待値が現れてから、撮影が有効な案件で指定場面を保存します。ルート E2E の結果と画像は、既定で `evidence/system/<実行ID>/` に保存されます。各テスト結果から該当場面の画像を参照できます。Claude Code 用には両方の E2E パスを対象とする `.claude/rules/nikomi-e2e.md` を導入時に配置します。Codex では両作成工程が最初から共通スキルを参照し、対象 `e2e/` 内の指示にも参照先を残します。[E2E の作成ルール](japanese/skills/e2e-authoring/SKILL.md)
 
 ## ライセンス
 

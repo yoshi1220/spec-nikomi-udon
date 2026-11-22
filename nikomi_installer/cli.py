@@ -15,12 +15,14 @@ from pathlib import Path
 from .environment import prepare
 
 AGENTS = {"codex": ".agents/skills", "claude": ".claude/skills"}
-SKILLS = "ajimi dandori kondate koromogae nikomu okosu osameru osumitsuki saguru shikomi shitagaki torikomu".split()
+SKILLS = ("ajimi dandori e2e-authoring kondate koromogae moritsuke nikomu okosu osameru "
+          "osumitsuki saguru shikomi shishoku shitagaki torikomu").split()
 RECORD = "designs/nikomi-udon-install.json"
 CONFIG = "designs/nikomi-udon.json"
 DESIGN_TEMPLATE = "designs/basic-design.template.md"
 DESIGN_POLICY = "designs/basic-design-writing.md"
 DESIGN_ASSETS = "shitagaki/assets"
+CLAUDE_E2E_RULE = ".claude/rules/nikomi-e2e.md"
 TARGETS = {f"{folder}/{name}" for folder in AGENTS.values() for name in SKILLS}
 METHODS = ("playwright", "agent-browser", "chrome-extension", "manual")
 
@@ -160,7 +162,7 @@ def recover(root, work):
             raise ValueError("Invalid installation journal")
         for entry in entries:
             if (not isinstance(entry, list) or len(entry) not in (2, 3)
-                    or entry[0] not in TARGETS | {CONFIG, RECORD, DESIGN_TEMPLATE, DESIGN_POLICY}
+                    or entry[0] not in TARGETS | {CONFIG, RECORD, DESIGN_TEMPLATE, DESIGN_POLICY, CLAUDE_E2E_RULE}
                     or type(entry[1]) is not bool):
                 raise ValueError("Invalid installation journal")
         for entry in reversed(entries):
@@ -228,9 +230,15 @@ def install(root, work, action):
             raise ValueError("Run update with the desired release tag")
         language = old["language"]
         expected = {f"{AGENTS[a]}/{s}" for a in agents for s in SKILLS}
-        legacy = expected - {f"{AGENTS[a]}/osumitsuki" for a in agents}
-        if action == "update" and old["version"] != release and set(old["files"]) == legacy:
-            expected = legacy
+        if action == "update" and old["version"] != release:
+            # Editions before the system E2E skills shipped had 12 skills;
+            # the edition before design approval also lacked osumitsuki.
+            additions = {"e2e-authoring", "moritsuke", "shishoku"}
+            for missing in (additions, additions | {"osumitsuki"}):
+                legacy = expected - {f"{AGENTS[a]}/{s}" for a in agents for s in missing}
+                if set(old["files"]) == legacy:
+                    expected = legacy
+                    break
         if set(old["files"]) != expected:
             raise ValueError("Installation record does not match the expected skill set")
         converted = clean_crlf_paths(root, expected)
@@ -296,6 +304,8 @@ def install(root, work, action):
         write_json(stage / CONFIG, settings)
         entries.append((CONFIG, False))
     standard_diff = stage_design_format(root, stage, entries, source, old)
+    if "claude" in agents:
+        stage_claude_rule(root, stage, source, old, previous, entries)
     current = dict(version=release, language=language, agents=sorted(agents), files=files)
     if old != current:
         write_json(stage / RECORD, current)
@@ -307,12 +317,38 @@ def install(root, work, action):
         print("Standard basic design template changes / 標準書式の変更")
         print(standard_diff, end="")
         print(f"Edit {DESIGN_TEMPLATE} to adopt selected changes.")
-    report_ignored_files(root, files)
+    shared_paths = set(files)
+    if "claude" in agents:
+        shared_paths.add(CLAUDE_E2E_RULE)
+    report_ignored_files(root, shared_paths)
     if "codex" in agents:
         print("Codex: $shikomi")
     if "claude" in agents:
         print("Claude Code: /shikomi")
     return settings
+
+
+def stage_claude_rule(root, stage, source, old, previous, entries):
+    relative_asset = "assets/nikomi-e2e.md"
+    skill = f"{AGENTS['claude']}/e2e-authoring"
+    template = source / "e2e-authoring" / relative_asset
+    rule = safe(root, CLAUDE_E2E_RULE)
+    existed = rule.exists()
+    if existed:
+        original = file_stamp(rule)
+        installed = file_stamp(rule, normalize_crlf=True)
+        if installed == file_stamp(template, normalize_crlf=True):
+            return
+        old_template = old["files"].get(skill, {}).get(relative_asset) if old else None
+        if old_template not in (original, installed):
+            print(f"Keeping the project's {CLAUDE_E2E_RULE}. Compare its scope and instructions "
+                  f"with {skill}/{relative_asset}.")
+            return
+        previous[CLAUDE_E2E_RULE] = original
+    staged = stage / CLAUDE_E2E_RULE
+    staged.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(template, staged)
+    entries.append((CLAUDE_E2E_RULE, existed))
 
 
 def stage_design_format(root, stage, entries, source, old):
