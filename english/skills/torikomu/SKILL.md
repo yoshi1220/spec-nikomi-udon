@@ -1,6 +1,6 @@
 ---
 name: torikomu
-description: Start a change using an existing file as the primary input. Draft shikomi.md from the file and clarify it with the user. Use kondate for system-wide requirements material.
+description: Start a change using an existing file as the primary input. Draft shikomi.md from the file and clarify it with the user. Use shikomi for discovery summaries from saguru and kondate for system-wide requirements material.
 ---
 
 # Start a change from an existing file

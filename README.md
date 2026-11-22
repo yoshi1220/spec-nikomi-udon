@@ -32,6 +32,8 @@ Run this command in the target Git repository for a fresh installation of v0.0.3
 uvx --from git+https://github.com/yoshi1220/spec-nikomi-udon.git@v0.0.3 spec-nikomi-udon init
 ```
 
+To use the development version (`0.0.4.dev0`) with the updated `saguru` skill, replace `@v0.0.3` with `@main` in the command above. To upgrade an existing v0.0.3 installation to the development version, also replace `init` with `update`.
+
 Migration from v0.0.2 is manual. In v0.0.3, use `shikomi` and `shikomi.md` for the change specification and `nikomu` for implementation.
 
 Select a language and Codex, Claude Code, or both. The same skills go into `.agents/skills/` for Codex and `.claude/skills/` for Claude Code. For new projects, choose the E2E method, design approval mode, screenshots, and screen item definitions. Skills and settings are saved even if E2E preparation is pending. Rerun `init` with the same release to resume preparation or add the other agent.
@@ -55,7 +57,9 @@ If you choose `pr` for design approval and use GitHub CLI to check reviews, inst
 
 Start a session in the target project. To specify one change, use `$shikomi` in Codex or `/shikomi` in Claude Code. To run E2E tests, use `$ajimi` or `/ajimi`, respectively.
 
-Use `kondate` to turn requirements documents or a short description into system-wide guidance. It records the purpose, main capabilities, and shared constraints in `designs/system-overview.md` and the program layout in `designs/repository-structure.md`. Use `saguru` to explore a problem before deciding what to change.
+Use `kondate` to turn requirements documents or a short description into system-wide guidance. It records the purpose, main capabilities, and shared constraints in `designs/system-overview.md` and the program layout in `designs/repository-structure.md`.
+
+When you are still deciding what to change, `saguru` explores a real or anticipated situation one question at a time and revisits unknowns that could change the direction. The recommended location for the summary is `saguri/<topic>/saguri.md` at the repository root. If the change already has a feature branch, you can also save it as `specs/<change>/saguri.md`. You can also keep it in the conversation. Only the target feature’s `saguri.md` is read automatically by `shikomi`. To use a top-level summary, supply its path or move it to the feature location.
 
 ### Design approval before planning
 

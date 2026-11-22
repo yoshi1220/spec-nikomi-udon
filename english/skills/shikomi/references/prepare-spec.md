@@ -1,11 +1,12 @@
 # Prepare a specification
 
-## Set up the working branch and directory
+## Identify the input and working directory
 
-When resuming a change, locate its branch and `shikomi.md`. For a new change, choose a short slug describing the request, such as `export-csv`. If it is unclear whether the new change should start from another feature branch, confirm the starting point before creating the branch.
+1. If the user specifies a summary path, read that file before switching branches. If it cannot be read, ask for the correct path or its contents. When following this procedure from `torikomu`, use the document specified there as the primary input.
+2. Follow [Prepare the change directory](change-directory.md) to identify the target branch and working tree. Reuse the directory for an existing change. For a new change, allocate a number and prepare `specs/<change>/`.
+3. Only when using `shikomi` without a specified summary path, check the target working tree for `specs/<change>/saguri.md`. Read it if present. If absent, proceed from the request, backlog item, or conversation about this change. Do not search the top-level `saguri/` directory.
 
-1. If Git remotes are configured, run `git fetch --all --prune`. If fetching fails, explain the error and say that the latest remote numbers could not be verified. Ask whether to continue with the available information or stop. Wait for the user to choose before continuing. When there are no remotes, use the local information.
-2. From the target repository, run the bundled [start_change.py](../scripts/start_change.py) with Python 3 and pass the slug as its only argument. The helper uses one more than the highest number among local branches, fetched remote branches, and existing directories under `specs/`. Write `shikomi.md` inside the directory reported by the helper. If it exits with an error, inspect the current branch and the change directory before retrying.
+When using a summary, carry the problem, scope, adopted direction, and rationale into the draft and cite its original path. Keep unverified hypotheses and further investigation open. Record options the user has set aside as out of scope, with the reason. Apply any more recent corrections the user made about this change in the conversation. When resuming, read the existing `shikomi.md`. If a decision conflicts with the summary, check both sources and the current request to resolve it.
 
 ## Draft from what you already know
 

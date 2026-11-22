@@ -32,6 +32,8 @@ PBI ごとの成果物とその状況は、変更用ディレクトリの `oshin
 uvx --from git+https://github.com/yoshi1220/spec-nikomi-udon.git@v0.0.3 spec-nikomi-udon init
 ```
 
+新しい `saguru` を含む開発版（`0.0.4.dev0`）を使うには、上のコマンドの `@v0.0.3` を `@main` に変更します。既存の v0.0.3 環境を開発版に更新する場合は、末尾を `update` に変更します。
+
 v0.0.2 からの移行は手動です。この版では、変更仕様に `shikomi` と `shikomi.md`、実装に `nikomu` を使います。
 
 言語と Codex・Claude Code・両方のいずれかを選びます。Codex には `.agents/skills/`、Claude Code には `.claude/skills/` に同じ版のスキルを配置します。案件設定がなければ E2E 方式、計画前の承認、画面キャプチャ、画面項目定義書を選びます。準備が残る場合もスキルと設定は保存されます。同じ版の `init` で環境準備の再開やエージェントの追加ができます。
@@ -55,7 +57,9 @@ Playwright の依存管理方式が特定できない場合は、案件の管理
 
 導入先のプロジェクトでセッションを始めます。一件の変更仕様を作るには、Codex では `$shikomi`、Claude Code では `/shikomi` と入力します。E2E テストでは `$ajimi` または `/ajimi` を使います。
 
-要件資料や説明からシステム全体を整理するときは `kondate`（献立）を使います。目的・主要機能・共通の制約は `designs/system-overview.md` に、プログラムの配置は `designs/repository-structure.md` にまとめます。個別の変更で何に取り組むかを相談するには `saguru` を使います。
+要件資料や説明からシステム全体を整理するときは `kondate`（献立）を使います。目的・主要機能・共通の制約は `designs/system-overview.md` に、プログラムの配置は `designs/repository-structure.md` にまとめます。
+
+何に取り組むかが決まっていないときは、`saguru` で具体的な利用場面から一問ずつ掘り下げ、方針を左右する不明点を再点検します。終了時は、リポジトリ直下の `saguri/<相談名>/saguri.md` への保存を推奨します。対応する feature ブランチがあれば `specs/<変更名>/saguri.md` も選べます。保存せず会話だけで使うこともできます。`shikomi` が自動参照するのは対象 feature の `saguri.md` だけです。リポジトリ直下に保存したまとめを使うときは、そのパスを指定するか、対象 feature の保存先へ移します。
 
 ### 計画前の設計承認
 
