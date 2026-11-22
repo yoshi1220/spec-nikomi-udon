@@ -26,13 +26,13 @@ Move any manually installed skill directories with matching names out of the des
 
 ### Initialize the project
 
-To install this development edition, run this command in the target Git repository. Replace the example path with the path to this checkout.
+Run this command in the target Git repository for a fresh installation of v0.0.3.
 
 ```sh
-uvx --from /path/to/spec-nikomi-udon spec-nikomi-udon init
+uvx --from git+https://github.com/yoshi1220/spec-nikomi-udon.git@v0.0.3 spec-nikomi-udon init
 ```
 
-For a tagged release, follow the README at that tag. [v0.0.2 installation instructions](https://github.com/yoshi1220/spec-nikomi-udon/blob/v0.0.2/README.md#installation)
+Migration from v0.0.2 is manual. In v0.0.3, use `shikomi` and `shikomi.md` for the change specification and `nikomu` for implementation.
 
 Select a language and Codex, Claude Code, or both. The same skills go into `.agents/skills/` for Codex and `.claude/skills/` for Claude Code. For new projects, choose the E2E method, design approval mode, screenshots, and screen item definitions. Skills and settings are saved even if E2E preparation is pending. Rerun `init` with the same release to resume preparation or add the other agent.
 

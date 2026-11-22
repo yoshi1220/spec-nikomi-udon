@@ -26,13 +26,13 @@ PBI ごとの成果物とその状況は、変更用ディレクトリの `oshin
 
 ### 案件に導入する
 
-この開発版を導入するには、導入先の Git リポジトリで次のコマンドを実行します。パスには、この版をチェックアウトしたディレクトリを指定します。
+導入先の Git リポジトリで、次のコマンドを実行して v0.0.3 を新規導入します。
 
 ```sh
-uvx --from /path/to/spec-nikomi-udon spec-nikomi-udon init
+uvx --from git+https://github.com/yoshi1220/spec-nikomi-udon.git@v0.0.3 spec-nikomi-udon init
 ```
 
-公開タグから導入する場合は、そのタグの README を参照してください。[v0.0.2 の導入手順](https://github.com/yoshi1220/spec-nikomi-udon/blob/v0.0.2/README.ja.md#導入方法)
+v0.0.2 からの移行は手動です。この版では、変更仕様に `shikomi` と `shikomi.md`、実装に `nikomu` を使います。
 
 言語と Codex・Claude Code・両方のいずれかを選びます。Codex には `.agents/skills/`、Claude Code には `.claude/skills/` に同じ版のスキルを配置します。案件設定がなければ E2E 方式、計画前の承認、画面キャプチャ、画面項目定義書を選びます。準備が残る場合もスキルと設定は保存されます。同じ版の `init` で環境準備の再開やエージェントの追加ができます。
 
