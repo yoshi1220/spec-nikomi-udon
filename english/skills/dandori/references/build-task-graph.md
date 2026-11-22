@@ -14,6 +14,8 @@ Give each task an ID, the prerequisites it needs, the result it provides, its re
 - Split work when a result has its own verification and is useful to later work. Headings, layers, and files alone do not determine task boundaries.
 - Distinguish task completion from acceptance verification. If acceptance verification needs several results, include all the required task IDs in its verification method. If a separate integration test or manual verification needs its own task, give it a node with the necessary tasks as prerequisites.
 
+When planning PBI E2E checks for a method that uses test code, include preparing tests in the current `specs/<change>/e2e/` and running them during implementation.
+
 ## Connect direct prerequisites
 
 `A → B` means B needs A's result to proceed through its completion check. Record A's ID under B, with the result B requires. If B needs several results, record each prerequisite.

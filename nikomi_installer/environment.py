@@ -89,6 +89,8 @@ def runner_options(config, manager):
     for name, deps in config.get("dependency-groups", {}).items():
         if declares_runner(deps):
             return ["--group" if manager == "uv" else "--with", name]
+    if manager == "uv" and declares_runner(config.get("tool", {}).get("uv", {}).get("dev-dependencies", [])):
+        return ["--group", "dev"]
     return None
 
 
@@ -100,18 +102,45 @@ def runner_install(config, manager):
     return ([manager, "add", "--dev"] if manager == "uv" else [manager, "add", "--group", "dev"]) + ["pytest-playwright"]
 
 
+def requirements_declare_runner(requirements):
+    pending = [requirements] if requirements.is_file() else []
+    seen = set()
+    complete = True
+    while pending:
+        path = pending.pop()
+        identity = path.resolve()
+        if identity in seen:
+            continue
+        seen.add(identity)
+        if not path.is_file():
+            complete = False
+            continue
+        lines = path.read_text(encoding="utf-8-sig").splitlines()
+        if declares_runner(lines):
+            return True
+        for line in lines:
+            include = re.match(r"^\s*(?:-r\s*|--requirement(?:=|\s+))(.+)$", line)
+            if include:
+                names = shlex.split(include[1], comments=True)
+                if len(names) == 1 and "://" not in names[0] and "${" not in names[0]:
+                    pending.append(path.parent / names[0])
+                else:
+                    complete = False
+    return False if complete else None
+
+
 def project_declares_python_runner(root):
-    requirements = root / "requirements.txt"
-    if requirements.is_file() and declares_runner(requirements.read_text(encoding="utf-8").splitlines()):
-        return True
-    project = root / "pyproject.toml"
-    if not project.is_file():
-        return False
     try:
-        config = tomllib.loads(project.read_text(encoding="utf-8"))
-        # Include both standard declarations and Poetry's dependency tables.
-        return runner_options(config, "poetry") is not None
-    except (ValueError, TypeError, AttributeError):
+        declared = requirements_declare_runner(root / "requirements.txt")
+        if declared:
+            return True
+        project = root / "pyproject.toml"
+        if project.is_file():
+            config = tomllib.loads(project.read_text(encoding="utf-8"))
+            if any(runner_options(config, manager) is not None for manager in ("poetry", "uv")):
+                return True
+        return declared
+    except (OSError, ValueError, TypeError, AttributeError, RuntimeError):
         # Leave the choice open when Python's declarations cannot be read.
         return None
 
@@ -177,11 +206,14 @@ def prepare(root, method, choose):
         if not kinds:
             raise ValueError("Select a project test runner and set up a Node.js or Python test environment.")
         if len(kinds) == 2:
-            package = node_package(root)
-            existing_node = any("@playwright/test" in package.get(key, {})
-                                for key in ("dependencies", "devDependencies"))
+            try:
+                package = node_package(root)
+                existing_node = any("@playwright/test" in package.get(key, {})
+                                    for key in ("dependencies", "devDependencies"))
+            except (OSError, ValueError):
+                existing_node = None
             existing_python = project_declares_python_runner(root)
-            if existing_python is not None and existing_node != existing_python:
+            if existing_node is not None and existing_python is not None and existing_node != existing_python:
                 kinds = ["Node.js" if existing_node else "Python"]
         kind = kinds[0] if len(kinds) == 1 else choose("Playwright runner", kinds)
         try:

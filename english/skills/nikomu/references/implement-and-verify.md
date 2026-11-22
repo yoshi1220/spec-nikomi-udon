@@ -8,6 +8,12 @@
 3. Make the changes needed to satisfy the specification and the task's intended result. Run the tests or manual checks named in the completion check along with affected existing tests and applicable required project checks. If these edits affect the evidence for earlier tasks or passing criteria, update the records and re-run the affected checks as described in [Recover and finish](recover-and-finish.md). Use the same procedure for failures or discrepancies.
 4. Once the completion check passes, confirm the task ID and description in the latest `dandori.md`, then update the checkbox and save what was checked and the result. If the specification, plan status, prerequisites, or completion check have changed, return to preparation and cross-check the documents again. Review the saved entry before moving on. If a required check fails or has not run, record why and leave the task unchecked.
 
+## Prepare and run the PBI’s automated E2E tests
+
+When `e2e.md` exists and the configured method uses test code, create or update tests in the current PBI’s `specs/<change>/e2e/`. Identify each behavior ID in the test name or another traceable location. Exercise its specified steps and assert the expected result. Reuse existing tests and shared helpers where appropriate.
+
+During implementation, run the project’s runner against this PBI’s tests. Check that the runner collected only this PBI’s cases and ran the required IDs with the expected results. Verify that the full command exited successfully. Record the command and results in `dandori.md` so `ajimi` can rerun the same tests.
+
 ## Verify acceptance criteria
 
 - For each criterion ID, verify that all tasks it requires are complete. When reusing a task result, check that its inputs and the results actually checked satisfy the verification method and expected result for that criterion. Verify behavior that depends on several tasks with those changes in place together.

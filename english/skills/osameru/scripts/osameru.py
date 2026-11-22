@@ -230,13 +230,54 @@ def file_hash(path):
     return hasher.hexdigest()
 
 
-def test_snapshot(root, change, policy, checks, text):
+def suite_inputs(root, suite):
+    """Collect test inputs, including ignored fixtures reached through worktree links."""
+    paths = set()
+    pending = [suite]
+    scanned = set()
+    while pending:
+        directory = pending.pop()
+        if directory in scanned:
+            continue
+        scanned.add(directory)
+        files = git(root, "ls-files", "--cached", "--others", "-z", "--exclude=__pycache__/",
+                    "--exclude=.pytest_cache/", "--exclude=node_modules/", "--exclude=.venv/",
+                    "--", f":(top,literal){directory}")
+        for raw in files.split(b"\0"):
+            if not raw:
+                continue
+            paths.add(raw)
+            path = root / os.fsdecode(raw)
+            if path.is_symlink():
+                try:
+                    resolved = path.resolve()
+                    target = resolved.relative_to(root)
+                except (OSError, ValueError, RuntimeError) as error:
+                    raise WorkflowError(f"E2E input must resolve inside the worktree: {os.fsdecode(raw)}") from error
+                if not target.parts or ".git" in target.parts:
+                    raise WorkflowError(f"Expected a project test file or directory: {os.fsdecode(raw)}")
+                if resolved.is_dir():
+                    pending.append(target.as_posix())
+                elif resolved.is_file():
+                    paths.add(os.fsencode(target))
+                elif resolved.exists():
+                    raise WorkflowError(f"Unsupported E2E input: {os.fsdecode(raw)}")
+    return paths, scanned
+
+
+def test_snapshot(root, change, policy, checks, text, *, starting=False):
     change_name = change.relative_to(root).as_posix()
-    exclude = {f"{change_name}/e2e.md", f"{change_name}/oshinagaki.md"}
+    report_name = f"{change_name}/e2e.md"
+    index_name = f"{change_name}/oshinagaki.md"
     generated = (f"{CANONICAL}/", f"{change_name}/evidence/")
-    files = git(root, "ls-files", "--cached", "--others", "--exclude-standard", "-z")
-    paths = set(files.split(b"\0")) - {b""}
-    # A project's ignore rules may cover specs/. These inputs still define the tested change.
+    suite = f"{change_name}/e2e"
+    tests, directories = suite_inputs(root, suite)
+    remaining = [f":(top,exclude,literal){directory}" for directory in sorted(directories)]
+    files = git(root, "ls-files", "--cached", "--others", "--exclude-standard", "-z",
+                "--", *remaining)
+    paths = tests.union(files.split(b"\0"))
+    paths.discard(b"")
+    # A project's ignore rules may also cover the PBI documents.
     inputs = ["shikomi.md", "dandori.md", "shitagaki.md"]
     if policy["screen_items"]:
         inputs.append("screen-items.md")
@@ -253,25 +294,36 @@ def test_snapshot(root, change, policy, checks, text):
         prose = text[:notes.start()] + text[notes.end():]
         definition = CHECKS.sub("", REVIEW.sub("", prose))
         state.update(hashlib.sha256(definition.encode()).digest())
+    has_suite_file = False
     for raw in sorted(paths):
         name = os.fsdecode(raw)
-        if name in exclude or name.startswith(generated):
+        # The report's definition is hashed above. Recording a run changes its other fields.
+        if name == report_name or (raw not in tests and (name == index_name or name.startswith(generated))):
             continue
         path = root / name
         if path.is_symlink():
             stamp = ["link", os.readlink(path)]
+            if raw in tests:
+                stamp.append(path.resolve().relative_to(root).as_posix())
         elif path.resolve() != path:
             raise WorkflowError(f"Symlink enclosing a worktree file: {name}")
         elif path.is_file():
             stamp = ["file", file_hash(path), bool(path.stat().st_mode & 0o111)]
+            if raw in tests:
+                has_suite_file = True
         elif (path / ".git").exists():
             stamp = ["submodule", git(path, "rev-parse", "HEAD").decode().strip()]
+            if raw in tests:
+                has_suite_file = True
             if git(path, "status", "--porcelain"):
                 raise WorkflowError(f"Commit or clean changes in submodule before testing: {name}")
         else:
             continue
         state.update(repr((name, stamp)).encode("utf-8", errors="backslashreplace"))
         state.update(b"\0")
+    if starting and policy["e2e_method"] == "playwright":
+        if not (root / suite).is_dir() or not has_suite_file:
+            raise WorkflowError(f"Use nikomu to prepare this PBI's Playwright tests in {suite}/ before starting")
     return state.hexdigest()
 
 
@@ -359,7 +411,8 @@ def start_e2e(root, change, policy):
         updated = EXECUTION.sub(EMPTY_EXECUTION, updated, count=1)
     else:
         updated = updated.rstrip("\n") + "\n\n" + EMPTY_EXECUTION + "\n"
-    run = {"id": uuid4().hex, "snapshot": test_snapshot(root, change, policy, checks, updated)}
+    snapshot = test_snapshot(root, change, policy, checks, updated, starting=True)
+    run = {"id": uuid4().hex, "snapshot": snapshot}
     updated = REVIEW.sub(
         lambda _: f"<!-- e2e:review -->\n{review_record(run)}<!-- /e2e:review -->", updated, count=1
     )

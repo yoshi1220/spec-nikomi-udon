@@ -38,6 +38,8 @@ v0.0.4 includes the new `osumitsuki` design approval skill and the revised `sagu
 uvx --from git+https://github.com/yoshi1220/spec-nikomi-udon.git@v0.0.4 spec-nikomi-udon update
 ```
 
+The 0.0.5.dev0 development version includes the workflow for creating automated PBI E2E tests in `nikomu`. To try it, run the appropriate `init` or `update` command above in the target project, passing the directory of your development checkout to `--from`.
+
 Migration from v0.0.2 is manual. In v0.0.3 and later, use `shikomi` and `shikomi.md` for the change specification and `nikomu` for implementation.
 
 Select a language and Codex, Claude Code, or both. The same skills go into `.agents/skills/` for Codex and `.claude/skills/` for Claude Code. For new projects, choose the E2E method, design approval mode, screenshots, and screen item definitions. Skills and settings are saved even if E2E preparation is pending. Rerun `init` with the same release to resume preparation or add the other agent.
@@ -129,6 +131,8 @@ $osameru Use "Add note creation" as the change reason.
 ```
 
 Use `shikomi` to agree on the specification and acceptance criteria, then review `shikomi.md` and continue on the same work branch. Before implementing, review `shitagaki.md`, `dandori.md`, and the E2E test specification `e2e.md` under `specs/<change>/`.
+
+For automated PBI E2E tests, `nikomu` prepares tests in `specs/<change>/e2e/` and runs them during implementation. `ajimi` reruns the same tests and records the integration test results in that PBI’s `e2e.md`. These results correspond to the acceptance criteria at the time of testing. Keep system tests for ongoing verification of end-to-end workflows in the repository’s top-level `e2e/` directory and update them as the system specification changes.
 
 Run `osameru` once all required E2E tests pass and the reviewer's confirmation is recorded in `e2e.md`. Review the implementation and design in the same PR and merge it to update the canonical design.
 
