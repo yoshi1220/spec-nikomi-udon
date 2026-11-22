@@ -1,4 +1,4 @@
-<!-- nikomi-review: pending -->
+<!-- shikomi-review: pending -->
 # 変更仕様
 
 ## 元の依頼

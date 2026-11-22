@@ -1,6 +1,6 @@
 ---
 name: ajimi
-description: Run the E2E tests in e2e.md after implementation with yonabe, and record verdicts, evidence, and reviewer confirmation. Route test failures back to planning or implementation as appropriate, then retest once.
+description: Run the E2E tests in e2e.md after implementation with nikomu, and record verdicts, evidence, and reviewer confirmation. Route test failures back to planning or implementation as appropriate, then retest once.
 ---
 
 # Verify an implemented change with E2E tests

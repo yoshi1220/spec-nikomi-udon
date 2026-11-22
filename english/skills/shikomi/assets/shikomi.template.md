@@ -1,4 +1,4 @@
-<!-- nikomi-review: pending -->
+<!-- shikomi-review: pending -->
 # Change specification
 
 ## Original request

@@ -8,10 +8,10 @@ SIer や日本の伝統的な企業の開発チームを想定しています。
 
 ## 開発の流れ
 
-1. **仕様を詰める**。要件やプロダクトバックログ項目（PBI）から始めるときは `nikomu`、既存資料から始めるときは `torikomu` を使います。対象範囲、振る舞い、受け入れ条件を一問ずつ確認し、`nikomi.md` に残します。
-2. **基本設計を下書きする**。担当者が `nikomi.md` を確認し、必要に応じて修正します。保存した仕様をもとに、`shitagaki` で機能ごとの基本設計書案を `shitagaki.md` に作ります。
+1. **仕様を詰める**。要件やプロダクトバックログ項目（PBI）から始めるときは `shikomi`、既存資料から始めるときは `torikomu` を使います。対象範囲、振る舞い、受け入れ条件を一問ずつ確認し、`shikomi.md` に残します。
+2. **基本設計を下書きする**。担当者が `shikomi.md` を確認し、必要に応じて修正します。保存した仕様をもとに、`shitagaki` で機能ごとの基本設計書案を `shitagaki.md` に作ります。
 3. **計画する**。`dandori` で作業と確認方法を `dandori.md` にまとめます。変更する振る舞いと影響を受ける既存の振る舞いについて、不具合を見分けられる入力と期待結果を対にして記します。E2E テストの手順と期待結果は `e2e.md` にまとめます。
-4. **実装して検証する**。`yonabe` で実装し、新規・既存のテストや手動確認で計画どおりに不具合を見分けられるか確かめます。その後、`ajimi`（味見）で E2E テストを実施します。不合格の原因に応じて実装または計画からやり直し、一度再テストしても解決しなければ利用者に対応を求めます。担当者はテストの実施内容と結果を確認し、同じ仕様書に記録を残します。
+4. **実装して検証する**。`nikomu` で実装し、新規・既存のテストや手動確認で計画どおりに不具合を見分けられるか確かめます。その後、`ajimi`（味見）で E2E テストを実施します。不合格の原因に応じて実装または計画からやり直し、一度再テストしても解決しなければ利用者に対応を求めます。担当者はテストの実施内容と結果を確認し、同じ仕様書に記録を残します。
 5. **正本に納める**。`osameru` で合格と担当者の確認を照合し、作業ブランチの `designs/specifications/` に設計書と改訂履歴の更新を用意します。実装と同じ PR でレビューし、マージ時に正本を更新します。
 
 PBI ごとの成果物とその状況は、変更用ディレクトリの `oshinagaki.md`（お品書き）で確認できます。
@@ -26,17 +26,17 @@ PBI ごとの成果物とその状況は、変更用ディレクトリの `oshin
 
 ### 案件に導入する
 
-導入先の Git リポジトリで、次のコマンドを実行して v0.0.2 をインストールします。
+この開発版を導入するには、導入先の Git リポジトリで次のコマンドを実行します。パスには、この版をチェックアウトしたディレクトリを指定します。
 
 ```sh
-uvx --from git+https://github.com/yoshi1220/spec-nikomi-udon.git@v0.0.2 spec-nikomi-udon init
+uvx --from /path/to/spec-nikomi-udon spec-nikomi-udon init
 ```
 
-ローカルの配布元から試す場合は、導入先で `uvx --from /path/to/spec-nikomi-udon spec-nikomi-udon init` を実行します。
+公開タグから導入する場合は、そのタグの README を参照してください。[v0.0.2 の導入手順](https://github.com/yoshi1220/spec-nikomi-udon/blob/v0.0.2/README.ja.md#導入方法)
 
 言語と Codex・Claude Code・両方のいずれかを選びます。Codex には `.agents/skills/`、Claude Code には `.claude/skills/` に同じ版のスキルを配置します。案件設定がなければ E2E 方式、計画前の承認、画面キャプチャ、画面項目定義書を選びます。準備が残る場合もスキルと設定は保存されます。同じ版の `init` で環境準備の再開やエージェントの追加ができます。
 
-新版への更新は、新しいタグを指定し、上のコマンドの末尾を `update` に変更します。配置したスキル、案件設定 `designs/nikomi-udon.json`、導入記録 `designs/nikomi-udon-install.json` を案件の Git に含め、チームで共有します。Git の除外設定に該当するファイルがあれば、インストーラが件数とパスの例を表示します。`git check-ignore -v -- <パス>` で該当ルールを確認し、共有する配布ファイルが Git に含まれるようにします。配布スキルを直接編集した場合はその変更を退避して元の配布状態に戻し、更新後に必要な変更を再反映します。
+この版の導入後に配布スキルを更新するには、上のコマンドの末尾を `update` に変更します。配置したスキル、案件設定 `designs/nikomi-udon.json`、導入記録 `designs/nikomi-udon-install.json` を案件の Git に含め、チームで共有します。Git の除外設定に該当するファイルがあれば、インストーラが件数とパスの例を表示します。`git check-ignore -v -- <パス>` で該当ルールを確認し、共有する配布ファイルが Git に含まれるようにします。配布スキルを直接編集した場合はその変更を退避して元の配布状態に戻し、更新後に必要な変更を再反映します。
 
 ### `init` の後に
 
@@ -53,13 +53,13 @@ Playwright の依存管理方式が特定できない場合は、案件の管理
 
 計画前の設計承認に `pr` を選び、GitHub CLI で照会する場合は、`gh` を用意し、対象リポジトリと PR を参照できるよう認証します。 [PR の照会手順](japanese/skills/dandori/references/design-approval.md)
 
-導入先のプロジェクトでセッションを始めます。たとえば `nikomu` は、Codex では `$nikomu`、Claude Code では `/nikomu` と入力します。E2E テストでは `$ajimi` または `/ajimi` を使います。
+導入先のプロジェクトでセッションを始めます。一件の変更仕様を作るには、Codex では `$shikomi`、Claude Code では `/shikomi` と入力します。E2E テストでは `$ajimi` または `/ajimi` を使います。
 
-システム全体の指針を作るには `shikomu`、何を変えるか相談するには `saguru` を使います。
+要件資料や説明からシステム全体を整理するときは `kondate`（献立）を使います。目的・主要機能・共通の制約は `designs/system-overview.md` に、プログラムの配置は `designs/repository-structure.md` にまとめます。個別の変更で何に取り組むかを相談するには `saguru` を使います。
 
 ### 計画前の設計承認
 
-`dandori` は確認済みの `nikomi.md` を必須とし、`shitagaki.md` があれば計画に使います。計画に進む前の承認方式はプロジェクト単位で選びます。たとえば、Codex の導入先で PR レビューを使うには、次のコマンドを実行します。
+`dandori` は確認済みの `shikomi.md` を必須とし、`shitagaki.md` があれば計画に使います。計画に進む前の承認方式はプロジェクト単位で選びます。たとえば、Codex の導入先で PR レビューを使うには、次のコマンドを実行します。
 
 ```sh
 python3 .agents/skills/osameru/scripts/osameru.py setup --design-approval pr
@@ -75,7 +75,7 @@ python3 .agents/skills/osameru/scripts/osameru.py setup --design-approval pr
 
 ## 案件の基本設計書式を使う
 
-上記の v0.0.2 のコマンドを使い、新規導入には `init`、v0.0.1 からの更新には `update` を実行します。`init` または初回の `update` で `designs/basic-design.template.md` と `designs/basic-design-writing.md` が用意されます。両方を案件の Git で共有します。チームはテンプレートの標題・見出し・表を編集できます。次に `okosu`、`shitagaki`、`koromogae` がその書式を使う際に、変更に合わせて作成方針を更新します。
+初回の `init` で `designs/basic-design.template.md` と `designs/basic-design-writing.md` が用意されます。両方を案件の Git で共有します。チームはテンプレートの標題・見出し・表を編集できます。次に `okosu`、`shitagaki`、`koromogae` がその書式を使う際に、変更に合わせて作成方針を更新します。
 
 本体を更新しても案件の書式と作成方針を引き継ぎます。同梱の標準書式に変更があれば、更新時に表示する差分を確認し、採用する変更を案件のテンプレートに取り込みます。同梱の標準書式は導入先の `shitagaki/assets/basic-design.template.md` にあります。
 
@@ -95,10 +95,10 @@ python3 .agents/skills/osameru/scripts/osameru.py setup --design-approval pr
 
 ```text
 # アプリ全体の目的と主な機能を designs/system-overview.md にまとめる。
-$shikomu 作業メモを保存し、一覧から見返せるアプリを作りたいです。
+$kondate 作業メモを保存し、一覧から見返せるアプリを作りたいです。
 
-# 作業ブランチを作り、対話で決めた仕様と受け入れ条件を nikomi.md に残す。
-$nikomu タイトルと本文を保存し、一覧にタイトルを表示。タイトルが空なら入力を促し、保存しない。
+# 作業ブランチを作り、対話で決めた仕様と受け入れ条件を shikomi.md に残す。
+$shikomi タイトルと本文を保存し、一覧にタイトルを表示。タイトルが空なら入力を促し、保存しない。
 
 # 合意した仕様から、メモ登録機能の基本設計書案を shitagaki.md に作る。
 $shitagaki
@@ -107,7 +107,7 @@ $shitagaki
 $dandori
 
 # 計画に沿って実装し、各作業の進捗と検証結果を dandori.md に記録する。
-$yonabe
+$nikomu
 
 # 実際のアプリで登録と入力エラーを試し、期待どおりに動いたかを e2e.md に記録する。
 $ajimi
@@ -116,7 +116,7 @@ $ajimi
 $osameru 変更理由は「メモ登録機能を追加するため」です。
 ```
 
-`nikomu` の対話で仕様と受け入れ条件に合意し、`nikomi.md` を確認したら、同じ作業ブランチで続けます。実装する前に、`specs/<変更名>/` の基本設計書案 `shitagaki.md`、計画 `dandori.md`、E2E テスト仕様書 `e2e.md` を確認します。
+`shikomi` の対話で仕様と受け入れ条件に合意し、`shikomi.md` を確認したら、同じ作業ブランチで続けます。実装する前に、`specs/<変更名>/` の基本設計書案 `shitagaki.md`、計画 `dandori.md`、E2E テスト仕様書 `e2e.md` を確認します。
 
 必須 E2E テストがすべて合格し、担当者の確認が `e2e.md` に記録されたら `osameru` を実行します。実装と設計書を同じ PR でレビューし、マージすると正本が更新されます。
 

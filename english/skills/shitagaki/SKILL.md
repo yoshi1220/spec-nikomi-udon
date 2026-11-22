@@ -1,11 +1,11 @@
 ---
 name: shitagaki
-description: Draft or update a functional basic design in the PBI's shitagaki.md from its saved nikomi.md.
+description: Draft or update a functional basic design in the PBI's shitagaki.md from its saved shikomi.md.
 ---
 
 # Draft the basic design
 
-Use the specified `specs/<change>/` directory. Otherwise map the current `feature/<change>` branch to its change directory. Ask when the target is unclear. Read `nikomi.md` first. If the file is missing, report the required path and stop before creating files. Use the saved content at invocation time, including manual edits.
+Use the specified `specs/<change>/` directory. Otherwise map the current `feature/<change>` branch to its change directory. Ask when the target is unclear. Read `shikomi.md` first. If the file is missing, report the required path and stop before creating files. Use the saved content at invocation time, including manual edits.
 
 1. Identify the affected functions and their expected behavior. Read the system overview, related documents, and any existing canonical specifications. Compare `dandori.md`, implementation code, and verification results when available. Account for the timing of the planned change when comparing behaviors. If sources disagree about the same behavior at the same point in time, show the evidence, ask the user one question at a time, and wait before creating or updating the draft.
 2. For an existing function without a canonical design, investigate its current externally observable behavior across the entire function. Combine the behavior to retain with the agreed changes. For an existing canonical design, use that document as the base for a complete updated draft. Mark unsupported items as requiring user confirmation and explain what to confirm and what it affects. Place new canonical documents in the system's functional hierarchy.

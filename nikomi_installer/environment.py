@@ -61,31 +61,59 @@ def node_commands(root):
     return [add, prefix + ["playwright", "install", "chromium"]], node + ["-e", NODE_PROBE]
 
 
-def runner_install(config, manager):
-    # Keep the project's version constraint and dependency group on a fresh checkout.
-    def declares_runner(dependencies):
-        pattern = r"^pytest[-_.]+playwright(?=$|[\s<>=!~@;\[])"
-        return any(isinstance(dep, str) and re.match(pattern, dep.strip(), re.I) for dep in dependencies)
+def declares_runner(dependencies):
+    pattern = r"^pytest[-_.]+playwright(?=$|[\s<>=!~@;\[])"
+    return any(isinstance(dep, str) and re.match(pattern, dep.strip(), re.I) for dep in dependencies)
 
+
+def runner_options(config, manager):
+    # An empty list selects a declared default dependency; None means it needs adding.
     project = config.get("project", {})
     poetry = config.get("tool", {}).get("poetry", {})
-    install = ["uv", "sync", "--inexact"] if manager == "uv" else ["poetry", "install"]
     if declares_runner(project.get("dependencies", [])):
-        return install
+        return []
     for extra, deps in project.get("optional-dependencies", {}).items():
         if declares_runner(deps):
-            return install + (["--extra", extra] if manager == "uv" else ["--extras", extra])
-    groups = dict(config.get("dependency-groups", {}))
+            return ["--extra" if manager == "uv" else "--extras", extra]
     if manager == "poetry":
         if declares_runner(poetry.get("dependencies", {})):
-            return install
+            for extra, deps in poetry.get("extras", {}).items():
+                if declares_runner(deps):
+                    return ["--extras", extra]
+            return []
         if declares_runner(poetry.get("dev-dependencies", {})):
-            return install + ["--with", "dev"]
-        groups.update({name: group.get("dependencies", {}) for name, group in poetry.get("group", {}).items()})
-    for name, deps in groups.items():
+            return ["--with", "dev"]
+        for name, group in poetry.get("group", {}).items():
+            if declares_runner(group.get("dependencies", {})):
+                return ["--with", name]
+    for name, deps in config.get("dependency-groups", {}).items():
         if declares_runner(deps):
-            return install + (["--group", name] if manager == "uv" else ["--with", name])
+            return ["--group" if manager == "uv" else "--with", name]
+    return None
+
+
+def runner_install(config, manager):
+    options = runner_options(config, manager)
+    if options is not None:
+        install = ["uv", "sync", "--inexact"] if manager == "uv" else ["poetry", "install"]
+        return install + options
     return ([manager, "add", "--dev"] if manager == "uv" else [manager, "add", "--group", "dev"]) + ["pytest-playwright"]
+
+
+def project_declares_python_runner(root):
+    requirements = root / "requirements.txt"
+    if requirements.is_file() and declares_runner(requirements.read_text(encoding="utf-8").splitlines()):
+        return True
+    project = root / "pyproject.toml"
+    if not project.is_file():
+        return False
+    try:
+        config = tomllib.loads(project.read_text(encoding="utf-8"))
+        # Include both standard declarations and Poetry's dependency tables.
+        return runner_options(config, "poetry") is not None
+    except (ValueError, TypeError, AttributeError):
+        # Leave the choice open when Python's declarations cannot be read.
+        return None
 
 
 def python_commands(root):
@@ -152,9 +180,8 @@ def prepare(root, method, choose):
             package = node_package(root)
             existing_node = any("@playwright/test" in package.get(key, {})
                                 for key in ("dependencies", "devDependencies"))
-            existing_python = any("pytest-playwright" in p.read_text(encoding="utf-8")
-                                  for p in (root / "requirements.txt", root / "pyproject.toml") if p.is_file())
-            if existing_node != existing_python:
+            existing_python = project_declares_python_runner(root)
+            if existing_python is not None and existing_node != existing_python:
                 kinds = ["Node.js" if existing_node else "Python"]
         kind = kinds[0] if len(kinds) == 1 else choose("Playwright runner", kinds)
         try:

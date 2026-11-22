@@ -22,6 +22,8 @@ APPROVALS = ("none", "operational", "pr")
 DEFAULTS = {"design_approval": "none", "e2e_method": "manual", "screen_items": False, "screenshots": False}
 CHECKS = re.compile(r"(?ms)^<!-- e2e:checks -->\n(.*?)^<!-- /e2e:checks -->$")
 REVIEW = re.compile(r"(?ms)^<!-- e2e:review -->\n(.*?)^<!-- /e2e:review -->$")
+EXECUTION = re.compile(r"(?ms)^<!-- e2e:execution -->\n(.*?)^<!-- /e2e:execution -->$")
+EMPTY_EXECUTION = "<!-- e2e:execution -->\n-\n<!-- /e2e:execution -->"
 DOCUMENT = re.compile(
     r"(?ms)^<!-- osameru-target: (\{[^\n]+\}) -->\n(.*?)^<!-- /osameru-target -->$"
 )
@@ -72,8 +74,8 @@ def change_directory(root, specified, applying=False):
         raise WorkflowError("Use a single PBI directory under specs/")
     if applying and branch != f"feature/{path.name}":
         raise WorkflowError(f"Switch to feature/{path.name} before applying")
-    if not managed_path(path, "nikomi.md").is_file():
-        raise WorkflowError(f"Required input missing: {path / 'nikomi.md'}")
+    if not managed_path(path, "shikomi.md").is_file():
+        raise WorkflowError(f"Required input missing: {path / 'shikomi.md'}")
     return path
 
 
@@ -163,11 +165,22 @@ def setup(root, args):
     print(CONFIG)
 
 
-def one_block(pattern, text, label):
-    matches = list(pattern.finditer(text))
-    if len(matches) != 1:
-        raise WorkflowError(f"Expected one {label} block in e2e.md")
-    return matches[0]
+def report_blocks(text):
+    lines = text.splitlines()
+    blocks = {}
+    for name, pattern in (("checks", CHECKS), ("review", REVIEW), ("execution", EXECUTION)):
+        starts = lines.count(f"<!-- e2e:{name} -->")
+        ends = lines.count(f"<!-- /e2e:{name} -->")
+        if name == "execution" and not starts and not ends:
+            continue
+        block = pattern.search(text)
+        if starts != 1 or ends != 1 or block is None:
+            raise WorkflowError(f"Expected one {name} block in e2e.md")
+        blocks[name] = block
+    ordered = sorted(blocks.values(), key=lambda block: block.start())
+    if any(left.end() > right.start() for left, right in zip(ordered, ordered[1:])):
+        raise WorkflowError("Keep checks, execution and review in separate blocks in e2e.md")
+    return blocks
 
 
 def table_cells(line):
@@ -190,8 +203,8 @@ def table_cells(line):
 def read_e2e(change):
     path = managed_path(change, "e2e.md")
     text = read(path)
-    table = one_block(CHECKS, text, "checks")
-    lines = table.group(1).strip().splitlines()
+    blocks = report_blocks(text)
+    lines = blocks["checks"].group(1).strip().splitlines()
     if len(lines) < 3:
         raise WorkflowError("List at least one required behavior in e2e.md")
     table_cells(lines[0])
@@ -206,7 +219,7 @@ def read_e2e(change):
         if any(cell in {"", "-"} for cell in (cells[1], cells[3], cells[4])):
             raise WorkflowError(f"{key}: behavior, steps and expected result are required")
         checks[key] = cells
-    return path, text, table, checks
+    return path, text, blocks, checks
 
 
 def file_hash(path):
@@ -217,11 +230,17 @@ def file_hash(path):
     return hasher.hexdigest()
 
 
-def test_snapshot(root, change, policy, checks):
+def test_snapshot(root, change, policy, checks, text):
     change_name = change.relative_to(root).as_posix()
     exclude = {f"{change_name}/e2e.md", f"{change_name}/oshinagaki.md"}
     generated = (f"{CANONICAL}/", f"{change_name}/evidence/")
     files = git(root, "ls-files", "--cached", "--others", "--exclude-standard", "-z")
+    paths = set(files.split(b"\0")) - {b""}
+    # A project's ignore rules may cover specs/. These inputs still define the tested change.
+    inputs = ["shikomi.md", "dandori.md", "shitagaki.md"]
+    if policy["screen_items"]:
+        inputs.append("screen-items.md")
+    paths.update(os.fsencode(f"{change_name}/{name}") for name in inputs)
     # Keep snapshots from projects configured before design approval was introduced.
     snapshot_policy = policy.copy()
     if snapshot_policy["design_approval"] == "none":
@@ -229,7 +248,12 @@ def test_snapshot(root, change, policy, checks):
     state = hashlib.sha256(
         json_text([change_name, snapshot_policy, [row[:6] for row in checks.values()]]).encode()
     )
-    for raw in sorted(set(files.split(b"\0")) - {b""}):
+    notes = EXECUTION.search(text)
+    if notes:
+        prose = text[:notes.start()] + text[notes.end():]
+        definition = CHECKS.sub("", REVIEW.sub("", prose))
+        state.update(hashlib.sha256(definition.encode()).digest())
+    for raw in sorted(paths):
         name = os.fsdecode(raw)
         if name in exclude or name.startswith(generated):
             continue
@@ -254,6 +278,9 @@ def test_snapshot(root, change, policy, checks):
 def result_digest(change, policy, checks, run_id, report):
     evidence = {}
     problems = []
+    notes = EXECUTION.search(report)
+    if notes and notes.group(1).strip() in {"", "-"}:
+        problems.append("Record the actual test method, environment and date in the execution block")
     for key, row in checks.items():
         if row[7] != "OK" or row[6] in {"", "-"}:
             problems.append(f"{key}: expected an observed result and OK")
@@ -298,12 +325,16 @@ def read_run(review):
 
 
 def start_e2e(root, change, policy):
-    path, text, table, checks = read_e2e(change)
-    one_block(REVIEW, text, "review")
-    run = {"id": uuid4().hex, "snapshot": test_snapshot(root, change, policy, checks)}
+    path, text, blocks, checks = read_e2e(change)
+    table = blocks["checks"]
     header = table.group(1).strip().splitlines()[:2]
     rows = ["| " + " | ".join(row[:6] + ["-", "-", "-"]) + " |" for row in checks.values()]
     updated = text[:table.start(1)] + "\n".join(header + rows) + "\n" + text[table.end(1):]
+    if "execution" in blocks:
+        updated = EXECUTION.sub(EMPTY_EXECUTION, updated, count=1)
+    else:
+        updated = updated.rstrip("\n") + "\n\n" + EMPTY_EXECUTION + "\n"
+    run = {"id": uuid4().hex, "snapshot": test_snapshot(root, change, policy, checks, updated)}
     updated = REVIEW.sub(
         lambda _: f"<!-- e2e:review -->\n{review_record(run)}<!-- /e2e:review -->", updated, count=1
     )
@@ -311,19 +342,19 @@ def start_e2e(root, change, policy):
     print(run["id"])
 
 
-def require_current_run(root, change, policy, checks, review, run_id):
+def require_current_run(root, change, policy, checks, text, review, run_id):
     run = read_run(review)
     if run_id != run["id"]:
         raise WorkflowError("The run ID does not match the current E2E run")
-    if run["snapshot"] != test_snapshot(root, change, policy, checks):
+    if run["snapshot"] != test_snapshot(root, change, policy, checks, text):
         raise WorkflowError("The tested worktree, test definition or project settings have changed")
     return run
 
 
 def review_e2e(root, change, policy, run_id, reviewer):
-    path, text, _, checks = read_e2e(change)
-    block = one_block(REVIEW, text, "review")
-    run = require_current_run(root, change, policy, checks, block.group(1), run_id)
+    path, text, blocks, checks = read_e2e(change)
+    block = blocks["review"]
+    run = require_current_run(root, change, policy, checks, text, block.group(1), run_id)
     if not reviewer.strip() or any(ord(character) < 32 for character in reviewer) or "-->" in reviewer:
         raise WorkflowError("Provide the name of the person who confirmed the execution and results")
     receipt = {
@@ -339,8 +370,8 @@ def review_e2e(root, change, policy, run_id, reviewer):
 
 
 def verify_e2e(root, change, policy):
-    _, text, _, checks = read_e2e(change)
-    block = one_block(REVIEW, text, "review")
+    _, text, blocks, checks = read_e2e(change)
+    block = blocks["review"]
     review = block.group(1)
     run = read_run(review)
     receipts = re.findall(r"(?m)^<!-- e2e-receipt: (\{[^\n]+\}) -->$", review)
@@ -353,7 +384,7 @@ def verify_e2e(root, change, policy):
         or not isinstance(value.get("reviewer"), str)
         or not value["reviewer"].strip()
         or value.get("run_id") != run["id"]
-        or run["snapshot"] != test_snapshot(root, change, policy, checks)
+        or run["snapshot"] != test_snapshot(root, change, policy, checks, text)
         or value.get("results") != results
         or value.get("method") != policy["e2e_method"]
         or review != review_record(run, value)
@@ -448,7 +479,7 @@ def history_text(path, change, current, reason):
     if not reason.strip() or any(ord(character) < 32 for character in reason):
         raise WorkflowError("Use a non-empty, single-line change reason")
     references = []
-    for filename in ("nikomi.md", "e2e.md"):
+    for filename in ("shikomi.md", "e2e.md"):
         relative = os.path.relpath(change / filename, path.parent)
         references.append(f"[{filename}]({quote(Path(relative).as_posix())})")
     entry = f"{mark}\n\n## {identifier}\n\n{reason}\n\n{' · '.join(references)}\n\n{end}"
@@ -600,9 +631,9 @@ def main():
             if args.command == "start-e2e":
                 start_e2e(root, change, policy)
             elif args.command == "check-e2e-run":
-                _, text, _, checks = read_e2e(change)
-                review = one_block(REVIEW, text, "review").group(1)
-                require_current_run(root, change, policy, checks, review, args.tested)
+                _, text, blocks, checks = read_e2e(change)
+                review = blocks["review"].group(1)
+                require_current_run(root, change, policy, checks, text, review, args.tested)
                 print("E2E run matches current inputs")
             elif args.command == "review-e2e":
                 review_e2e(root, change, policy, args.tested, args.reviewer)

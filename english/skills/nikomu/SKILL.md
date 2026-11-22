@@ -1,10 +1,14 @@
 ---
 name: nikomu
-description: Start a change from user requirements, a backlog item, or a saguru summary. Draft or resume nikomi.md, then clarify goals and dependent decisions one question at a time before planning. Use torikomu when an existing file is the primary input.
+description: Implement a change using shikomi.md and dandori.md, and record task completion and acceptance verification in dandori.md. Use it to resume implementation or fix implementation defects.
 ---
 
-# Draft and clarify a change specification
+# Implement from the plan and record verification
 
-Use the requirements or backlog item to identify the purpose of the change. Read related material when it bears on the change. If the user asks to resume a previously drafted `nikomi.md`, use that file.
+Use the directory the user specifies. Otherwise, map the current `feature/<change-name>` branch to `specs/<change-name>/`. Confirm the working location with the user if you cannot resolve it or the current branch belongs to another change.
 
-Follow [Prepare a specification](references/prepare-spec.md) for a new or resumed change. After preparing the draft, read and follow the required [clarification workflow](references/clarify-spec.md) and the two references it requires. Work through the decision tree in rounds, save each confirmed answer, and rescan until consequential questions are settled or explicitly deferred. After confirmation, follow the project workflow to `shitagaki` for a design draft or `dandori` for planning.
+1. Follow [Prepare or resume execution](references/prepare-execution.md). Cross-check `shikomi.md` and `dandori.md`, inspect the worktree and saved evidence, and identify work that can resume.
+2. Follow [Implement and verify](references/implement-and-verify.md). Process tasks in plan order when their prerequisites are met. Record task completion and acceptance verification separately in `dandori.md`.
+3. Use [Recover and finish](references/recover-and-finish.md) when a check fails, a discrepancy appears, or execution ends. Reassess the affected work and evidence, then report completion once the current change is fully verified.
+
+When `e2e.md` is present, point the user to `ajimi` after implementation.

@@ -1,6 +1,6 @@
 # Design approval before planning
 
-Use the installed path of the [bundled CLI](../../osameru/scripts/osameru.py) in the commands below. Run `python3 <osameru-script> settings` in the target repository and read `design_approval`. Projects without this setting default to `none`. Every mode requires confirmed `nikomi.md` and uses `shitagaki.md` when available.
+Use the installed path of the [bundled CLI](../../osameru/scripts/osameru.py) in the commands below. Run `python3 <osameru-script> settings` in the target repository and read `design_approval`. Projects without this setting default to `none`. Every mode requires confirmed `shikomi.md` and uses `shitagaki.md` when available.
 
 For an explicit PBI exception such as an emergency, obtain the reason and the operator’s confirmation that the designated role authorized the exception. Record both in the target PBI’s `dandori.md` and proceed directly to planning. Keep the exception local to the PBI. On resumption, honor an exception already recorded for the same PBI.
 

@@ -1,6 +1,6 @@
 ---
-name: shikomu
-description: Analyze requirements material or a short description to prepare a system overview with an evidence-backed capability tree and directed relationship graph where possible. Document program directories separately. Use nikomu or torikomu to start an individual change.
+name: kondate
+description: Analyze requirements material or a short description to prepare a system overview with an evidence-backed capability tree and directed relationship graph where possible. Document program directories separately. Use shikomi or torikomu to start an individual change.
 ---
 
 # Prepare the system-wide guidance

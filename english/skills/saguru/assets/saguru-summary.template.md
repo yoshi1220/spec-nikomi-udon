@@ -14,4 +14,4 @@
 
 ## Open questions
 
-<!-- For each remaining question, note what would resolve it. If proceeding, carry these questions and the agreed scope into nikomu. -->
+<!-- For each remaining question, note what would resolve it. If proceeding, carry these questions and the agreed scope into shikomi. -->

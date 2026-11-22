@@ -15,8 +15,7 @@ from pathlib import Path
 from .environment import prepare
 
 AGENTS = {"codex": ".agents/skills", "claude": ".claude/skills"}
-LEGACY_SKILLS = "ajimi dandori nikomu okosu osameru saguru shikomu shitagaki torikomu yonabe".split()
-SKILLS = sorted([*LEGACY_SKILLS, "koromogae"])
+SKILLS = "ajimi dandori kondate koromogae nikomu okosu osameru saguru shikomi shitagaki torikomu".split()
 RECORD = "designs/nikomi-udon-install.json"
 CONFIG = "designs/nikomi-udon.json"
 DESIGN_TEMPLATE = "designs/basic-design.template.md"
@@ -229,14 +228,8 @@ def install(root, work, action):
             raise ValueError("Run update with the desired release tag")
         language = old["language"]
         expected = {f"{AGENTS[a]}/{s}" for a in agents for s in SKILLS}
-        legacy = {f"{AGENTS[a]}/{s}" for a in agents for s in LEGACY_SKILLS}
-        recorded_targets = set(old["files"])
-        if recorded_targets == legacy and action == "update":
-            expected = legacy
-        elif recorded_targets != expected:
-            if recorded_targets == legacy:
-                raise ValueError("Run update to add the basic design format and koromogae")
-            raise ValueError("Incomplete installation record")
+        if set(old["files"]) != expected:
+            raise ValueError("Installation record does not match the expected skill set")
         converted = clean_crlf_paths(root, expected)
         conflicts = []
         for relative in sorted(expected):
@@ -313,9 +306,9 @@ def install(root, work, action):
         print(f"Edit {DESIGN_TEMPLATE} to adopt selected changes.")
     report_ignored_files(root, files)
     if "codex" in agents:
-        print("Codex: $nikomu")
+        print("Codex: $shikomi")
     if "claude" in agents:
-        print("Claude Code: /nikomu")
+        print("Claude Code: /shikomi")
     return settings
 
 

@@ -1,7 +1,7 @@
 <!-- dandori-plan: pending -->
 # Implementation plan
 
-Specification — [nikomi.md](./nikomi.md)
+Specification — [shikomi.md](./shikomi.md)
 
 ## Implementation approach
 
@@ -20,7 +20,7 @@ Specification — [nikomi.md](./nikomi.md)
 
 ## Acceptance checks
 
-<!-- Add one row per acceptance criterion in nikomi.md. In the verification method, record the required task IDs, setup, test or manual check, and expected result. Start with Pending. During implementation, record what was run or checked and the observed result. -->
+<!-- Add one row per acceptance criterion in shikomi.md. In the verification method, record the required task IDs, setup, test or manual check, and expected result. Start with Pending. During implementation, record what was run or checked and the observed result. -->
 
 | Criterion ID | Verification method | Result | Evidence |
 | --- | --- | --- | --- |

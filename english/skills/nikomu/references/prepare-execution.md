@@ -2,7 +2,7 @@
 
 ## Cross-check the specification and plan
 
-1. Read the target `nikomi.md` and `dandori.md` and confirm the plan points to this specification. Proceed when the specification contains `<!-- nikomi-review: confirmed -->` and nothing unconfirmed blocks implementation or acceptance verification. If confirmation is needed, identify the relevant passage and what the user needs to confirm, then return to clarification.
+1. Read the target `shikomi.md` and `dandori.md` and confirm the plan points to this specification. Proceed when the specification contains `<!-- shikomi-review: confirmed -->` and nothing unconfirmed blocks implementation or acceptance verification. If confirmation is needed, identify the relevant passage and what the user needs to confirm, then return to clarification.
 2. If the plan has a status marker, require exactly one marker on the first line, `<!-- dandori-plan: ready -->`. Return to planning if it is pending or invalid. For a legacy plan without a marker, use the same content checks below to establish whether it is ready.
 3. Check that the plan matches the current specification. Look for duplicate task or criterion IDs, unknown references, tasks listed before their prerequisites, and criteria without a verification method. If the order, task scope, or verification method needs revision, identify the affected IDs and return to planning.
 

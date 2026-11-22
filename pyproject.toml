@@ -4,13 +4,26 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "spec-nikomi-udon"
-version = "0.0.2"
+version = "0.0.3.dev0"
 description = "Project installer for Spec Nikomi Udon"
 requires-python = ">=3.8"
 dependencies = ["tomli>=1.1; python_version < '3.11'"]
 
 [project.scripts]
 spec-nikomi-udon = "nikomi_installer.cli:main"
+
+[tool.uv]
+cache-keys = [
+    { file = "pyproject.toml" },
+    { file = "setup.py" },
+    { file = "MANIFEST.in" },
+    { file = "LICENSE" },
+    { file = "nikomi_installer/*.py" },
+    { file = "english/skills/**/*.md" },
+    { file = "english/skills/*/scripts/*.py" },
+    { file = "japanese/skills/**/*.md" },
+    { file = "japanese/skills/*/scripts/*.py" },
+]
 
 [tool.setuptools]
 packages = ["nikomi_installer", "nikomi_installer.japanese", "nikomi_installer.english"]

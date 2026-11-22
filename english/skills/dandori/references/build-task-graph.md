@@ -2,7 +2,7 @@
 
 ## Compare the specification with the existing implementation
 
-1. Extract the expected behavior, agreed design decisions and constraints, and acceptance criteria from `nikomi.md`. For each criterion, identify the required setup, action, and observable outcome. Keep the criterion IDs from the specification.
+1. Extract the expected behavior, agreed design decisions and constraints, and acceptance criteria from `shikomi.md`. For each criterion, identify the required setup, action, and observable outcome. Keep the criterion IDs from the specification.
 2. Read the relevant system guidance, current specifications, code, and tests. Identify where the change enters the system, where relevant constraints are enforced, and which implementations and checks are reusable. Follow existing approaches where they fit. Record why a departure is necessary.
 3. For each criterion, distinguish the work the change requires from existing behavior that only needs verification. Return to clarification if a decision would change the specification. Investigate technical unknowns using the implementation or tests. If the investigation could change the plan itself, identify what needs investigating and what result would let planning resume.
 

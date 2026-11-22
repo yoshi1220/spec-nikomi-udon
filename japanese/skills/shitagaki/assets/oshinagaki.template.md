@@ -2,7 +2,7 @@
 
 | 成果物 | 参照先 | 状況 |
 | --- | --- | --- |
-| 変更仕様 | [nikomi.md](nikomi.md) | 作成済み |
+| 変更仕様 | [shikomi.md](shikomi.md) | 作成済み |
 | 基本設計書案 | `shitagaki.md` | 未作成 |
 | 実装計画 | `dandori.md` | 未作成 |
 | E2E テスト仕様・結果 | `e2e.md` | 未作成 |

@@ -1,6 +1,6 @@
 # 計画前の設計承認
 
-[同梱 CLI](../../osameru/scripts/osameru.py) の設置先を以下のコマンドで指定する。対象リポジトリで `python3 <osameruスクリプト> settings` を実行し、`design_approval` を読む。設定がない既存案件の既定値は `none`。どの方式でも確認済みの `nikomi.md` が必要で、`shitagaki.md` があれば使う。
+[同梱 CLI](../../osameru/scripts/osameru.py) の設置先を以下のコマンドで指定する。対象リポジトリで `python3 <osameruスクリプト> settings` を実行し、`design_approval` を読む。設定がない既存案件の既定値は `none`。どの方式でも確認済みの `shikomi.md` が必要で、`shitagaki.md` があれば使う。
 
 利用者が緊急対応などの例外を指定した場合は、指定の役割の人から例外の承認を得た旨と省略理由を利用者から受け取り、対象 PBI の `dandori.md` に両方を記録し、通常の承認照会を省いて計画に進む。プロジェクト設定は他の PBI にも適用されるため、例外は対象 PBI に記録する。再開時は同じ PBI に記録済みの例外を引き継ぐ。
 

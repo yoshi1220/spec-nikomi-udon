@@ -7,7 +7,7 @@
 | An implementation defect that can be fixed within the agreed specification and plan | Use the failed test or procedure to diagnose the cause, fix it, and re-check affected behavior. |
 | Missing verification environment or data | Record the check that could not run and the missing prerequisite. Restore it and retry if it is within scope. If the user needs to provide it, identify what is needed. |
 | The specification can stand, but task scope, prerequisites, or verification methods need revision | Identify the evidence and task IDs, pause affected work, and return to `dandori`. |
-| The specification is unclear or conflicts with observed behavior, leaving the required implementation uncertain | Record the specification passage and observations as “Unconfirmed (user confirmation required)” and pause affected work. Ask the user one question at a time. Return to `nikomu` when the specification needs clarification. |
+| The specification is unclear or conflicts with observed behavior, leaving the required implementation uncertain | Record the specification passage and observations as “Unconfirmed (user confirmation required)” and pause affected work. Ask the user one question at a time. Return to `shikomi` when the specification needs clarification. |
 
 When offering choices, normally give three viable options in recommendation order, explain your first choice, and allow free-form input. Ask an open question if viable options are unavailable. Continue independent work with satisfied prerequisites. If the user asks to stop, stop implementation and record what has been verified and what is needed to resume.
 
@@ -21,5 +21,5 @@ For example, suppose `AC-01` needs both `T-01` and `T-02`, and `T-02` depends on
 
 ## Report completion or interruption
 
-- Review the saved `dandori.md` and current diff. Check that every task is complete, every acceptance criterion ID from `nikomi.md` has valid passing evidence for the current change, and required project checks have passed. Continue verifying if evidence is missing and can still be obtained.
+- Review the saved `dandori.md` and current diff. Check that every task is complete, every acceptance criterion ID from `shikomi.md` has valid passing evidence for the current change, and required project checks have passed. Continue verifying if evidence is missing and can still be obtained.
 - On completion, summarize the task count, acceptance results, and location of `dandori.md`. If work remains, report the task or criterion IDs, their current state, and what is needed to resume. Count only current passes as passed.

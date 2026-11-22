@@ -8,10 +8,10 @@ It is intended for systems integrators and teams at established Japanese compani
 
 ## The development workflow
 
-1. **Clarify the specification.** Use `nikomu` for requirements or a product backlog item (PBI) and `torikomu` for existing documents. Agree on scope, behavior, and acceptance criteria one question at a time, and record them in `nikomi.md`.
-2. **Draft the basic design.** Review `nikomi.md` and make any needed edits. Use `shitagaki` to turn the saved specification into a functional basic design in `shitagaki.md`.
+1. **Clarify the specification.** Use `shikomi` for requirements or a product backlog item (PBI) and `torikomu` for existing documents. Agree on scope, behavior, and acceptance criteria one question at a time, and record them in `shikomi.md`.
+2. **Draft the basic design.** Review `shikomi.md` and make any needed edits. Use `shitagaki` to turn the saved specification into a functional basic design in `shitagaki.md`.
 3. **Plan implementation and testing.** Use `dandori` to record tasks and verification methods in `dandori.md`. For changed behavior and existing behavior the change could affect, pair each input with an expected result that would reveal a defect. Use `e2e.md` to record E2E steps and expected results for each behavior under test.
-4. **Implement and verify.** Use `yonabe` to implement the change and check that new or reused tests and manual checks can detect the failures identified in the plan. Then use `ajimi` to run E2E tests. If a test fails, `ajimi` returns to implementation or planning as needed and retests once. If the issue persists, it asks the user to intervene. A reviewer confirms what was tested and the results in the same test specification.
+4. **Implement and verify.** Use `nikomu` to implement the change and check that new or reused tests and manual checks can detect the failures identified in the plan. Then use `ajimi` to run E2E tests. If a test fails, `ajimi` returns to implementation or planning as needed and retests once. If the issue persists, it asks the user to intervene. A reviewer confirms what was tested and the results in the same test specification.
 5. **Apply the canonical design.** Use `osameru` to verify the passes and reviewer confirmation and prepare the design and revision history under `designs/specifications/` on the work branch. Review the implementation and design in the same PR. The merge updates the canonical design.
 
 Each PBI has an `oshinagaki.md` in its change directory that lists deliverables and their statuses.
@@ -26,17 +26,17 @@ Move any manually installed skill directories with matching names out of the des
 
 ### Initialize the project
 
-Run this command in the target Git repository to install v0.0.2.
+To install this development edition, run this command in the target Git repository. Replace the example path with the path to this checkout.
 
 ```sh
-uvx --from git+https://github.com/yoshi1220/spec-nikomi-udon.git@v0.0.2 spec-nikomi-udon init
+uvx --from /path/to/spec-nikomi-udon spec-nikomi-udon init
 ```
 
-To try a local checkout, run `uvx --from /path/to/spec-nikomi-udon spec-nikomi-udon init` from the target project.
+For a tagged release, follow the README at that tag. [v0.0.2 installation instructions](https://github.com/yoshi1220/spec-nikomi-udon/blob/v0.0.2/README.md#installation)
 
 Select a language and Codex, Claude Code, or both. The same skills go into `.agents/skills/` for Codex and `.claude/skills/` for Claude Code. For new projects, choose the E2E method, design approval mode, screenshots, and screen item definitions. Skills and settings are saved even if E2E preparation is pending. Rerun `init` with the same release to resume preparation or add the other agent.
 
-To upgrade, select the new tag and replace the final `init` with `update`. Track the installed skills, project settings (`designs/nikomi-udon.json`), and installation record (`designs/nikomi-udon-install.json`) together in the project repository. If Git ignores any of these files, the installer reports the count and an example path. Use `git check-ignore -v -- <path>` to find the rule and include the distribution files you intend to share. If you edited the distributed skills directly, save those edits, restore the installed files to their original state, and reapply the edits you need after updating.
+To update an installation of this edition, use the same command with `update` in place of `init`. Track the installed skills, project settings (`designs/nikomi-udon.json`), and installation record (`designs/nikomi-udon-install.json`) together in the project repository. If Git ignores any of these files, the installer reports the count and an example path. Use `git check-ignore -v -- <path>` to find the rule and include the distribution files you intend to share. If you edited the distributed skills directly, save those edits, restore the installed files to their original state, and reapply the edits you need after updating.
 
 ### After `init`
 
@@ -53,13 +53,13 @@ If the installer cannot identify the dependency manager, use the project’s own
 
 If you choose `pr` for design approval and use GitHub CLI to check reviews, install `gh` and authenticate with access to the target repository and pull request. [Checking design PR reviews](english/skills/dandori/references/design-approval.md)
 
-Start a session in the target project. Use `$nikomu` in Codex or `/nikomu` in Claude Code. To run E2E tests, use `$ajimi` or `/ajimi`, respectively.
+Start a session in the target project. To specify one change, use `$shikomi` in Codex or `/shikomi` in Claude Code. To run E2E tests, use `$ajimi` or `/ajimi`, respectively.
 
-Use `shikomu` to write a system overview, or `saguru` to explore a problem before deciding what to change.
+Use `kondate` to turn requirements documents or a short description into system-wide guidance. It records the purpose, main capabilities, and shared constraints in `designs/system-overview.md` and the program layout in `designs/repository-structure.md`. Use `saguru` to explore a problem before deciding what to change.
 
 ### Design approval before planning
 
-`dandori` requires a confirmed `nikomi.md` and uses `shitagaki.md` when available. Choose the approval mode for the project. For example, to enable PR review in a Codex installation, run the following command in the target repository.
+`dandori` requires a confirmed `shikomi.md` and uses `shitagaki.md` when available. Choose the approval mode for the project. For example, to enable PR review in a Codex installation, run the following command in the target repository.
 
 ```sh
 python3 .agents/skills/osameru/scripts/osameru.py setup --design-approval pr
@@ -75,7 +75,7 @@ If `dandori` cannot verify PR approval, it explains why and asks whether to cont
 
 ## Use a project basic design template
 
-Use the v0.0.2 command above with `init` for a new installation or `update` to upgrade from v0.0.1. The installer creates `designs/basic-design.template.md` and `designs/basic-design-writing.md`. Share both in the project repository. The team can edit the template title, headings, and tables. The next time `okosu`, `shitagaki`, or `koromogae` uses the template, it updates the writing guidance to match.
+The installer creates `designs/basic-design.template.md` and `designs/basic-design-writing.md`. Share both in the project repository. The team can edit the template title, headings, and tables. The next time `okosu`, `shitagaki`, or `koromogae` uses the template, it updates the writing guidance to match.
 
 Installer updates preserve the project's template and guidance. If the bundled standard template changes, review the diff shown by the installer and copy the changes you choose into the project template. Find the bundled template at `shitagaki/assets/basic-design.template.md` under the installed skills directory.
 
@@ -95,10 +95,10 @@ This example builds the first feature of a notes app in a Git repository with th
 
 ```text
 # Outline the app’s purpose and main features in designs/system-overview.md.
-$shikomu Build an app for saving work notes and finding them in a list.
+$kondate Build an app for saving work notes and finding them in a list.
 
-# Create a work branch and agree on the acceptance criteria in nikomi.md.
-$nikomu Save the title and body. List titles. If untitled, prompt for a title and skip saving.
+# Create a work branch and agree on the acceptance criteria in shikomi.md.
+$shikomi Save the title and body. List titles. If untitled, prompt for a title and skip saving.
 
 # Draft the design for note creation in shitagaki.md from the agreed specification.
 $shitagaki
@@ -107,7 +107,7 @@ $shitagaki
 $dandori
 
 # Implement the plan and record progress and verification results in dandori.md.
-$yonabe
+$nikomu
 
 # Try saving a note with and without a title. Record the E2E results in e2e.md.
 $ajimi
@@ -116,7 +116,7 @@ $ajimi
 $osameru Use "Add note creation" as the change reason.
 ```
 
-Use `nikomu` to agree on the specification and acceptance criteria, then review `nikomi.md` and continue on the same work branch. Before implementing, review `shitagaki.md`, `dandori.md`, and the E2E test specification `e2e.md` under `specs/<change>/`.
+Use `shikomi` to agree on the specification and acceptance criteria, then review `shikomi.md` and continue on the same work branch. Before implementing, review `shitagaki.md`, `dandori.md`, and the E2E test specification `e2e.md` under `specs/<change>/`.
 
 Run `osameru` once all required E2E tests pass and the reviewer's confirmation is recorded in `e2e.md`. Review the implementation and design in the same PR and merge it to update the canonical design.
 

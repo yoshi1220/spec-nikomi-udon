@@ -2,7 +2,7 @@
 
 ## Scope and environment
 
-<!-- Identify the PBI, functions, method, environment, and shared prerequisites. Record the actual method, environment, and date at execution. -->
+<!-- Identify the PBI, functions, method, environment, and shared prerequisites. -->
 
 ## Test items
 
@@ -12,6 +12,12 @@
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | E2E-01 |  | - |  |  | - | - | Pending | - |
 <!-- /e2e:checks -->
+
+## Actual method, environment, and date
+
+<!-- e2e:execution -->
+-
+<!-- /e2e:execution -->
 
 ## Confirmation of execution and results
 
