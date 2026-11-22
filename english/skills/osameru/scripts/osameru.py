@@ -11,7 +11,7 @@ import subprocess
 import sys
 import tempfile
 from contextlib import contextmanager
-from urllib.parse import quote
+from urllib.parse import quote, unquote, urlsplit
 from uuid import uuid4
 
 
@@ -275,6 +275,31 @@ def test_snapshot(root, change, policy, checks, text):
     return state.hexdigest()
 
 
+def evidence_links(cell):
+    # Markdown destinations can enclose a path in <> or balance parentheses in a filename.
+    closing = re.compile(r"""(?:\s+(?:"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|\((?:\\.|[^()\\])*\)))?\s*\)""")
+    for match in re.finditer(r"\]\(\s*(<)?(?:\./)*(?=evidence/)", cell):
+        start = match.end()
+        if match[1]:
+            end = cell.find(">", start)
+            if end == -1 or not closing.match(cell, end + 1):
+                raise WorkflowError("Unclosed evidence link in the E2E table")
+        else:
+            depth = 0
+            for token in re.finditer(r"\\.|[()]|\s+", cell[start:]):
+                end = start + token.start()
+                if depth == 0 and closing.match(cell, end):
+                    break
+                if token[0] == "(":
+                    depth += 1
+                elif token[0] == ")":
+                    depth -= 1
+            else:
+                raise WorkflowError("Unclosed evidence link in the E2E table")
+        destination = re.sub(r"\\([()|])", r"\1", cell[start:end])
+        yield unquote(urlsplit(destination).path)
+
+
 def result_digest(change, policy, checks, run_id, report):
     evidence = {}
     problems = []
@@ -284,7 +309,7 @@ def result_digest(change, policy, checks, run_id, report):
     for key, row in checks.items():
         if row[7] != "OK" or row[6] in {"", "-"}:
             problems.append(f"{key}: expected an observed result and OK")
-        links = re.findall(r"\]\((evidence/[^()]+)\)", row[8])
+        links = list(evidence_links(row[8]))
         if policy["screenshots"] and row[5] not in {"", "-"}:
             image_types = {".png", ".jpg", ".jpeg", ".webp", ".gif", ".avif"}
             if not any(PurePosixPath(link).suffix.lower() in image_types for link in links):
@@ -468,7 +493,7 @@ def history_text(path, change, current, reason):
     mark = f"<!-- osameru-change: {identifier} -->"
     end = "<!-- /osameru-change -->"
     old = current.decode("utf-8") if current is not None else f"# {path.stem}\n"
-    pattern = rf"(?m)^{re.escape(mark)}\n(?:(?!<!-- osameru-change: )[^\n]*\n)*?^{re.escape(end)}$"
+    pattern = rf"(?m)^{re.escape(mark)}\r?\n(?:(?!<!-- osameru-change: )[^\n]*\n)*?^{re.escape(end)}(?=\r?$)"
     existing = re.search(pattern, old)
     if old.count(mark) > 1 or (mark in old and existing is None):
         raise WorkflowError(f"Invalid history for {identifier}: {path}")
@@ -483,10 +508,12 @@ def history_text(path, change, current, reason):
         relative = os.path.relpath(change / filename, path.parent)
         references.append(f"[{filename}]({quote(Path(relative).as_posix())})")
     entry = f"{mark}\n\n## {identifier}\n\n{reason}\n\n{' · '.join(references)}\n\n{end}"
+    newline = "\r\n" if "\r\n" in (existing[0] if existing else old) else "\n"
+    entry = entry.replace("\n", newline)
     if existing:
         result = old[:existing.start()] + entry + old[existing.end():]
     else:
-        result = old.rstrip() + "\n\n" + entry + "\n"
+        result = old.rstrip() + newline * 2 + entry + newline
     return result.encode()
 
 
@@ -497,13 +524,15 @@ def apply_documents(root, change, policy, reason):
         history = managed_path(path.parent, path.stem + ".history.md")
         prior = path.read_bytes() if path.exists() else None
         previous_history = history.read_bytes() if history.exists() else None
-        already_applied = prior == content and previous_history is not None and (
-            f"<!-- osameru-change: {change.name} -->".encode() in previous_history
+        already_applied = (
+            prior is not None and prior.replace(b"\r\n", b"\n") == content
+            and previous_history is not None
+            and f"<!-- osameru-change: {change.name} -->".encode() in previous_history
         )
         if not already_applied and (digest(prior) if prior is not None else "new") != base:
             raise WorkflowError(f"Base specification changed: {path.relative_to(root)}")
         updates[history] = (previous_history, history_text(history, change, previous_history, reason))
-        updates[path] = (prior, content)
+        updates[path] = (prior, prior if already_applied else content)
 
     written = []
     try:
