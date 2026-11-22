@@ -34,9 +34,9 @@ uvx --from git+https://github.com/yoshi1220/spec-nikomi-udon.git@v0.0.1 spec-nik
 
 ローカルの配布元から試す場合は、導入先で `uvx --from /path/to/spec-nikomi-udon spec-nikomi-udon init` を実行します。
 
-言語と Codex・Claude Code・両方のいずれかを選びます。Codex には `.agents/skills/`、Claude Code には `.claude/skills/` に同じ版の10スキルを配置します。案件設定がなければ E2E 方式、計画前の承認、画面キャプチャ、画面項目定義書を選びます。準備が残る場合もスキルと設定は保存されます。同じ版の `init` で環境準備の再開やエージェントの追加ができます。
+言語と Codex・Claude Code・両方のいずれかを選びます。Codex には `.agents/skills/`、Claude Code には `.claude/skills/` に同じ版のスキルを配置します。案件設定がなければ E2E 方式、計画前の承認、画面キャプチャ、画面項目定義書を選びます。準備が残る場合もスキルと設定は保存されます。同じ版の `init` で環境準備の再開やエージェントの追加ができます。
 
-新版への更新は、新しいタグを指定し、上のコマンドの末尾を `update` に変更します。配置したスキル、案件設定 `designs/nikomi-udon.json`、導入記録 `designs/nikomi-udon-install.json` を案件の Git に含め、チームで共有します。Git の除外設定に該当するファイルがあれば、インストーラが件数とパスの例を表示します。`git check-ignore -v -- <パス>` で該当ルールを確認し、共有する配布ファイルが Git に含まれるようにします。独自の編集は退避して元の配布状態に戻し、更新後に必要な変更を再反映します。
+新版への更新は、新しいタグを指定し、上のコマンドの末尾を `update` に変更します。配置したスキル、案件設定 `designs/nikomi-udon.json`、導入記録 `designs/nikomi-udon-install.json` を案件の Git に含め、チームで共有します。Git の除外設定に該当するファイルがあれば、インストーラが件数とパスの例を表示します。`git check-ignore -v -- <パス>` で該当ルールを確認し、共有する配布ファイルが Git に含まれるようにします。配布スキルを直接編集した場合はその変更を退避して元の配布状態に戻し、更新後に必要な変更を再反映します。
 
 ### `init` の後に
 
@@ -72,6 +72,14 @@ python3 .agents/skills/osameru/scripts/osameru.py setup --design-approval pr
 | `pr` | `dandori` が設計レビュー用 PR を照会し、手元の設計書案が承認済みの内容と一致すれば、マージ前でも計画に進めます。 |
 
 `pr` で承認を確認できない場合、`dandori` は理由を示して続行するか尋ねます。続行を選ぶと、確認できなかった項目と判断を対象 PBI の `dandori.md` に記録します。緊急対応などで事前承認を省く場合は、プロジェクトが指定した担当者から例外の承認を得て、省略理由と承認を得た旨を同じファイルに残します。 [設計レビュー用 PR の指定と例外の手順](japanese/skills/dandori/references/design-approval.md)
+
+## 案件の基本設計書式を使う
+
+この作業ツリーで試すには、導入先で上記のローカル配布元を指定し、新規導入には `init`、v0.0.1 からの更新には `update` を実行します。`init` または初回の `update` で `designs/basic-design.template.md` と `designs/basic-design-writing.md` が用意されます。両方を案件の Git で共有します。チームはテンプレートの標題・見出し・表を編集できます。次に `okosu`、`shitagaki`、`koromogae` がその書式を使う際に、変更に合わせて作成方針を更新します。
+
+本体を更新しても案件の書式と作成方針を引き継ぎます。同梱の標準書式に変更があれば、更新時に表示する差分を確認し、採用する変更を案件のテンプレートに取り込みます。同梱の標準書式は導入先の `shitagaki/assets/basic-design.template.md` にあります。
+
+既存の設計書は次の作成・改修で新しい書式を使います。まとめて揃えるには、Codex で `$koromogae`、Claude Code で `/koromogae` を実行します。既定では対象全件を一つの文書PRにまとめ、利用者が指定すれば業務や機能ごとに分けられます。移行前後の差分で設計内容と手修正を確認し、マージ時に正本を更新します。 [衣替えの手順](japanese/skills/koromogae/SKILL.md)
 
 ## 既存案件で現行の設計書を起こす
 

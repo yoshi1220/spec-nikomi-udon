@@ -14,8 +14,12 @@
 
 `shitagaki.md` に、機能別の完成した本文を一つずつ置きます。
 
+案件書式の先頭が `# ` の見出しなら、機能別の本文もその見出しで始めます。表や文書属性から始まる書式では、その形式の本文をブロック内に置きます。
+
+基本設計案を作成・更新するときは各ブロックに `requires_heading` を記録します。本文書式を読み、先頭の空白を除いて `# ` で始まれば `true`、それ以外は `false` です。空の書式は担当者に確認します。正本反映時は案に記録した条件を使います。画面項目定義のブロックは `path` と `base` を記録します。
+
 ```markdown
-<!-- osameru-target: {"path":"orders/register.md","base":"new"} -->
+<!-- osameru-target: {"path":"orders/register.md","base":"new","requires_heading":true} -->
 # 受注登録 基本設計書
 
 本文

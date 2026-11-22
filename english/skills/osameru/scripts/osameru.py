@@ -393,15 +393,37 @@ def documents(root, change, policy):
             raise WorkflowError(f"Invalid or missing specification blocks in {filename}")
         for block in blocks:
             item = json.loads(block.group(1))
-            if not isinstance(item, dict) or set(item) != {"path", "base"}:
+            if not isinstance(item, dict):
+                raise WorkflowError(f"Expected a target object in {filename}")
+            # The draft and its recorded format are reviewed and tested together.
+            fields = set(item)
+            body = block.group(2).rstrip("\n")
+            if not screen and "requires_heading" in fields:
+                fields.remove("requires_heading")
+                requires_heading = item["requires_heading"]
+                if not isinstance(requires_heading, bool):
+                    raise WorkflowError(f"Expected a boolean requires_heading in {filename}")
+            elif screen:
+                body = body.strip()
+                requires_heading = True
+            else:
+                # Earlier drafts have no stored format. Retain their validation rules.
+                template = managed_path(root, "designs/basic-design.template.md")
+                project_format = read(template).lstrip() if template.exists() else None
+                if project_format == "":
+                    raise WorkflowError("The project basic design template is empty")
+                requires_heading = project_format is None or project_format.startswith("# ")
+                if project_format is None:
+                    body = body.strip()
+            if fields != {"path", "base"}:
                 raise WorkflowError(f"Expected path and base in {filename}")
             name, base = item["path"], item["base"]
-            body = block.group(2).strip()
+            valid_body = body.lstrip().startswith("# ") if requires_heading else bool(body.strip())
             if (
                 not isinstance(name, str)
                 or not isinstance(base, str)
                 or not re.fullmatch(r"new|[0-9a-f]{64}", base)
-                or not body.startswith("# ")
+                or not valid_body
                 or screen != name.endswith(".screen-items.md")
                 or name in seen
             ):

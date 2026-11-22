@@ -1,5 +1,6 @@
 """Install a complete language edition in a Git worktree."""
 import argparse
+import difflib
 import hashlib
 import json
 import os
@@ -14,9 +15,13 @@ from pathlib import Path
 from .environment import prepare
 
 AGENTS = {"codex": ".agents/skills", "claude": ".claude/skills"}
-SKILLS = "ajimi dandori nikomu okosu osameru saguru shikomu shitagaki torikomu yonabe".split()
+LEGACY_SKILLS = "ajimi dandori nikomu okosu osameru saguru shikomu shitagaki torikomu yonabe".split()
+SKILLS = sorted([*LEGACY_SKILLS, "koromogae"])
 RECORD = "designs/nikomi-udon-install.json"
 CONFIG = "designs/nikomi-udon.json"
+DESIGN_TEMPLATE = "designs/basic-design.template.md"
+DESIGN_POLICY = "designs/basic-design-writing.md"
+DESIGN_ASSETS = "shitagaki/assets"
 TARGETS = {f"{folder}/{name}" for folder in AGENTS.values() for name in SKILLS}
 METHODS = ("playwright", "agent-browser", "chrome-extension", "manual")
 
@@ -123,7 +128,7 @@ def clean_crlf_paths(root, directories):
 def report_ignored_files(root, directories):
     result = subprocess.run(
         ["git", "ls-files", "--others", "--ignored", "--exclude-standard", "-z",
-         "--", CONFIG, RECORD, *sorted(directories)],
+         "--", CONFIG, RECORD, DESIGN_TEMPLATE, DESIGN_POLICY, *sorted(directories)],
         cwd=root, stdout=subprocess.PIPE,
     )
     if result.returncode:
@@ -156,7 +161,8 @@ def recover(root, work):
             raise ValueError("Invalid installation journal")
         for entry in entries:
             if (not isinstance(entry, list) or len(entry) not in (2, 3)
-                    or entry[0] not in TARGETS | {CONFIG, RECORD} or type(entry[1]) is not bool):
+                    or entry[0] not in TARGETS | {CONFIG, RECORD, DESIGN_TEMPLATE, DESIGN_POLICY}
+                    or type(entry[1]) is not bool):
                 raise ValueError("Invalid installation journal")
         for entry in reversed(entries):
             relative, existed = entry[:2]
@@ -223,7 +229,13 @@ def install(root, work, action):
             raise ValueError("Run update with the desired release tag")
         language = old["language"]
         expected = {f"{AGENTS[a]}/{s}" for a in agents for s in SKILLS}
-        if set(old["files"]) != expected:
+        legacy = {f"{AGENTS[a]}/{s}" for a in agents for s in LEGACY_SKILLS}
+        recorded_targets = set(old["files"])
+        if recorded_targets == legacy and action == "update":
+            expected = legacy
+        elif recorded_targets != expected:
+            if recorded_targets == legacy:
+                raise ValueError("Run update to add the basic design format and koromogae")
             raise ValueError("Incomplete installation record")
         converted = clean_crlf_paths(root, expected)
         conflicts = []
@@ -287,6 +299,7 @@ def install(root, work, action):
                         screen_items=choose("Screen item definitions / 画面項目定義書", ("off", "on"), "off") == "on")
         write_json(stage / CONFIG, settings)
         entries.append((CONFIG, False))
+    standard_diff = stage_design_format(root, stage, entries, source, old)
     current = dict(version=release, language=language, agents=sorted(agents), files=files)
     if old != current:
         write_json(stage / RECORD, current)
@@ -294,12 +307,56 @@ def install(root, work, action):
     if entries:
         commit(root, work, entries, previous)
     print(f"Installed {release} ({language}): {', '.join(sorted(agents))}")
+    if standard_diff:
+        print("Standard basic design template changes / 標準書式の変更")
+        print(standard_diff, end="")
+        print(f"Edit {DESIGN_TEMPLATE} to adopt selected changes.")
     report_ignored_files(root, files)
     if "codex" in agents:
         print("Codex: $nikomu")
     if "claude" in agents:
         print("Claude Code: /nikomu")
     return settings
+
+
+def stage_design_format(root, stage, entries, source, old):
+    template = source / DESIGN_ASSETS / Path(DESIGN_TEMPLATE).name
+    policy = source / DESIGN_ASSETS / Path(DESIGN_POLICY).name
+    installed = None
+    if old:
+        agent = sorted(old["agents"])[0]
+        installed = root / AGENTS[agent] / DESIGN_ASSETS / template.name
+    has_standard = installed is not None and installed.is_file()
+
+    for relative, asset in ((DESIGN_TEMPLATE, template), (DESIGN_POLICY, policy)):
+        target = safe(root, relative)
+        if target.exists():
+            if not target.is_file():
+                raise ValueError(f"Expected a project file: {relative}")
+            continue
+        if relative == DESIGN_TEMPLATE and (has_standard or safe(root, DESIGN_POLICY).exists()):
+            raise ValueError(f"Restore the missing project template before retrying: {relative}")
+        if has_standard:
+            # The next design operation rebuilds missing guidance from the project template.
+            continue
+        staged = stage / relative
+        staged.parent.mkdir(parents=True, exist_ok=True)
+        if relative == DESIGN_TEMPLATE:
+            shutil.copyfile(asset, staged)
+        else:
+            digest = subprocess.check_output(
+                ["git", "hash-object", "--no-filters", "--", str(template)], cwd=root, text=True
+            ).strip()
+            staged.write_text(f"<!-- template-blob: {digest} -->\n\n"
+                              + asset.read_text(encoding="utf-8"), encoding="utf-8")
+        entries.append((relative, False))
+    if not has_standard:
+        return ""
+    return "".join(difflib.unified_diff(
+        installed.read_text(encoding="utf-8").splitlines(keepends=True),
+        template.read_text(encoding="utf-8").splitlines(keepends=True),
+        fromfile="previous standard", tofile="new standard",
+    ))
 
 
 def main():

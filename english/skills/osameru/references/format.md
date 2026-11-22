@@ -14,8 +14,12 @@ Use the `--design-approval` option of `setup` to select `none` (default), `opera
 
 Place one complete basic design per affected function inside `shitagaki.md`.
 
+When the project template starts with a `# ` heading, start each function’s body with its heading. For templates that start with a table or front matter, put that formatted body inside the block.
+
+When writing or revising a basic design draft, record `requires_heading` in each block. Use `true` when the body template starts with `# ` after leading whitespace, and `false` otherwise. Ask the operator about an empty template. Application uses the condition saved with the draft. Screen item blocks use `path` and `base`.
+
 ```markdown
-<!-- osameru-target: {"path":"orders/register.md","base":"new"} -->
+<!-- osameru-target: {"path":"orders/register.md","base":"new","requires_heading":true} -->
 # Register an order — basic design
 
 Document text

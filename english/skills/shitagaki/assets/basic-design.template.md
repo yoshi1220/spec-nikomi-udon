@@ -1,8 +1,3 @@
-# Basic design draft
-
-<!-- Repeat the block for each destination. Replace path and base according to format.md. -->
-
-<!-- osameru-target: {"path":"<function>.md","base":"new"} -->
 # <Function> basic design
 
 ## Purpose and scope
@@ -20,8 +15,3 @@
 ## Sources and references
 
 <!-- References in the document body must resolve from the canonical destination. -->
-<!-- /osameru-target -->
-
-## Items for review
-
-<!-- Record open questions, their rationale and impact. Apply resolved items to the relevant blocks. -->

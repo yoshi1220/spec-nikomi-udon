@@ -34,9 +34,9 @@ uvx --from git+https://github.com/yoshi1220/spec-nikomi-udon.git@v0.0.1 spec-nik
 
 To try a local checkout, run `uvx --from /path/to/spec-nikomi-udon spec-nikomi-udon init` from the target project.
 
-Select a language and Codex, Claude Code, or both. The same ten skills go into `.agents/skills/` for Codex and `.claude/skills/` for Claude Code. For new projects, choose the E2E method, design approval mode, screenshots, and screen item definitions. Skills and settings are saved even if E2E preparation is pending. Rerun `init` with the same release to resume preparation or add the other agent.
+Select a language and Codex, Claude Code, or both. The same skills go into `.agents/skills/` for Codex and `.claude/skills/` for Claude Code. For new projects, choose the E2E method, design approval mode, screenshots, and screen item definitions. Skills and settings are saved even if E2E preparation is pending. Rerun `init` with the same release to resume preparation or add the other agent.
 
-To upgrade, select the new tag and replace the final `init` with `update`. Track the installed skills, project settings (`designs/nikomi-udon.json`), and installation record (`designs/nikomi-udon-install.json`) together in the project repository. If Git ignores any of these files, the installer reports the count and an example path. Use `git check-ignore -v -- <path>` to find the rule and include the distribution files you intend to share. Save local edits, restore the installed files to their original state, and reapply the edits you need after updating.
+To upgrade, select the new tag and replace the final `init` with `update`. Track the installed skills, project settings (`designs/nikomi-udon.json`), and installation record (`designs/nikomi-udon-install.json`) together in the project repository. If Git ignores any of these files, the installer reports the count and an example path. Use `git check-ignore -v -- <path>` to find the rule and include the distribution files you intend to share. If you edited the distributed skills directly, save those edits, restore the installed files to their original state, and reapply the edits you need after updating.
 
 ### After `init`
 
@@ -72,6 +72,14 @@ python3 .agents/skills/osameru/scripts/osameru.py setup --design-approval pr
 | `pr` | `dandori` checks the design PR. Planning can begin before merge when the local draft matches the approved design. |
 
 If `dandori` cannot verify PR approval, it explains why and asks whether to continue. If the operator continues, it records the unconfirmed item and the decision in the PBI’s `dandori.md`. For an exception such as an emergency change, obtain authorization from the project’s designated role and record the reason and confirmation in the same file. [Selecting the design PR and handling exceptions](english/skills/dandori/references/design-approval.md)
+
+## Use a project basic design template
+
+To try this feature from this checkout, use the local source command above. Use `init` for a new installation or `update` to upgrade v0.0.1. The installer creates `designs/basic-design.template.md` and `designs/basic-design-writing.md`. Share both in the project repository. The team can edit the template title, headings, and tables. The next time `okosu`, `shitagaki`, or `koromogae` uses the template, it updates the writing guidance to match.
+
+Installer updates preserve the project's template and guidance. If the bundled standard template changes, review the diff shown by the installer and copy the changes you choose into the project template. Find the bundled template at `shitagaki/assets/basic-design.template.md` under the installed skills directory.
+
+Existing designs use the new template the next time they are written or revised. To migrate them in bulk, run `$koromogae` in Codex or `/koromogae` in Claude Code. It prepares one documentation PR for the selected designs by default. You can also request separate PRs by business area or function. Review the diff for preservation of design content and manual edits, then merge to update the canonical designs. [Migration workflow](english/skills/koromogae/SKILL.md)
 
 ## Document the current design of an existing project
 
