@@ -26,10 +26,10 @@ PBI ごとの成果物とその状況は、変更用ディレクトリの `oshin
 
 ### 案件に導入する
 
-導入先の Git リポジトリで、次のコマンドを実行して v0.0.1 をインストールします。
+導入先の Git リポジトリで、次のコマンドを実行して v0.0.2 をインストールします。
 
 ```sh
-uvx --from git+https://github.com/yoshi1220/spec-nikomi-udon.git@v0.0.1 spec-nikomi-udon init
+uvx --from git+https://github.com/yoshi1220/spec-nikomi-udon.git@v0.0.2 spec-nikomi-udon init
 ```
 
 ローカルの配布元から試す場合は、導入先で `uvx --from /path/to/spec-nikomi-udon spec-nikomi-udon init` を実行します。
@@ -75,7 +75,7 @@ python3 .agents/skills/osameru/scripts/osameru.py setup --design-approval pr
 
 ## 案件の基本設計書式を使う
 
-この作業ツリーで試すには、導入先で上記のローカル配布元を指定し、新規導入には `init`、v0.0.1 からの更新には `update` を実行します。`init` または初回の `update` で `designs/basic-design.template.md` と `designs/basic-design-writing.md` が用意されます。両方を案件の Git で共有します。チームはテンプレートの標題・見出し・表を編集できます。次に `okosu`、`shitagaki`、`koromogae` がその書式を使う際に、変更に合わせて作成方針を更新します。
+上記の v0.0.2 のコマンドを使い、新規導入には `init`、v0.0.1 からの更新には `update` を実行します。`init` または初回の `update` で `designs/basic-design.template.md` と `designs/basic-design-writing.md` が用意されます。両方を案件の Git で共有します。チームはテンプレートの標題・見出し・表を編集できます。次に `okosu`、`shitagaki`、`koromogae` がその書式を使う際に、変更に合わせて作成方針を更新します。
 
 本体を更新しても案件の書式と作成方針を引き継ぎます。同梱の標準書式に変更があれば、更新時に表示する差分を確認し、採用する変更を案件のテンプレートに取り込みます。同梱の標準書式は導入先の `shitagaki/assets/basic-design.template.md` にあります。
 

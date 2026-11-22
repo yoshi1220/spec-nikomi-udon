@@ -26,10 +26,10 @@ Move any manually installed skill directories with matching names out of the des
 
 ### Initialize the project
 
-Run this command in the target Git repository to install v0.0.1.
+Run this command in the target Git repository to install v0.0.2.
 
 ```sh
-uvx --from git+https://github.com/yoshi1220/spec-nikomi-udon.git@v0.0.1 spec-nikomi-udon init
+uvx --from git+https://github.com/yoshi1220/spec-nikomi-udon.git@v0.0.2 spec-nikomi-udon init
 ```
 
 To try a local checkout, run `uvx --from /path/to/spec-nikomi-udon spec-nikomi-udon init` from the target project.
@@ -75,7 +75,7 @@ If `dandori` cannot verify PR approval, it explains why and asks whether to cont
 
 ## Use a project basic design template
 
-To try this feature from this checkout, use the local source command above. Use `init` for a new installation or `update` to upgrade v0.0.1. The installer creates `designs/basic-design.template.md` and `designs/basic-design-writing.md`. Share both in the project repository. The team can edit the template title, headings, and tables. The next time `okosu`, `shitagaki`, or `koromogae` uses the template, it updates the writing guidance to match.
+Use the v0.0.2 command above with `init` for a new installation or `update` to upgrade from v0.0.1. The installer creates `designs/basic-design.template.md` and `designs/basic-design-writing.md`. Share both in the project repository. The team can edit the template title, headings, and tables. The next time `okosu`, `shitagaki`, or `koromogae` uses the template, it updates the writing guidance to match.
 
 Installer updates preserve the project's template and guidance. If the bundled standard template changes, review the diff shown by the installer and copy the changes you choose into the project template. Find the bundled template at `shitagaki/assets/basic-design.template.md` under the installed skills directory.
 
