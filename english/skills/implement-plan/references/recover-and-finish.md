@@ -13,7 +13,7 @@ When offering choices, normally give three viable options in recommendation orde
 
 ## Update affected records
 
-In the working graph prepared at startup, run `affected FILE failed-task-ID --via requires verifies`. Check the starting task itself and the returned downstream tasks and criteria against the plan before updating their records.
+If the issue concerns a subtask, clear its checkbox and reopen its parent. Check which subtasks within or outside that parent lost their valid verification and reopen those too. Keep unaffected results. Use the parent ID for a subtask when working with the graph. In the working graph prepared at startup, run `affected FILE failed-task-ID --via requires verifies`. Check the starting task itself and the returned downstream tasks and criteria against the plan before updating their records.
 
 1. Clear the checkbox of a task that failed re-verification or whose previous check no longer holds. Follow the plan's dependency edges downstream and reopen each task that relies on that result directly or indirectly.
 2. For affected acceptance criteria, record a failure if the criterion's own check failed, or mark the previous pass as awaiting re-verification if its evidence is invalid. Preserve unaffected records.
@@ -23,5 +23,5 @@ For example, suppose `AC-01` needs both `T-01` and `T-02`, and `T-02` depends on
 
 ## Report completion or interruption
 
-- Review the saved `dandori.md` and current diff. Check that every task is complete, every acceptance criterion ID from `shikomi.md` has valid passing evidence for the current change, and required project checks have passed. Continue verifying if evidence is missing and can still be obtained.
+- Review the saved `dandori.md` and current diff. Check that every task is complete, every acceptance criterion ID from `shikomi.md` has valid passing evidence for the current change, and required project checks have passed. Record the unit-test results and line coverage following the [unit-testing procedure](../../plan-implementation/references/unit-testing.md#target-at-least-80-line-coverage). Leave implementation incomplete if a required unit test did not run or failed. Continue verifying if evidence is missing and can still be obtained.
 - On completion, summarize the task count, acceptance results, and location of `dandori.md`. If work remains, report the task or criterion IDs, their current state, and what is needed to resume. Count only current passes as passed.

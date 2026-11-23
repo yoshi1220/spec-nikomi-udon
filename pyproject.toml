@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "spec-nikomi-udon"
-version = "0.0.8.dev0"
+version = "0.0.8"
 description = "Project installer for Spec Nikomi Udon"
 license = { file = "LICENSE" }
 requires-python = ">=3.8"

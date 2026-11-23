@@ -446,14 +446,17 @@ def review_record(run, receipt=None):
     marker = f"<!-- e2e-run: {json_text(run)} -->\n"
     if receipt is None:
         return "-\n" + marker
-    reviewer = re.sub(r"([\\`*_{}\[\]()#+.!|<>])", r"\\\1", receipt["reviewer"])
-    return f"- {reviewer} ({receipt['method']})\n{marker}<!-- e2e-receipt: {json_text(receipt)} -->\n"
+    label = "E2E results verified automatically"
+    if receipt["reviewer"] is not None:
+        reviewer = re.sub(r"([\\`*_{}\[\]()#+.!|<>])", r"\\\1", receipt["reviewer"])
+        label = f"{reviewer} ({receipt['method']})"
+    return f"- {label}\n{marker}<!-- e2e-receipt: {json_text(receipt)} -->\n"
 
 
 def read_run(review):
     markers = re.findall(r"(?m)^<!-- e2e-run: (\{[^\n]+\}) -->$", review)
     if len(markers) != 1:
-        raise WorkflowError("Start a run with start-e2e before recording confirmation")
+        raise WorkflowError("Start a run with start-e2e before recording or verifying E2E results")
     run = json.loads(markers[0])
     if not isinstance(run, dict) or set(run) - {"id", "snapshot", "version"} or not all(
         isinstance(run.get(key), str) and re.fullmatch(pattern, run[key])
@@ -465,7 +468,68 @@ def read_run(review):
     return run
 
 
+def require_completed_plan(change):
+    plan = managed_path(change, "dandori.md")
+    if not plan.exists():
+        return
+    lines = read(plan).splitlines()
+    markers = [index for index, line in enumerate(lines) if line.startswith("<!-- dandori-plan:")]
+    if markers and (markers != [0] or lines[0] != "<!-- dandori-plan: ready -->"):
+        raise WorkflowError("The implementation plan is not ready: finish planning before E2E")
+
+    in_task_list = False
+    parent_indent = None
+    fence = None
+    fence_base = 0
+    in_comment = False
+    unfinished = []
+    for line in lines:
+        line = line.expandtabs(4)
+        content = line.lstrip(" ")
+        indent = len(line) - len(content)
+        if not content:
+            continue
+        if parent_indent is not None and indent < parent_indent:
+            parent_indent = None
+            fence = None
+            in_comment = False
+        if in_comment:
+            in_comment = "-->" not in line
+            continue
+        if fence:
+            closing = content.rstrip()
+            if (fence_base <= indent < fence_base + 4 and closing.startswith(fence)
+                    and not closing.strip(fence[0])):
+                fence = None
+            continue
+        # A nested list may be indented four spaces from the margin. Read its
+        # blocks relative to the parent item, preserving indented code examples.
+        if indent >= (parent_indent or 0) + 4:
+            continue
+        if content.startswith("<!--"):
+            in_comment = "-->" not in content
+            continue
+        delimiter = re.match(r"^(`{3,}|~{3,})", content)
+        if delimiter:
+            fence = delimiter[1]
+            fence_base = parent_indent or 0
+            continue
+        if parent_indent is None and re.match(r"^#{1,2}[ \t]", content):
+            in_task_list = bool(re.fullmatch(r"## +(?:作業|Tasks)(?: +#+)? *", content))
+            parent_indent = None
+        if in_task_list:
+            task = re.match(r"^([-*+] +)\[([ xX])\] +(\S+)", content)
+            if task:
+                if parent_indent is None:
+                    parent_indent = indent + len(task[1])
+                if task[2] == " ":
+                    unfinished.append(task[3])
+    if unfinished:
+        raise WorkflowError("Complete the implementation tasks before E2E: " + ", ".join(unfinished))
+
+
 def start_e2e(root, change, policy):
+    require_completed_plan(change)
     path, text, blocks, checks = read_e2e(change)
     table = blocks["checks"]
     header = table.group(1).strip().splitlines()[:2]
@@ -495,6 +559,7 @@ def require_current_run(root, change, policy, checks, text, review, run_id=None)
 
 
 def review_e2e(root, change, policy, run_id, reviewer):
+    require_completed_plan(change)
     path, text, blocks, checks = read_e2e(change)
     block = blocks["review"]
     run = require_current_run(root, change, policy, checks, text, block.group(1), run_id)
@@ -506,34 +571,51 @@ def review_e2e(root, change, policy, run_id, reviewer):
         "results": result_digest(change, policy, checks, run_id, text[:block.start()] + text[block.end():]),
         "reviewer": reviewer,
     }
-    replacement = f"<!-- e2e:review -->\n{review_record(run, receipt)}<!-- /e2e:review -->"
-    updated = text[:block.start()] + replacement + text[block.end():]
-    write_file(path, updated.encode())
+    write_e2e_receipt(path, text, block, run, receipt)
     print(path.relative_to(root))
 
 
+def write_e2e_receipt(path, text, block, run, receipt):
+    replacement = f"<!-- e2e:review -->\n{review_record(run, receipt)}<!-- /e2e:review -->"
+    updated = text[:block.start()] + replacement + text[block.end():]
+    write_file(path, updated.encode())
+
+
 def verify_e2e(root, change, policy):
-    _, text, blocks, checks = read_e2e(change)
+    require_completed_plan(change)
+    path, text, blocks, checks = read_e2e(change)
     block = blocks["review"]
     review = block.group(1)
     run = require_current_run(root, change, policy, checks, text, review)
     receipts = re.findall(r"(?m)^<!-- e2e-receipt: (\{[^\n]+\}) -->$", review)
-    if len(receipts) != 1:
+    review_required = policy["design_approval"] != "none"
+    if not receipts and review_required:
         raise WorkflowError("Confirmation of the E2E execution and results is missing")
+    if review.count("<!-- e2e-receipt:") != len(receipts) or len(receipts) > 1:
+        raise WorkflowError("Invalid E2E verification record")
     # Existing receipts bind the complete table and evidence bytes, including older link labels.
     results = result_digest(change, policy, checks, run["id"],
-                            text[:block.start()] + text[block.end():], confirming=False)
+                            text[:block.start()] + text[block.end():], confirming=not receipts)
+    if not receipts:
+        receipt = {"run_id": run["id"], "method": policy["e2e_method"],
+                   "results": results, "reviewer": None}
+        write_e2e_receipt(path, text, block, run, receipt)
+        return run["snapshot"]
+
     value = json.loads(receipts[0])
+    if not isinstance(value, dict) or "reviewer" not in value:
+        raise WorkflowError("Invalid E2E verification record")
+    reviewer = value["reviewer"]
+    verified_automatically = reviewer is None and not review_required
+    reviewed_by_person = isinstance(reviewer, str) and bool(reviewer.strip())
     if (
-        not isinstance(value, dict)
-        or not isinstance(value.get("reviewer"), str)
-        or not value["reviewer"].strip()
+        not (verified_automatically or reviewed_by_person)
         or value.get("run_id") != run["id"]
         or value.get("results") != results
         or value.get("method") != policy["e2e_method"]
         or review != review_record(run, value)
     ):
-        raise WorkflowError("E2E confirmation does not match the current inputs or recorded results")
+        raise WorkflowError("E2E verification record does not match the current inputs or recorded results")
     return run["snapshot"]
 
 
@@ -910,7 +992,7 @@ def main():
                 review_e2e(root, change, policy, args.tested, args.reviewer)
             elif args.command == "verify-e2e":
                 verify_e2e(root, change, policy)
-                print("E2E results confirmed")
+                print("E2E results verified")
             elif args.command == "apply":
                 apply_documents(root, change, policy, args.reason)
     except (WorkflowError, OSError, ValueError) as error:

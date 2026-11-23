@@ -12,8 +12,8 @@ When technical context affects implementation or verification, consult the relev
 
 Give each task an ID, the prerequisites it needs, the result it provides, its related acceptance criterion IDs, and a completion check. Tasks and criteria can map many-to-many. Represent shared work needed by several criteria as one task and reference it from each criterion. Keep criteria that require no implementation in the verification plan and link them to an existing test or manual check.
 
-- When a behavior can be implemented and verified through an existing entry point, the corresponding changes and tests can form one task.
-- Split work when a result has its own verification and is useful to later work. Headings, layers, and files alone do not determine task boundaries.
+- Follow the [unit-testing procedure](unit-testing.md#identify-the-rules-to-verify) to plan the rules to verify, tests before and after implementation, and coverage scope. Tests and implementation can form one task. Record the test-first order within that task.
+- Use separate tasks in the graph when another task directly consumes an independently verifiable result. Use subtasks in the written plan for independently checkable steps within a task. Headings, layers, and files alone do not determine task boundaries.
 - Distinguish task completion from acceptance verification. If acceptance verification needs several results, include all the required task IDs in its verification method. If a separate integration test or manual verification needs its own task, give it a node with the necessary tasks as prerequisites.
 
 When planning PBI E2E checks for a method that uses test code, include preparing tests in the current `specs/<change>/e2e/` and running them during implementation.

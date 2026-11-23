@@ -2,13 +2,15 @@
 
 ## Cross-check the specification and plan
 
-1. Read the target `shikomi.md` and `dandori.md` and confirm the plan points to this specification. Proceed when the specification contains `<!-- shikomi-review: confirmed -->` and nothing unconfirmed blocks implementation or acceptance verification. If confirmation is needed, identify the relevant passage and what the user needs to confirm, then return to clarification.
+1. Read the target `shikomi.md` and `dandori.md` and confirm the plan points to this specification. Proceed when the first line of `shikomi.md` is `<!-- shikomi-review: confirmed -->` and nothing unconfirmed blocks implementation or acceptance verification. If confirmation is needed, identify the relevant passage and what the user needs to confirm, then return to clarification.
 2. If the plan has a status marker, require exactly one marker on the first line, `<!-- dandori-plan: ready -->`. Return to planning if it is pending or invalid. For a legacy plan without a marker, use the same content checks below to establish whether it is ready.
-3. Check that the plan matches the current specification. Look for duplicate task or criterion IDs, unknown references, tasks listed before their prerequisites, and criteria without a verification method. If the order, task scope, or verification method needs revision, identify the affected IDs and return to planning.
+3. Check that the plan matches the current specification. Look for duplicate task or criterion IDs, unknown references, tasks listed before their prerequisites, and criteria without a verification method. If the order, task scope, or verification method needs revision, identify the affected IDs and return to planning. If unit-level behavior is in scope but the plan lacks a mapping to unit tests, an execution method, or coverage scope, fill those gaps through `plan-implementation`.
 
 When technical context affects the work, read the relevant sections of `designs/technical-context.md` if available and check the implementation and verification assumptions. If a difference changes task scope or how a check must run, cite the affected IDs and evidence and return to planning.
 
-Load tasks from the current plan in recorded order with `tasks FILE --print-order` in the [temporary GraphML operations](../../plan-implementation/references/work-graph.md), then compare its output with the plan order before adding other nodes. Add acceptance criteria from the verification table and link each required task to its criterion with `verifies`. Rebuild from the current plan and verification table on resume.
+If subtasks are present, check that their IDs match their parents and are unique. A parent can be complete only after every subtask is verified. If a parent is checked off while a subtask is unfinished, review the parent and dependents using [Recover and finish](recover-and-finish.md).
+
+Load parent tasks from the current plan in recorded order with `tasks FILE --print-order` in the [temporary GraphML operations](../../plan-implementation/references/work-graph.md), then compare its output with the plan order before adding other nodes. Add acceptance criteria from the verification table and link each required task to its criterion with `verifies`. Rebuild from the current plan and verification table on resume.
 
 ## Resume a change in progress
 

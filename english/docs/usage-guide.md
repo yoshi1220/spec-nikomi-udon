@@ -17,14 +17,14 @@ flowchart TD
     D -->|Approval enabled| A["record-design-approval<br/>Record approval for the draft"]
     A --> P
     P --> I["implement-plan<br/>Implement and verify the acceptance criteria"]
-    I --> T["run-feature-e2e<br/>Run E2E and have a reviewer confirm the results"]
+    I --> T["run-feature-e2e<br/>Run E2E and verify the results"]
     T --> M["apply-basic-design<br/>Update the design and history on the work branch"]
     M --> R["Review and merge the implementation and design in the same PR"]
 ~~~
 
 ## Before you start
 
-The example prompts use the English edition of v0.0.7. Read the guide in the framework repository and use the installed skills in your project's Git repository. During setup, choose how to run end-to-end (E2E) tests that exercise the running application, and decide whether the project requires design approval before planning. [Installation instructions](../../README.md#initialize-the-project)
+This guide covers v0.0.8. Use the skills in your project's Git repository. During setup, choose how to run end-to-end (E2E) tests that exercise the application and whether the project requires design approval before planning. [Installation instructions](../../README.md#initialize-the-project)
 
 Enter prompts such as `$specify-spec` in the **Codex conversation** for the target project. In Claude Code, replace the leading `$` with `/`. Review each skill's saved artifacts before moving to the next step. To resume an existing change, open the same work branch or specify the change directory.
 
@@ -87,7 +87,7 @@ $plan-implementation
 
 The skill derives tasks from the confirmed `shikomi.md` and design draft and uses a directed graph to check their dependencies. For example, implement storage and validation, connect the form and list, then verify saving and validation errors. The execution order puts prerequisites before the tasks that depend on them.
 
-- `dandori.md` records dependencies, execution order, completion criteria for each task, and how to verify each acceptance criterion.
+- `dandori.md` records dependencies, execution order, completion criteria for tasks and subtasks, the unit-test plan, and how to verify each acceptance criterion.
 - `e2e.md` records test environments and data, steps, expected outcomes, and linked acceptance criterion IDs. When screenshots are enabled, it specifies what should be visible at each capture point.
 
 Check that each acceptance criterion has a verification method that can detect the intended failure. For `AC-02`, for example, verify both that the message appears and that the note is absent from the list. Proceed when the prerequisites are in place and the plan is ready to execute. [`plan-implementation` procedure](../skills/plan-implementation/SKILL.md)
@@ -98,11 +98,11 @@ Check that each acceptance criterion has a verification method that can detect t
 $implement-plan
 ~~~
 
-The skill checks `shikomi.md` against the executable `dandori.md` and implements the tasks whose prerequisites are satisfied. In this example, it implements storage, validation, the entry form, and the list, then checks that valid input is saved and empty titles are rejected. It records completed tasks and the check that passed for each acceptance criterion in `dandori.md`, so you can resume in a later session.
+The skill checks `shikomi.md` against the executable `dandori.md` and implements the tasks whose prerequisites are satisfied. In this example, it implements storage, validation, the entry form, and the list. A unit test checks that empty titles are rejected, with its failure before implementation and pass afterward recorded in the plan. The plan also records completed tasks and the check that passed for each acceptance criterion, so you can resume in a later session.
 
 For automated E2E, the skill creates or updates tests in `specs/<change>/e2e/` and runs them during implementation. Once the tasks are complete and the acceptance criteria have been verified, it hands the completed change and tests to `run-feature-e2e`. [`implement-plan` procedure](../skills/implement-plan/SKILL.md)
 
-### 6. Run E2E on the finished change and confirm the results — `run-feature-e2e`
+### 6. Run E2E tests and verify the results — `run-feature-e2e`
 
 ~~~text
 $run-feature-e2e
@@ -110,7 +110,7 @@ $run-feature-e2e
 
 The skill checks that the specification, executable plan, completed tasks, and current passes for every acceptance criterion agree. It runs the scenarios in `e2e.md` using the project's E2E method. In automated mode, it reruns the tests for the same PBI. In manual mode, the tester follows the steps and supplies the observations. For example, check that “Weekly meeting” appears after saving and that a note with an empty title is rejected.
 
-The skill records observed results and verdicts in `e2e.md`. If screenshots are required, the results link to the images for this run under `specs/<change>/evidence/<run-id>/`. Once the run completes successfully and all required cases pass, the reviewer explicitly confirms the steps and the results. That confirmation is recorded in the same `e2e.md`.
+The skill records observed results and verdicts in `e2e.md`. If screenshots are required, the results link to the images for this run under `specs/<change>/evidence/<run-id>/`. Once the run completes successfully and all required cases pass, the skill verifies the run ID, results, and evidence. If the project requires design approval, the reviewer confirms the steps and results, and the skill records that confirmation in the same `e2e.md`.
 
 If a case fails, return to `implement-plan` for implementation or test-code issues, or to `plan-implementation` if tasks or verification methods need to change. Once recovery is possible, the skill retests once. If the problem persists, it presents the affected cases and observations for the team to resolve. If prerequisites prevent a case from running, it records the case and the environment or data it needs. [`run-feature-e2e` procedure](../skills/run-feature-e2e/SKILL.md) · [Recover from a failed test](../skills/run-feature-e2e/references/recover.md)
 
@@ -120,7 +120,7 @@ If a case fails, return to `implement-plan` for implementation or test-code issu
 $apply-basic-design
 ~~~
 
-The skill checks that `shikomi.md`, `shitagaki.md`, and `e2e.md` agree. It validates the required E2E passes and the reviewer's confirmation against the current change. Once those checks pass, it prepares the design, current structure, and revision history under `designs/specifications/` on the work branch. The change index, `oshinagaki.md`, links to the updated locations.
+The skill checks that `shikomi.md`, `shitagaki.md`, and `e2e.md` agree. It validates the required E2E passes and any required reviewer confirmation against the current change. Once those checks pass, it prepares the design, current structure, and revision history under `designs/specifications/` on the work branch. The change index, `oshinagaki.md`, links to the updated locations.
 
 Review the implementation, design, and test results in the PR. After the merge the shared branch holds the canonical design for note creation. The next PBI can use it to establish current behavior and determine what to add or change. [`apply-basic-design` procedure](../skills/apply-basic-design/SKILL.md) · [Canonical structure and history](../skills/apply-basic-design/references/structure.md)
 
@@ -189,7 +189,7 @@ After opening the change, use the same skills as for a new project. Check that e
 | 2 | If design approval is enabled, run `$record-design-approval` after approval | A record of approval for the current draft |
 | 3 | `$plan-implementation` | The order of search implementation tasks and the E2E scenarios for search, clearing the field, and existing note creation |
 | 4 | `$implement-plan` | The search implementation and work records, with reused or added tests checking effects on creation and listing |
-| 5 | `$run-feature-e2e` | Results from operating the completed app and the reviewer's confirmation |
+| 5 | `$run-feature-e2e` | Results from operating the completed app and any required reviewer confirmation |
 | 6 | `$apply-basic-design` | Updated design and revision history on the work branch. After the change PR merges, the shared canonical design includes search |
 
 If the list stays filtered after clearing the field, use the observation from `run-feature-e2e` to see whether the agreed specification and plan already cover that case. If the plan is sufficient, fix the behavior with `implement-plan`, then retest. [Steps shared with new projects](#3-draft-the-features-basic-design--draft-basic-design)
@@ -258,6 +258,6 @@ Select root E2E tests by feature, scenario ID, or file. Run `$execute-system-e2e
 | What behavior the team agreed to deliver | `specs/<change>/shikomi.md` |
 | What the draft says and where it will be applied | `specs/<change>/shitagaki.md` and `structure-plan.json` |
 | How the change was implemented and which criteria were verified | `specs/<change>/dandori.md` |
-| What E2E covered and whether the reviewer confirmed it | `specs/<change>/e2e.md` |
+| What E2E covered and how the results were verified | `specs/<change>/e2e.md` |
 | What the current design is and how it has changed | `designs/specifications/` on the shared branch |
 | Where to find the system scenarios and the results of a run | Root `e2e/` and `evidence/system/<run-id>/results.md` |

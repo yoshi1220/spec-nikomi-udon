@@ -11,8 +11,8 @@ It is intended for systems integrators and teams at established Japanese compani
 1. **Clarify the specification.** Use `specify-spec` for requirements or a product backlog item (PBI) and `import-requirements` for existing documents. Agree on scope, behavior, and acceptance criteria one question at a time, and record them in `shikomi.md`.
 2. **Draft the basic design.** Review `shikomi.md` and make any needed edits. Use `draft-basic-design` to turn the saved specification into a functional basic design in `shitagaki.md`. If the project requires design approval, record it with `record-design-approval` before planning.
 3. **Plan implementation and testing.** Use `plan-implementation` to record tasks and verification methods in `dandori.md`. For changed behavior and existing behavior the change could affect, pair each input with an expected result that would reveal a defect. Use `e2e.md` to record E2E steps and expected results for each behavior under test.
-4. **Implement and verify.** Use `implement-plan` to implement the change and check that new or reused tests and manual checks can detect the failures identified in the plan. Then use `run-feature-e2e` to run E2E tests. If a test fails, `run-feature-e2e` returns to implementation or planning as needed and retests once. If the issue persists, it asks the user to intervene. A reviewer confirms what was tested and the results in the same test specification.
-5. **Apply the canonical design.** Use `apply-basic-design` to verify the passes and reviewer confirmation and prepare the design and revision history under `designs/specifications/` on the work branch. Review the implementation and design in the same PR. The merge updates the canonical design.
+4. **Implement and verify.** Use `implement-plan` to implement the plan and check the acceptance criteria. Add or update unit tests for new or changed behavior. Verify that they fail as expected before implementation and pass afterward. Aim for at least 80% line coverage of the affected production code. Then use `run-feature-e2e` to run E2E tests and record the results in `e2e.md`. If a test fails, return to implementation or planning as needed and retest once. If the issue persists, ask the user to intervene.
+5. **Apply the canonical design.** Use `apply-basic-design` to verify the passes and any required reviewer confirmation and prepare the design and revision history under `designs/specifications/` on the work branch. Review the implementation and design in the same PR. The merge updates the canonical design.
 
 Each PBI has an `oshinagaki.md` in its change directory that lists deliverables and their statuses.
 
@@ -28,10 +28,10 @@ Move any manually installed skill directories with matching names out of the des
 
 ### Initialize the project
 
-Run this command in the target Git repository to install v0.0.7.
+Run this command in the target Git repository to install v0.0.8.
 
 ```sh
-uvx --from git+https://github.com/yoshi1220/spec-nikomi-udon.git@v0.0.7 spec-nikomi-udon init
+uvx --from git+https://github.com/yoshi1220/spec-nikomi-udon.git@v0.0.8 spec-nikomi-udon init
 ```
 
 To refresh an English installation that already uses the v0.0.7 skill names, replace `init` with `update`.
@@ -67,18 +67,12 @@ When you are still deciding what to change, `open-discussion` explores a real or
 
 ### Design approval before planning
 
-`plan-implementation` requires a confirmed `shikomi.md` and uses `shitagaki.md` when available. In development version `0.0.8.dev0`, the design approval prompt in `init` asks whether approval must be recorded before planning.
+`plan-implementation` requires a confirmed `shikomi.md` and uses `shitagaki.md` when available. The design approval prompt in `init` asks whether approval must be recorded before planning.
 
 | `init` choice | Saved setting | Before planning |
 | --- | --- | --- |
 | `off` (default) | `none` | Proceed after confirming the specification. The index has no approval section. |
 | `on` | `operational` | Obtain approval through the project's process and give `record-design-approval` the approval date and approver. Proceed after the approval is recorded in the index. |
-
-In the `v0.0.7` release of `init`, select `none` for `off` or `operational` for `on`. To try the development version, run the following command in the target Git repository with `/path/to/spec-nikomi-udon` replaced by the path to your local development checkout. To update an existing installation, replace `init` with `update`.
-
-```sh
-uvx --from /path/to/spec-nikomi-udon spec-nikomi-udon init
-```
 
 If your project requires `record-design-approval` to verify the revision approved in a PR review, configure `pr` after installation. For a Codex installation, run the following command in the target repository.
 
@@ -133,7 +127,7 @@ $implement-plan
 # Try saving a note with and without a title. Record the E2E results in e2e.md.
 $run-feature-e2e
 
-# Verify test passes and reviewer confirmation. Update the design and history on the work branch.
+# Verify the test passes. Update the design and history on the work branch.
 $apply-basic-design
 ```
 
@@ -141,7 +135,7 @@ Use `specify-spec` to agree on the specification and acceptance criteria, then r
 
 For automated PBI E2E tests, `implement-plan` prepares tests in `specs/<change>/e2e/` and runs them during implementation. `run-feature-e2e` reruns the same tests and records the integration test results in that PBI’s `e2e.md`. These results correspond to the acceptance criteria at the time of testing. Keep system tests for ongoing verification of end-to-end workflows in the repository’s top-level `e2e/` directory and update them as the system specification changes.
 
-Run `apply-basic-design` once all required E2E tests pass and the reviewer's confirmation is recorded in `e2e.md`. Review the implementation and design in the same PR and merge it to update the canonical design.
+Once all required E2E tests pass, record reviewer confirmation when design approval is enabled. Proceed to `apply-basic-design` once `run-feature-e2e` verifies the run ID, results, and evidence. Review the implementation and design in the same PR and merge it to update the canonical design.
 
 ## Create and run system E2E tests
 

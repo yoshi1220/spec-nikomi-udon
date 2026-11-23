@@ -2,7 +2,7 @@
 
 ## Check whether testing can start
 
-Read `shikomi.md`, `dandori.md`, and `e2e.md` and check that the agreed specification, plan, test steps, and expected results agree. If the plan has a status marker, require exactly one `<!-- dandori-plan: ready -->` marker on the first line. For a legacy plan without a marker, assess readiness from the plan itself. In either case, require completed tasks and current passes for all acceptance criteria. Report any gaps or discrepancies and name the next step.
+Read `shikomi.md`, `dandori.md`, and `e2e.md` and check that the agreed specification, plan, test steps, and expected results agree. If the plan has a status marker, require exactly one `<!-- dandori-plan: ready -->` marker on the first line. For a legacy plan without a marker, assess readiness from the plan itself. In either case, require all parent tasks and subtasks to be completed, and current passes for all acceptance criteria. Report any gaps or discrepancies and name the next step.
 
 Before issuing a run ID, check that the available environment, service, and configured method can establish each behavior’s expected result. When technical context affects a verdict, consult the relevant sections of `designs/technical-context.md` if available. If a prerequisite is missing, identify the affected IDs and the setup or methods that can satisfy them. For example, a behavior that requires the actual service must wait if only a substitute is available. If the planned environment or verification method must change, revise the plan with `plan-implementation`, then recheck task completion and acceptance results against the revised plan before starting the run.
 
@@ -30,12 +30,15 @@ If the user chooses another method, run `python3 <osameru.py> setup --method <me
 5. Record observations from this run in `e2e.md`, including results received later. Put the actual method, environment, and date in the `e2e:execution` block when present. Record a shared service once and identify any behavior IDs that used a different one.
    - Compare the actual setup with each ID’s preconditions. If the required service was not used, keep the observation and mark the planned case unexecuted. If the service is unknown and affects the verdict, mark the case unverified and ask the tester what was used.
    - For cases run under the planned conditions, record `NG` for an observed mismatch. Record `OK` when the expected result and all required captures are confirmed. When captures are enabled, link the requested screenshots from this run’s `evidence/<run-id>/` directory. Keep the observation and mark the case unverified if a required capture is missing. Give the reason for each unexecuted or unverified case.
-6. Return recovery retest results to the [recovery completion check](recover.md#recover-and-retest-once). For normal runs, follow [the recovery procedure](recover.md) if the command or a case failed, or proceed to reviewer confirmation once all required cases pass. If only unexecuted or unverified cases remain, report their IDs and outstanding prerequisites.
+6. Return recovery retest results to the [recovery completion check](recover.md#recover-and-retest-once). For normal runs, follow [the recovery procedure](recover.md) if the command or a case failed, or proceed to result verification once all required cases pass. If only unexecuted or unverified cases remain, report their IDs and outstanding prerequisites.
 
-## Record reviewer confirmation
+## Verify execution results
 
-When requesting reviewer confirmation, mark the E2E row “Awaiting review” in the index. Mark it “Confirmed” after `verify-e2e` succeeds. If tests have not run, recovery is underway, or user action is needed, record the corresponding status from the run or recovery record.
+After a successful run with all required cases marked `OK`, use `check-e2e-run` to verify the run ID against the current inputs. Read the project's `design_approval` value with `python3 <osameru.py> settings`.
 
-When the run completed successfully, all required cases are `OK`, and `check-e2e-run` succeeds, show the reviewer the steps and verdicts for that run. Once the reviewer explicitly confirms the execution and results, run `review-e2e` with the run ID and reviewer name. Reuse any existing confirmation for that run. Run `verify-e2e` before reporting completion. If validation fails, report the reason and any outstanding checks. If changed inputs require another recovery retest, record that it awaits user action.
+- For `none`, run `verify-e2e`. On success, mark the E2E row “Passed (verified)” in the index and report readiness for canonical application.
+- For `operational` or `pr`, reuse valid confirmation already recorded for the run. Otherwise present the steps and verdict for each ID to the reviewer, request explicit confirmation and the name to record, and mark the E2E row “Awaiting review.” After confirmation, run `review-e2e` with the same run ID and the reviewer's name. Once `verify-e2e` succeeds, mark the row “Confirmed” and hand off for canonical application.
+
+If CLI verification fails, report the reason and what remains. Reflect unexecuted tests, recovery in progress, and user action needed in the index. If changed inputs require another recovery retest, record that it awaits user action.
 
 If testing confirms a rollout, hand off the environment and evidence for a section update with `define-system-context`. When that document change belongs in the same PBI, save it before the run used for final confirmation. If it changes an existing run’s inputs, follow step 4 before handing off to `apply-basic-design`.
