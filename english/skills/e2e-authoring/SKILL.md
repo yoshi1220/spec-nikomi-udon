@@ -5,7 +5,7 @@ description: Use when creating or updating tests under specs/*/e2e/ or the root 
 
 # Verify the specified outcome before capturing the screen
 
-For `specs/<change>/e2e/`, read the PBI’s `e2e.md`. For the root `e2e/`, read the scenarios that `moritsuke` designed from current specifications. Include a stable case ID in the test name. For each capture checkpoint, identify the visible state that demonstrates the expected result.
+For `specs/<change>/e2e/`, read the PBI’s `e2e.md`. For the root `e2e/`, read the scenarios that `create-system-e2e` designed from current specifications. Include a stable case ID in the test name. For each capture checkpoint, identify the visible state that demonstrates the expected result.
 
 - After the action, use a retrying assertion scoped to the target view to wait for the row containing this test’s data, the final status, or the specific error. Also check the destination URL when navigation is part of the specification. For same-URL updates or dialogs, wait for the updated content itself. If the old view already contains the expected text, assert a value that identifies this operation, such as the new order number or updated quantity. Click completion, a fixed delay, network completion, or a shared header alone cannot establish readiness.
 - Always run the assertions. When project `screenshots` are enabled and the scenario specifies a checkpoint, capture immediately after the assertion and before the next action. Reuse existing project helpers and wait for each image write to complete.

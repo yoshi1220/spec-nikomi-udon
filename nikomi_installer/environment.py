@@ -193,7 +193,8 @@ def prepare(root, method, choose):
     if method in ("chrome-extension", "agent-browser"):
         instruction = ("Connect the project extension." if method == "chrome-extension" else
                        "Open the Codex desktop browser or connect Claude Code with /chrome.")
-        print(f"Browser connection pending / 接続確認待ち: {instruction} Run ajimi in the target session.")
+        print(f"Browser connection pending / 接続確認待ち: {instruction} "
+              "Open the test page in the target session and check that you can observe the expected result.")
         return
     try:
         node = (root / "package.json").is_file()

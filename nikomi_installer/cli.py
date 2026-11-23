@@ -15,15 +15,37 @@ from pathlib import Path
 from .environment import prepare
 
 AGENTS = {"codex": ".agents/skills", "claude": ".claude/skills"}
-SKILLS = ("ajimi dandori e2e-authoring kondate koromogae moritsuke nikomu okosu osameru "
-          "osumitsuki saguru shikomi shishoku shitagaki torikomu").split()
+SKILLS = {
+    "japanese": ("ajimi", "dandori", "e2e-authoring", "koromogae", "moritsuke", "nikomu",
+                 "okosu", "osameru", "osumitsuki", "oukagai", "saguru", "shikomi",
+                 "shishoku", "shitagaki", "torikomu"),
+    "english": ("apply-basic-design", "create-system-e2e", "define-system-context",
+                "document-existing-system", "draft-basic-design", "e2e-authoring",
+                "execute-system-e2e", "implement-plan", "import-requirements", "open-discussion",
+                "plan-implementation", "record-design-approval", "restructure-design-docs",
+                "run-feature-e2e", "specify-spec"),
+}
+START_SKILL = {"japanese": "shikomi", "english": "specify-spec"}
+DESIGN_SKILL = {"japanese": "shitagaki", "english": "draft-basic-design"}
+SETTINGS_SKILL = {"japanese": "osameru", "english": "apply-basic-design"}
+RETIRED_SKILL = "kondate"
+PRE_OUKAGAI_SKILLS = (set(SKILLS["japanese"]) - {"oukagai"}) | {RETIRED_SKILL}
+SYSTEM_E2E_SKILLS = {"e2e-authoring", "moritsuke", "shishoku"}
+LEGACY_JAPANESE_SKILL_SETS = (
+    PRE_OUKAGAI_SKILLS,
+    PRE_OUKAGAI_SKILLS - SYSTEM_E2E_SKILLS,
+    PRE_OUKAGAI_SKILLS - SYSTEM_E2E_SKILLS - {"osumitsuki"},
+)
 RECORD = "designs/nikomi-udon-install.json"
 CONFIG = "designs/nikomi-udon.json"
 DESIGN_TEMPLATE = "designs/basic-design.template.md"
 DESIGN_POLICY = "designs/basic-design-writing.md"
-DESIGN_ASSETS = "shitagaki/assets"
 CLAUDE_E2E_RULE = ".claude/rules/nikomi-e2e.md"
-TARGETS = {f"{folder}/{name}" for folder in AGENTS.values() for name in SKILLS}
+RETIRED_TARGETS = {f"{folder}/{RETIRED_SKILL}" for folder in AGENTS.values()}
+TRANSACTION_TARGETS = (
+    {f"{folder}/{name}" for folder in AGENTS.values() for edition in SKILLS.values() for name in edition}
+    | RETIRED_TARGETS | {CONFIG, RECORD, DESIGN_TEMPLATE, DESIGN_POLICY, CLAUDE_E2E_RULE}
+)
 METHODS = ("playwright", "agent-browser", "chrome-extension", "manual")
 
 
@@ -85,9 +107,13 @@ def stamp(path):
     return inventory(path) if path.is_dir() else file_stamp(path)
 
 
-def distribution_files(source):
+def skill_paths(agents, skills):
+    return {f"{AGENTS[agent]}/{skill}" for agent in agents for skill in skills}
+
+
+def distribution_files(source, skills):
     files = {}
-    for skill in SKILLS:
+    for skill in skills:
         folder = source / skill
         if not (folder / "SKILL.md").is_file():
             raise ValueError(f"Incomplete distribution: {skill}/SKILL.md")
@@ -162,8 +188,10 @@ def recover(root, work):
             raise ValueError("Invalid installation journal")
         for entry in entries:
             if (not isinstance(entry, list) or len(entry) not in (2, 3)
-                    or entry[0] not in TARGETS | {CONFIG, RECORD, DESIGN_TEMPLATE, DESIGN_POLICY, CLAUDE_E2E_RULE}
-                    or type(entry[1]) is not bool):
+                    or entry[0] not in TRANSACTION_TARGETS
+                    or type(entry[1]) is not bool
+                    or (len(entry) == 3 and entry[2] is None
+                        and (not entry[1] or entry[0] not in RETIRED_TARGETS))):
                 raise ValueError("Invalid installation journal")
         for entry in reversed(entries):
             relative, existed = entry[:2]
@@ -177,7 +205,7 @@ def recover(root, work):
             if target.exists():
                 # A user may have edited the new tree after an interrupted update.
                 # Older journals have no stamp, so leave that tree for manual backup.
-                if staged.exists() or len(entry) < 3 or stamp(target) != entry[2]:
+                if staged.exists() or len(entry) < 3 or entry[2] is None or stamp(target) != entry[2]:
                     raise ValueError(f"Move {relative} to a backup and rerun to finish recovery.")
                 target.replace(staged)
             if existed:
@@ -187,10 +215,11 @@ def recover(root, work):
     shutil.rmtree(work)
 
 
-def commit(root, work, entries, previous=None):
+def commit(root, work, entries, previous=None, removals=()):
     journal = work / "pending.json"
     write_json(work / "journal.tmp", [
-        (relative, existed, stamp(work / "new" / relative)) for relative, existed in entries
+        (relative, existed, None if relative in removals else stamp(work / "new" / relative))
+        for relative, existed in entries
     ])
     (work / "journal.tmp").replace(journal)
     for relative, existed in entries:
@@ -204,7 +233,8 @@ def commit(root, work, entries, previous=None):
             target.replace(backup)
             if previous and relative in previous and stamp(backup) != previous[relative]:
                 raise ValueError(f"File changed during setup. Save local edits and retry: {relative}")
-        (work / "new" / relative).replace(target)
+        if relative not in removals:
+            (work / "new" / relative).replace(target)
     journal.unlink()
 
 
@@ -222,28 +252,25 @@ def install(root, work, action):
     if record.exists() and (not isinstance(old, dict) or set(old) != {"agents", "language", "version", "files"}):
         raise ValueError("Invalid installation record")
     agents = set()
+    removals = set()
     if old is not None:
         agents = set(old["agents"])
-        if not agents or not agents <= AGENTS.keys() or old["language"] not in ("english", "japanese"):
+        if not agents or not agents <= AGENTS.keys() or old["language"] not in SKILLS:
             raise ValueError("Invalid installation record")
         if action == "init" and old["version"] != release:
             raise ValueError("Run update with the desired release tag")
         language = old["language"]
-        expected = {f"{AGENTS[a]}/{s}" for a in agents for s in SKILLS}
-        if action == "update" and old["version"] != release:
-            # Editions before the system E2E skills shipped had 12 skills;
-            # the edition before design approval also lacked osumitsuki.
-            additions = {"e2e-authoring", "moritsuke", "shishoku"}
-            for missing in (additions, additions | {"osumitsuki"}):
-                legacy = expected - {f"{AGENTS[a]}/{s}" for a in agents for s in missing}
-                if set(old["files"]) == legacy:
-                    expected = legacy
-                    break
-        if set(old["files"]) != expected:
-            raise ValueError("Installation record does not match the expected skill set")
-        converted = clean_crlf_paths(root, expected)
+        expected = skill_paths(agents, SKILLS[language])
+        recorded_paths = set(old["files"])
+        if recorded_paths != expected:
+            if (language != "japanese" or action != "update" or old["version"] == release
+                    or not any(recorded_paths == skill_paths(agents, skills)
+                               for skills in LEGACY_JAPANESE_SKILL_SETS)):
+                raise ValueError("Installation record does not match the expected skill set")
+            removals = recorded_paths - expected
+        converted = clean_crlf_paths(root, recorded_paths)
         conflicts = []
-        for relative in sorted(expected):
+        for relative in sorted(recorded_paths):
             target = safe(root, relative)
             actual = inventory(target) if target.is_dir() else {}
             # The transaction must compare the actual bytes again after moving its backup.
@@ -269,17 +296,17 @@ def install(root, work, action):
                         "both" if len(agents) == 2 else next(iter(agents), None))
         agents.update(AGENTS if choice == "both" else [choice])
     source = Path(__file__).resolve().parent / language
-    distribution = distribution_files(source)
+    distribution = distribution_files(source, SKILLS[language])
     files = {}
     entries = []
     stage = work / "new"
     for agent in sorted(agents):
-        for skill in SKILLS:
+        for skill in SKILLS[language]:
             relative = f"{AGENTS[agent]}/{skill}"
             target = safe(root, relative)
             managed = old is not None and relative in old["files"]
             if target.exists() and not managed:
-                raise ValueError(f"Move the existing skill before running init: {relative}")
+                raise ValueError(f"Move the existing skill before running {action}: {relative}")
             files[relative] = distribution[skill]
             if managed and files[relative] == old["files"][relative]:
                 continue
@@ -292,8 +319,9 @@ def install(root, work, action):
         if not config.is_file():
             raise ValueError(f"Expected a project settings file: {CONFIG}")
         # Validate using the same reader as the distributed workflow.
+        settings_script = source / SETTINGS_SKILL[language] / "scripts/osameru.py"
         settings = json.loads(subprocess.check_output(
-            [sys.executable, str(source / "osameru/scripts/osameru.py"), "settings"], cwd=root, text=True))
+            [sys.executable, str(settings_script), "settings"], cwd=root, text=True))
     else:
         if old is not None:
             raise ValueError(f"Restore missing project settings before retrying: {CONFIG}")
@@ -303,15 +331,16 @@ def install(root, work, action):
                         screen_items=choose("Screen item definitions / 画面項目定義書", ("off", "on"), "off") == "on")
         write_json(stage / CONFIG, settings)
         entries.append((CONFIG, False))
-    standard_diff = stage_design_format(root, stage, entries, source, old)
+    standard_diff = stage_design_format(root, stage, entries, source, DESIGN_SKILL[language], old)
     if "claude" in agents:
         stage_claude_rule(root, stage, source, old, previous, entries)
+    entries.extend((relative, True) for relative in sorted(removals))
     current = dict(version=release, language=language, agents=sorted(agents), files=files)
     if old != current:
         write_json(stage / RECORD, current)
         entries.append((RECORD, old is not None))
     if entries:
-        commit(root, work, entries, previous)
+        commit(root, work, entries, previous, removals)
     print(f"Installed {release} ({language}): {', '.join(sorted(agents))}")
     if standard_diff:
         print("Standard basic design template changes / 標準書式の変更")
@@ -322,9 +351,9 @@ def install(root, work, action):
         shared_paths.add(CLAUDE_E2E_RULE)
     report_ignored_files(root, shared_paths)
     if "codex" in agents:
-        print("Codex: $shikomi")
+        print(f"Codex: ${START_SKILL[language]}")
     if "claude" in agents:
-        print("Claude Code: /shikomi")
+        print(f"Claude Code: /{START_SKILL[language]}")
     return settings
 
 
@@ -351,13 +380,14 @@ def stage_claude_rule(root, stage, source, old, previous, entries):
     entries.append((CLAUDE_E2E_RULE, existed))
 
 
-def stage_design_format(root, stage, entries, source, old):
-    template = source / DESIGN_ASSETS / Path(DESIGN_TEMPLATE).name
-    policy = source / DESIGN_ASSETS / Path(DESIGN_POLICY).name
+def stage_design_format(root, stage, entries, source, design_skill, old):
+    assets = Path(design_skill, "assets")
+    template = source / assets / Path(DESIGN_TEMPLATE).name
+    policy = source / assets / Path(DESIGN_POLICY).name
     installed = None
     if old:
-        agent = sorted(old["agents"])[0]
-        installed = root / AGENTS[agent] / DESIGN_ASSETS / template.name
+        folder = AGENTS[sorted(old["agents"])[0]]
+        installed = root / folder / assets / template.name
     has_standard = installed is not None and installed.is_file()
 
     for relative, asset in ((DESIGN_TEMPLATE, template), (DESIGN_POLICY, policy)):

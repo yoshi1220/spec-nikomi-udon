@@ -1,9 +1,0 @@
-# Keep the discovery summary
-
-At the end, number the available options in the order below and wait for the user's choice. If they already asked to save without specifying a location, use the first option. Honor an explicit destination or a request to keep the summary in the conversation.
-
-- **Save to `saguri/<topic>/saguri.md` at the repository root (recommended).** Each discussion can have its own summary before it has a branch. Choose a short descriptive topic name and show the actual path in the option. Update the same file when continuing a discussion. Choose a distinct name if an unrelated discussion already uses it.
-- **Save to `specs/<change>/saguri.md` on an existing feature branch.** Offer this when a `feature/<change>` branch already exists for this discussion. Use that branch's working tree and the same directory as its `shikomi.md` and `dandori.md`.
-- **Keep it in this conversation.** Return the summary in the conversation. A subsequent `shikomi` in the same conversation can use those agreements.
-
-When saving, create the chosen directory as needed and write the summary using the [summary template](../assets/saguri.template.md). If the destination already contains a file, read it first. For the same discussion, update it while preserving earlier agreements that still apply. If an automatically generated topic name collides with an unrelated file, choose a distinct name. If the user chose that path, offer another destination and wait for their reply. Report the path after a successful save. If saving fails, explain why and return the summary in the conversation. To use a top-level summary later with `shikomi`, supply its path or move it to `specs/<change>/saguri.md` for the target feature. Saving the discovery summary requires neither a change number nor a new branch.

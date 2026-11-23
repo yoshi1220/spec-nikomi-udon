@@ -23,8 +23,8 @@ INDEX = "structure/index.json"
 TREE = "structure/hierarchy.md"
 EVENTS = "history/changes.graphml"
 ID = re.compile(r"[a-zA-Z0-9][a-zA-Z0-9_-]{0,95}\Z")
-MARKER = re.compile(r"<!-- spec-node: ([A-Za-z0-9_-]+) -->")
-HEADING = re.compile(r"^(#{1,6})[ \t]+(.+?)\s*$")
+MARKER = re.compile(r" {0,3}<!-- spec-node: ([A-Za-z0-9_-]+) -->[ \t]*")
+HEADING = re.compile(r"^ {0,3}(#{1,6})[ \t]+(.+?)\s*$")
 RELATIONS = {"contains", "calls", "transfers", "depends", "references"}
 
 
@@ -107,7 +107,10 @@ def sections(data, path):
         elif delimiter:
             fence = delimiter[1]
         else:
-            heading = HEADING.fullmatch(clean)
+            # Only marked indented headings introduce a new boundary. Keep other
+            # indented text in its original section for history and archive checks.
+            if clean.startswith("#") or (i + 1 < len(lines) and MARKER.fullmatch(lines[i + 1].rstrip("\r\n"))):
+                heading = HEADING.fullmatch(clean)
             if re.match(r"^ {0,3}<!-- spec-node:", clean):
                 marker = MARKER.fullmatch(clean)
                 require(marker, "Malformed node marker in " + path)
