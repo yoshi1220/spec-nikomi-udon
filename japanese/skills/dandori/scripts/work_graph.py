@@ -49,8 +49,11 @@ def domain_id(value):
 
 
 def read_graph(path):
+    return decode_graph(ET.parse(path).getroot())
+
+
+def decode_graph(root):
     nodes, edges = {}, {}
-    root = ET.parse(path).getroot()
     graph = root.find(tag("graph"))
     if graph is None or graph.get("edgedefault") != "directed":
         raise ValueError("Expected a directed work graph.")
@@ -66,29 +69,44 @@ def read_graph(path):
     return nodes, edges
 
 
-def save_graph(path, nodes, edges):
+def graph_bytes(nodes, edges, readable=False):
     root = ET.Element(tag("graphml"))
     graph = ET.Element(tag("graph"), edgedefault="directed")
     keys = {}
     for kind, items in (("node", nodes), ("edge", edges)):
-        for item_id, fields in items.items():
+        for item_id, fields in (sorted(items.items()) if readable else items.items()):
             attrs = {"id": xml_id(kind[0], item_id)}
             if kind == "edge":
                 attrs.update({k: xml_id("n", fields[k]) for k in ("source", "target")})
             element = ET.SubElement(graph, tag(kind), attrs)
-            for name, value in fields.items():
+            for name, value in (sorted(fields.items()) if readable else fields.items()):
                 if kind == "edge" and name in ("source", "target"):
                     continue
                 if (kind, name) not in keys:
-                    key = keys[kind, name] = "k%d" % len(keys)
+                    key = keys[kind, name] = (xml_id(kind[0] + "k", name) if readable else "k%d" % len(keys))
                     ET.SubElement(root, tag("key"), {
                         "id": key, "for": kind, "attr.name": name, "attr.type": "string"
                     })
                 ET.SubElement(element, tag("data"), key=keys[kind, name]).text = value
     root.append(graph)
+    if readable:
+        # Keep current and historical graph diffs legible on Python 3.8 as well.
+        def indent(element, level):
+            if len(element):
+                element.text = "\n" + "  " * (level + 1)
+                for child in element:
+                    indent(child, level + 1)
+                    child.tail = element.text
+                element[-1].tail = "\n" + "  " * level
+        indent(root, 0)
     data = ET.tostring(root, encoding="utf-8", xml_declaration=True)
     data = data.replace(b"\r", b"&#13;")  # Preserve CR and CRLF in field text when XML is read.
     ET.fromstring(data)  # Reject invalid XML characters before replacing the last good file.
+    return data
+
+
+def save_graph(path, nodes, edges):
+    data = graph_bytes(nodes, edges)
     stream = tempfile.NamedTemporaryFile(dir=path.parent, delete=False)
     pending = Path(stream.name)
     try:

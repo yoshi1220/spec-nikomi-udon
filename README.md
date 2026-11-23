@@ -38,7 +38,7 @@ v0.0.4 includes the new `osumitsuki` design approval skill and the revised `sagu
 uvx --from git+https://github.com/yoshi1220/spec-nikomi-udon.git@v0.0.4 spec-nikomi-udon update
 ```
 
-Development version 0.0.5.dev1 includes automated PBI E2E authoring and the `moritsuke` and `shishoku` system-test workflows. To try it, run the appropriate `init` or `update` command above in the target project, passing the directory of your development checkout to `--from`.
+Development version 0.0.5.dev2 includes canonical structure and history, automated PBI E2E authoring and the `moritsuke` and `shishoku` system-test workflows. To try it, run the appropriate `init` or `update` command above in the target project, passing the directory of your development checkout to `--from`.
 
 Migration from v0.0.2 is manual. In v0.0.3 and later, use `shikomi` and `shikomi.md` for the change specification and `nikomu` for implementation.
 
@@ -100,7 +100,7 @@ Existing designs use the new template the next time they are written or revised.
 In the existing repository, invoke `$okosu` in Codex or `/okosu` in Claude Code. New onboarding work starts from the current commit by default. You can also name a branch, tag, or commit to analyze. [okosu workflow](english/skills/okosu/SKILL.md)
 
 1. Review the system-wide function inventory and relationships in `designs/system-overview.md`. The same file records the confirmation state, selected scope, and analyzed commit so you can resume in another session.
-2. Choose the functions being changed and those affected, or the entire system. The skill drafts the current basic designs under `designs/specifications/`.
+2. In v0.0.4, choose the functions to document or select the entire system. In development version 0.0.5.dev2, the default scope is the entire system, to the extent supported by the evidence. Under `designs/specifications/`, `structure/` holds the current GraphML and section index. `history/` holds historical GraphML, revisions by node ID and retired text. [Structure and history](english/skills/osameru/references/structure.md)
 3. Review the documentation-only onboarding PR against the code, configuration, and existing tests at the analyzed revision. Points that can only be established at runtime remain marked as unverified. After the merge, use the designs on the shared branch as the canonical reference for the first change.
 
 ## Build the first feature in a new project
@@ -138,7 +138,7 @@ Run `osameru` once all required E2E tests pass and the reviewer's confirmation i
 
 ## Create and run system E2E tests
 
-In development version 0.0.5.dev1, use `$moritsuke` to compare current `designs/specifications/` with existing assertions and prepare workflows and missing tests in the root `e2e/`. Run `$shishoku` for the full root suite or use a selection such as `$shishoku order lookup`. In Claude Code use `/moritsuke` and `/shishoku`.
+In development version 0.0.5.dev2, use `$moritsuke` to compare current `designs/specifications/` with existing assertions and prepare workflows and missing tests in the root `e2e/`. Run `$shishoku` for the full root suite or use a selection such as `$shishoku order lookup`. In Claude Code use `/moritsuke` and `/shishoku`.
 
 PBI and root tests wait for the expected visible value, then save the specified checkpoints when captures are enabled. Root E2E reports and images are saved under `evidence/system/<run-id>/` by default. Each test result links to its checkpoint images. Claude Code installations receive `.claude/rules/nikomi-e2e.md` scoped to the two E2E paths. Both Codex authoring workflows consult the shared skill before writing tests and add a pointer to instructions inside the target `e2e/`. [E2E authoring rules](english/skills/e2e-authoring/SKILL.md)
 

@@ -38,7 +38,7 @@ v0.0.4 には設計承認を記録する `osumitsuki` と改訂した `saguru` �
 uvx --from git+https://github.com/yoshi1220/spec-nikomi-udon.git@v0.0.4 spec-nikomi-udon update
 ```
 
-PBI の自動 E2E とシステム全体の `moritsuke`・`shishoku` は、開発版 0.0.5.dev1 で使えます。この版を試すには、導入先で上記の `init` または `update` を実行する際に、`--from` に開発版をチェックアウトしたディレクトリを指定します。
+正本の構造・履歴管理、PBI の自動 E2E とシステム全体の `moritsuke`・`shishoku` は、開発版 0.0.5.dev2 で使えます。この版を試すには、導入先で上記の `init` または `update` を実行する際に、`--from` に開発版をチェックアウトしたディレクトリを指定します。
 
 v0.0.2 からの移行は手動です。v0.0.3 以降では、変更仕様に `shikomi` と `shikomi.md`、実装に `nikomu` を使います。
 
@@ -100,7 +100,7 @@ python3 .agents/skills/osameru/scripts/osameru.py setup --design-approval pr
 既存リポジトリで Codex なら `$okosu`、Claude Code なら `/okosu` を使います。初回は現在のコミットから始めます。調べるブランチ、タグ、コミットを指定することもできます。 [okosu の手順](japanese/skills/okosu/SKILL.md)
 
 1. `designs/system-overview.md` でシステム全体の機能と関係を確認します。確認状態、選んだ範囲、調査に使ったコミットも同じファイルに残るため、別セッションで再開できます。
-2. 改修対象と影響する機能、またはシステム全体を選ぶと、現行の基本設計書が `designs/specifications/` に作られます。
+2. v0.0.4 では、設計書にまとめる機能を選ぶか、システム全体を対象にします。開発版 0.0.5.dev2 では全体が既定の対象で、根拠を確認できた範囲を文書化します。`designs/specifications/` の `structure/` に現行 GraphML と本文索引、`history/` に履歴用 GraphML・固定ID単位の改訂履歴・廃止時の本文を保存します。[正本の構造と履歴](japanese/skills/osameru/references/structure.md)
 3. 導入専用の文書 PR で、対象版のコード・設定・既存テストと文書を照合します。実動作でしか分からない箇所は未確認として残します。マージ後、共有ブランチの設計書を正本として参照し、最初の改修を起票します。
 
 ## 新規開発で最初の機能を作る
@@ -138,7 +138,7 @@ PBI の自動 E2E は、`nikomu` が `specs/<変更名>/e2e/` に用意して実
 
 ## システム全体の E2E を作成・実行する
 
-開発版 0.0.5.dev1 の `$moritsuke`（盛りつけ）は、現在の `designs/specifications/` と既存のアサーションを照合し、ルート `e2e/` に業務シナリオと不足しているテストを用意します。`$shishoku`（試食）でルートの全件、たとえば `$shishoku 受注照会` で該当シナリオだけを実行します。Claude Code では `/moritsuke` と `/shishoku` を使います。
+開発版 0.0.5.dev2 の `$moritsuke`（盛りつけ）は、現在の `designs/specifications/` と既存のアサーションを照合し、ルート `e2e/` に業務シナリオと不足しているテストを用意します。`$shishoku`（試食）でルートの全件、たとえば `$shishoku 受注照会` で該当シナリオだけを実行します。Claude Code では `/moritsuke` と `/shishoku` を使います。
 
 PBI とルートのテストは、画面に今回の期待値が現れてから、撮影が有効な案件で指定場面を保存します。ルート E2E の結果と画像は、既定で `evidence/system/<実行ID>/` に保存されます。各テスト結果から該当場面の画像を参照できます。Claude Code 用には両方の E2E パスを対象とする `.claude/rules/nikomi-e2e.md` を導入時に配置します。Codex では両作成工程が最初から共通スキルを参照し、対象 `e2e/` 内の指示にも参照先を残します。[E2E の作成ルール](japanese/skills/e2e-authoring/SKILL.md)
 

@@ -31,7 +31,7 @@ DOCUMENT = re.compile(
 )
 
 
-class WorkflowError(Exception):
+class WorkflowError(ValueError):
     pass
 
 
@@ -289,6 +289,11 @@ def test_snapshot(root, change, policy, checks, text, *, starting=False, snapsho
     paths.discard(b"")
     # A project's ignore rules may also cover the PBI documents.
     inputs = ["shikomi.md", "dandori.md", "shitagaki.md"]
+    plan_path = managed_path(change, "structure-plan.json")
+    if plan_path.exists() or managed_path(change, "shitagaki.md").is_file():
+        validate_plan_binding(root, change)
+    if plan_path.exists():
+        inputs.append("structure-plan.json")
     if policy["screen_items"]:
         inputs.append("screen-items.md")
     paths.update(os.fsencode(f"{change_name}/{name}") for name in inputs)
@@ -529,11 +534,13 @@ def verify_e2e(root, change, policy):
         or review != review_record(run, value)
     ):
         raise WorkflowError("E2E confirmation does not match the current inputs or recorded results")
+    return run["snapshot"]
 
 
 def document_path(root, name):
     path = managed_path(root / CANONICAL, name)
-    if path.suffix != ".md" or path.name.endswith(".history.md"):
+    if (path.relative_to(root / CANONICAL).parts[0].casefold() in {"structure", "history", ".git"}
+            or path.suffix != ".md" or path.name.endswith(".history.md")):
         raise WorkflowError(f"Use a Markdown specification path under {CANONICAL}: {name}")
     return path
 
@@ -556,7 +563,7 @@ def documents(root, change, policy):
         content = read(managed_path(change, filename))
         blocks = list(DOCUMENT.finditer(content))
         if (
-            not blocks
+            (not blocks and (screen or not managed_path(change, "structure-plan.json").is_file()))
             or len(blocks) != content.count("<!-- osameru-target:")
             or len(blocks) != content.count("<!-- /osameru-target -->")
         ):
@@ -631,10 +638,40 @@ def history_text(path, change, current, reason):
     return result.encode()
 
 
+def apply_structure(root, change, targets, reason=None, preview=False, tested_snapshot=None):
+    import canonical
+    validate_plan_binding(root, change)
+    plan = canonical.load_json(managed_path(change, "structure-plan.json"), None)
+    if not isinstance(plan, dict):
+        raise WorkflowError("Prepare structure-plan.json beside the reviewed design draft")
+    if reason is not None and reason != plan.get("reason"):
+        raise WorkflowError("Use the change reason recorded in structure-plan.json")
+    deletions = plan.get("documents", {})
+    if (plan.get("refresh") or not isinstance(deletions, dict)
+            or any(not isinstance(item, dict) or item.get("text") is not None for item in deletions.values())):
+        raise WorkflowError("Place proposed PBI document bodies in reviewed osameru target blocks")
+    bodies = {path.relative_to(root / CANONICAL).as_posix(): (base, content)
+              for path, base, content in targets}
+    changed = canonical.execute(root, plan, bodies, preview=preview, pbi=change.relative_to(root).as_posix(),
+                                tested_snapshot=tested_snapshot)
+    print("\n".join(changed) if changed else "Already applied")
+
+
+def journal(root):
+    path = git(root, "rev-parse", "--git-path", "nikomi-structure-pending.json").decode().strip()
+    return root / path
+
+
 def apply_documents(root, change, policy, reason):
-    verify_e2e(root, change, policy)
+    tested_snapshot = verify_e2e(root, change, policy)
+    targets = list(documents(root, change, policy))
+    if journal(root).exists():
+        raise WorkflowError("Pending canonical update: run structure-resume")
+    if validate_plan_binding(root, change):
+        apply_structure(root, change, targets, reason, tested_snapshot=tested_snapshot)
+        return
     updates = {}
-    for path, base, content in documents(root, change, policy):
+    for path, base, content in targets:
         history = managed_path(path.parent, path.stem + ".history.md")
         prior = path.read_bytes() if path.exists() else None
         previous_history = history.read_bytes() if history.exists() else None
@@ -674,6 +711,37 @@ def gh_json(root, *args):
     return json.loads(result.stdout)
 
 
+def plan_digests(path):
+    raw = path.read_bytes()
+    lf = raw.replace(b"\r\n", b"\n")
+    # Older drafts recorded the checkout's byte digest. Accept their original
+    # line endings even after Git has checked out the plan with different ones.
+    yield digest(lf)
+    if raw != lf:
+        yield digest(raw)
+    yield digest(lf.replace(b"\n", b"\r\n"))
+
+
+def validate_plan_binding(root, change):
+    path = managed_path(change, "structure-plan.json")
+    draft = read(managed_path(change, "shitagaki.md"))
+    marker = re.compile(r"(?m)^<!-- structure-plan-sha256: ([0-9a-f]{64}) -->$")
+    if path.is_file():
+        bindings = marker.findall(DOCUMENT.sub("", draft))
+        if len(bindings) != 1 or bindings[0] not in plan_digests(path) or len(marker.findall(draft)) != 1:
+            raise WorkflowError("Refresh the structure-plan-digest marker in the draft and review the changes")
+        return True
+
+    import canonical
+    folder = managed_path(root, CANONICAL)
+    if (path.exists() or marker.search(draft)
+            or any(managed_path(folder, name).exists() for name in (canonical.GRAPH, canonical.INDEX, canonical.EVENTS))
+            or any("<!-- spec-node:" in body and canonical.sections(body.encode(), "shitagaki.md")
+                   for _, body in DOCUMENT.findall(draft))):
+        raise WorkflowError("Prepare structure-plan.json beside the reviewed design draft")
+    return False
+
+
 def design_blob(root, commit, draft_path):
     if not re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", commit):
         raise WorkflowError("Unable to identify the design revision")
@@ -697,6 +765,7 @@ def approval_identity(review):
 
 
 def check_design_review(root, change, pr_number, approver=None, approved_date=None):
+    validate_plan_binding(root, change)
     draft = managed_path(change, "shitagaki.md")
     if not draft.is_file():
         raise WorkflowError(f"Design draft missing: {draft}")
@@ -737,6 +806,12 @@ def check_design_review(root, change, pr_number, approver=None, approved_date=No
             local_blob = git(root, "hash-object", "--", draft_path).decode().strip()
             if local_blob != head_blob:
                 raise WorkflowError(f"The local draft differs from {review['url']}")
+            plan_path = change.relative_to(root).as_posix() + "/structure-plan.json"
+            if (root / plan_path).is_file():
+                local_plan = git(root, "hash-object", "--", plan_path).decode().strip()
+                if (design_blob(root, head, plan_path) != local_plan
+                        or (commit != head and design_blob(root, commit, plan_path) != local_plan)):
+                    raise WorkflowError("Include the matching structure plan in the reviewed design revision")
             return login, day, review["url"]
     raise WorkflowError(f"No current approval confirmed for this design revision: {review['url']}")
 
@@ -751,6 +826,15 @@ def make_parser():
     configure.add_argument("--screen-items", choices=("on", "off"))
     configure.add_argument("--screenshots", choices=("on", "off"))
     commands.add_parser("settings")
+    commands.add_parser("structure-base", help="Identify the current canonical revision")
+    binding = commands.add_parser("structure-plan-digest", help="Print the plan binding for the design draft")
+    binding.add_argument("plan", type=Path)
+    commands.add_parser("structure-check", help="Verify canonical documents, GraphML and index")
+    commands.add_parser("structure-preview", help="Preview a PBI draft and its structure plan together")
+    commands.add_parser("structure-resume", help="Complete interrupted writes on this worktree")
+    structure = commands.add_parser("structure", help="Apply an onboarding or documentation-only change")
+    structure.add_argument("plan", type=Path)
+    structure.add_argument("--preview", action="store_true")
     design = commands.add_parser("check-design-review")
     design.add_argument("--pr", type=int, help="Design PR number in the target repository")
     commands.add_parser("start-e2e")
@@ -771,6 +855,33 @@ def main():
     args = make_parser().parse_args()
     try:
         root = Path(os.fsdecode(git(Path.cwd(), "rev-parse", "--show-toplevel").rstrip(b"\n"))).resolve()
+        if args.command == "structure-plan-digest":
+            print(f"<!-- structure-plan-sha256: {next(plan_digests(args.plan))} -->")
+            return 0
+        if args.command.startswith("structure"):
+            import canonical
+            with lock(root):
+                if args.command == "structure-base":
+                    print(canonical.stamp(managed_path(root, CANONICAL)))
+                elif args.command == "structure-check":
+                    canonical.check(root)
+                    print("Canonical structure verified")
+                elif args.command == "structure-preview":
+                    change = change_directory(root, args.change)
+                    apply_structure(root, change, list(documents(root, change, settings(root))), preview=True)
+                elif args.command == "structure-resume":
+                    canonical.resume(root)
+                    print("Canonical update completed")
+                else:
+                    branch = subprocess.run(["git", "symbolic-ref", "--short", "-q", "HEAD"], cwd=root,
+                                            capture_output=True, text=True).stdout.strip()
+                    on_pbi = branch.startswith("feature/") and (root / "specs" / branch[len("feature/"):] / "shitagaki.md").is_file()
+                    if on_pbi or (args.plan.name == "structure-plan.json" and (args.plan.resolve().parent / "shitagaki.md").exists()):
+                        raise WorkflowError("Use structure-preview or E2E-reviewed apply for a PBI design")
+                    plan = canonical.load_json(args.plan, None)
+                    changed = canonical.execute(root, plan, preview=args.preview)
+                    print("\n".join(changed) if changed else "Already applied")
+            return 0
         if args.command == "setup":
             with lock(root):
                 setup(root, args)
@@ -809,4 +920,5 @@ def main():
 
 
 if __name__ == "__main__":
+    sys.dont_write_bytecode = True
     sys.exit(main())

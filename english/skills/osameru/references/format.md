@@ -12,7 +12,7 @@ Use the `--design-approval` option of `setup` to select `none` (default), `opera
 
 ## Draft blocks
 
-Place one complete basic design per affected function inside `shitagaki.md`.
+Prepare the [structure plan](structure.md) alongside the draft and record its digest in `shitagaki.md` before design approval and E2E. Include each complete target document once. A document may contain several independently identified function sections.
 
 When the project template starts with a `# ` heading, start each function’s body with its heading. For templates that start with a table or front matter, put that formatted body inside the block.
 
@@ -21,6 +21,7 @@ When writing or revising a basic design draft, record `requires_heading` in each
 ```markdown
 <!-- osameru-target: {"path":"orders/register.md","base":"new","requires_heading":true} -->
 # Register an order — basic design
+<!-- spec-node: order-entry -->
 
 Document text
 <!-- /osameru-target -->
@@ -35,9 +36,9 @@ When screen item definitions are enabled, put one `<!-- screen-items: applicable
 1. Immediately before testing, run `python3 <osameru.py> start-e2e` and keep the run ID. The CLI computes a hash of the test definitions, project settings, and relevant worktree files, then clears previous results and confirmation. Put logs and images you link in the report under the PBI's `evidence/<run-id>/` directory. Starting a new Playwright run requires test files in the current PBI’s `e2e/`. The CLI checks test code and inputs in this PBI’s `e2e/` even when Git ignores them. Linked inputs must resolve inside the worktree so the CLI can check their contents. New runs ignore untracked Python and pytest caches in the worktree. Tracked files and explicitly linked test inputs still count. Direct temporary runner output such as logs and reports to a Git-ignored path outside the test directory.
 2. Record the actual method, environment, and date between the `e2e:execution` markers. Each new run clears this block or adds it to an older report. Changes to planned scope or shared prerequisites require a new run. Record the outcome and verdict observed in this run for each behavior ID in `e2e.md`. Use inline Markdown links in the evidence column for logs and images. The CLI resolves each path from `e2e.md` and checks the file contents against the reviewer’s confirmation. When a row requests a screenshot and screenshots are enabled, link the image there, for example at `./evidence/<run-id>/E2E-01.png`. For checkpoints listed as `- Receipt<br>- Shipped`, use `Receipt` and `Shipped` as the link labels in the evidence column. At confirmation, `review-e2e` checks that each named checkpoint has a distinct, nonempty image from this run. The reviewer opens the images to check what they show.
 3. Once all required checks are marked `OK` and the reviewer confirms the execution and results, run `python3 <osameru.py> review-e2e --tested <run-id> --reviewer "<reviewer>"` to record confirmation in `e2e.md`. If inputs change, start a new run and obtain fresh results and confirmation. `verify-e2e` validates the record.
-4. Run `python3 <osameru.py> apply --reason "<reason>"` to prepare the canonical design and history files on the work branch. For example, `orders/register.md` has its history in `orders/register.history.md`. If the canonical base has changed, reconcile the draft. Rerunning after applying the same content completes without duplicating its history.
+4. Apply the reviewed design and its bound plan with `python3 <osameru.py> apply --reason "<reason>"`. Check current GraphML, the Markdown index and per-node revisions with `structure-check`. Legacy drafts predating node markers and a plan can still complete in an unmigrated project using the former sibling history files.
 
-To withdraw confirmation, restore the contents between the `e2e:review` markers to “Pending.” Use `start-e2e` to begin a new run before confirming again. To correct the change reason, pass the corrected text to `apply` to update the same PBI's history entry.
+To withdraw confirmation, restore the contents between the `e2e:review` markers to “Pending.” Use `start-e2e` to begin a new run before confirming again. For legacy per-document history, to correct the change reason, pass the corrected text to `apply` to update the same PBI's history entry.
 
 When resuming result entry or review for a completed run, keep the `id` in the `e2e-run` comment in `e2e.md`. Run `python3 <osameru.py> check-e2e-run --tested <run-id>` to verify the run ID and tested inputs. The command leaves results and reviewer confirmation untouched.
 

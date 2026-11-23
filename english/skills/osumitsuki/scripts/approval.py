@@ -16,7 +16,7 @@ SKILLS = Path(__file__).resolve().parents[2]
 sys.dont_write_bytecode = True
 sys.path.insert(0, str(SKILLS / "osameru" / "scripts"))
 from osameru import (WorkflowError, change_directory, check_design_review, git,
-                     lock, managed_path, settings, write_file)
+                     lock, managed_path, settings, validate_plan_binding, write_file)
 
 
 TITLE = "Design approval"
@@ -107,6 +107,7 @@ def approval_details(root, change, mode, args):
     original_draft = draft.read_bytes() if draft.is_file() else b""
     if not original_draft.decode("utf-8-sig").strip():
         raise WorkflowError("A non-empty design draft is required to record its approval")
+    validate_plan_binding(root, change)
     day, reviewer = args.date, args.approver
     url = None
     if args.action == "approve" and mode == "pr":
@@ -118,6 +119,11 @@ def approval_details(root, change, mode, args):
             local_blob = git(root, "hash-object", "--", str(draft)).decode().strip()
             if head_blob != local_blob or reviewed_blob != local_blob:
                 raise WorkflowError("The local design must match both the PR head and the approved design")
+            plan = managed_path(change, "structure-plan.json")
+            if plan.is_file():
+                plan_blob = git(root, "hash-object", "--", str(plan)).decode().strip()
+                if args.verified_plan != [plan_blob, plan_blob]:
+                    raise WorkflowError("Provide matching --verified-plan blob IDs from the PR head and approved revision")
         else:
             reviewer, day, url = check_design_review(root, change, args.pr, reviewer, day)
     elif args.action == "approve" and (args.pr is not None or args.verified_pr):
@@ -127,6 +133,7 @@ def approval_details(root, change, mode, args):
         details.append(("PR", url))
     if draft.read_bytes() != original_draft:
         raise WorkflowError("The design changed while checking its approval. Review the current draft and retry.")
+    validate_plan_binding(root, change)
     return details
 
 
@@ -209,11 +216,15 @@ def main():
     pr.add_argument("--pr", type=int)
     pr.add_argument("--verified-pr", nargs=3, metavar=("URL", "HEAD_BLOB", "REVIEWED_BLOB"),
                     help="Review URL and design file blob IDs obtained from the host PR integration")
+    approve.add_argument("--verified-plan", nargs=2, metavar=("HEAD_BLOB", "REVIEWED_BLOB"),
+                         help="Structure plan blob IDs for a design checked with --verified-pr")
     migrate = actions.add_parser("migrate", help="Import a verified approval from a legacy PBI")
     for action in (approve, migrate):
         action.add_argument("--date")
         action.add_argument("--approver")
     args = parser.parse_args()
+    if getattr(args, "verified_plan", None) and not args.verified_pr:
+        parser.error("--verified-plan requires --verified-pr")
     try:
         root = Path(os.fsdecode(git(Path.cwd(), "rev-parse", "--show-toplevel").rstrip(b"\n"))).resolve()
         with lock(root):
