@@ -1,4 +1,4 @@
-# spec-nikomi-udon
+# spec-nikomi-udon (“spec” for specification and “nikomi udon” for thick wheat noodles simmered in broth)
 
 [日本語](README.ja.md)
 
