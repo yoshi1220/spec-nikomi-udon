@@ -154,6 +154,14 @@ Start from the shared branch containing the merged design. If the request comes 
 $specify-spec Add partial title search to the notes list. When the search field is empty, show the list as before.
 ~~~
 
+For a request in Jira or GitHub Projects, pass the individual ticket URL directly. For example, with Jira, enter this prompt.
+
+~~~text
+$specify-spec https://jira.example.org/browse/NOTE-42
+~~~
+
+For GitHub Projects, pass the item link or the URL of its linked issue. The skill reads the ticket, drafts `shikomi.md` from the stated requirements and acceptance criteria, and cites the URL. If the ticket is inaccessible, paste its text or the relevant excerpt to continue.
+
 If a requirements document or change request file is your primary input, use `import-requirements` instead.
 
 ~~~text
@@ -205,6 +213,8 @@ Obtain design approval after reviewing the design draft and before planning impl
 | `none` (default) | Review the specification and draft, then proceed to planning |
 | `operational` | Obtain approval through the project's process, then enter a prompt such as `$record-design-approval The design lead approved on 2026-11-20`. The index records the actual approval date and approver |
 | `pr` | Run `$record-design-approval` after the draft has PR approval. The skill compares the approved revision with the current one and records valid approval in the index |
+
+In `operational` mode, the project decides who records approval. The approver can check out the change branch on their own computer, run `$record-design-approval`, and commit the updated `oshinagaki.md` under their own Git identity. The commit history then shows who recorded the approval. Before planning on another computer, check out the branch revision containing that commit. If the project accepts verbal approval, the implementer can run the skill on the approver’s behalf. The index still records the person who approved the draft and the date they approved it.
 
 In projects that require design approval, starting a redesign returns ordinary approval to pending and puts the existing plan on hold while preserving the work records. Obtain and record approval for the revised draft before reviewing the plan again. When the project authorizes emergency work, a prompt such as `$plan-implementation --emergency Restore production service` records the reason with the PBI. [`record-design-approval` procedure](../skills/record-design-approval/SKILL.md) · [Design approval settings](../../README.md#design-approval-before-planning)
 

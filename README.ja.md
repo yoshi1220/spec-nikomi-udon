@@ -87,6 +87,8 @@ python3 .agents/skills/osameru/scripts/osameru.py setup --design-approval pr
 | `operational` | 案件の手続きで承認を得て、たとえば `$osumitsuki 2026-11-20 に設計責任者が承認` と伝えます。承認日と承認者の両方が必要です。 |
 | `pr` | PRで設計が承認されたら `$osumitsuki` を実行します。対象版を照合し、承認日と承認者をお品書きに記録します。 |
 
+案件の運用に応じて、`operational` では承認者本人が記録することも、口頭承認を受けた実装担当者が記録することもできます。 [承認の記録例](japanese/docs/usage-guide.md#設計承認を記録する--osumitsuki)
+
 `dandori` はお品書きが「承認済み」なら計画に進みます。`shitagaki` で再設計に着手すると、通常の承認は「承認待ち」に戻り、既存の計画も保留になります。作業結果は残るので、`dandori` で有効なものを引き継げます。緊急時は所定の担当者の了承を得て、たとえば `$dandori --emergency 本番障害の復旧を優先` と伝えます。お品書きに「緊急対応」と理由が残り、同じPBIなら再設計後も通常の `dandori` 起動で再開できます。Claude Code ではスキル名の先頭を `/` にします。
 
 進行中のPBIは、次に設計・承認・計画を扱うときに移行します。旧記録から対象設計の承認日と承認者、または緊急例外と理由を引き継ぎます。どちらも確認できなければ設計を承認待ちにし、既存計画はタスクと作業結果を残して保留にします。[承認の記録](japanese/skills/osumitsuki/SKILL.md)・[お品書きの移行](japanese/skills/osumitsuki/references/index.md)

@@ -1,6 +1,6 @@
 ---
 name: specify-spec
-description: Start a change from user requirements, a backlog item, or an open-discussion summary. Draft or resume shikomi.md, then clarify goals and dependent decisions one question at a time before planning. Use import-requirements for other existing files used as the primary input.
+description: Start a change from user requirements, a backlog item (including a ticket URL), or an open-discussion summary. Draft or resume shikomi.md, then clarify goals and dependent decisions one question at a time before planning. Use import-requirements for other existing files used as the primary input.
 ---
 
 # Draft and clarify a change specification

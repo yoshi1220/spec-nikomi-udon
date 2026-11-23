@@ -81,6 +81,8 @@ PBIs get a design approval section in `oshinagaki.md` when their project uses ap
 | `operational` | Obtain approval through the project's process, then invoke e.g. `$record-design-approval The design lead approved on 2026-11-20`. Both the approval date and approver are required. |
 | `pr` | Once the design has PR approval, invoke `$record-design-approval`. It verifies the revision and records the approval date and reviewer in the index. |
 
+In `operational` mode, the project decides whether the approver records approval personally or the implementer records it after receiving verbal approval. [Approval recording examples](english/docs/usage-guide.md#record-design-approval--record-design-approval)
+
 `plan-implementation` proceeds from the approved index. When `draft-basic-design` starts a redesign, it returns a normal approval to pending and puts the existing plan on hold. The plan keeps its recorded work for `plan-implementation` to review. For an authorized emergency, invoke e.g. `$plan-implementation --emergency Restore production service`. The emergency and reason stay with the PBI, including after a redesign. Resume with a normal `plan-implementation` invocation. Use `/` in place of `$` in Claude Code.
 
 An in-progress PBI is migrated when next handling design, approval or planning. Its existing records can establish approval of the current design with a date and approver, or a PBI emergency with its reason. If the records establish neither, the design and any existing plan go on hold. The plan retains its tasks and results. [Record approval](english/skills/record-design-approval/SKILL.md) · [Migrate the index](english/skills/record-design-approval/references/index.md)

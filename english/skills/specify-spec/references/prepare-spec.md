@@ -2,6 +2,10 @@
 
 ## Identify the input and working directory
 
+When starting from a Jira or GitHub Projects ticket URL with `specify-spec`, open the specified item before preparing the branch. If the GitHub Projects item links to an issue, read the issue body as well. If the link identifies only a board, ask for the individual item link. If you cannot read the ticket, ask for its text or the relevant excerpt.
+
+Carry the ticket’s stated goals, constraints, and acceptance criteria into the draft. Cite the ticket URL in the sources section of `shikomi.md` and note when you used a supplied excerpt. Keep gaps and conflicting requirements open for the usual clarification interview. On resumption, if the ticket differs from a saved decision, show which decision would change and ask whether to update the specification. Refer to affected acceptance criteria by their existing IDs.
+
 1. If the user specifies a summary path, read that file before switching branches. If it cannot be read, ask for the correct path or its contents. When following this procedure from `import-requirements`, use the document specified there as the primary input.
 2. Follow [Prepare the change directory](change-directory.md) to identify the target branch and working tree. Reuse the directory for an existing change. For a new change, allocate a number and prepare `specs/<change>/`.
 3. Only when using `specify-spec` without a specified summary path, check the target working tree for `specs/<change>/saguri.md`. Read it if present. If absent, proceed from the request, backlog item, or conversation about this change. Do not search the top-level `saguri/` directory.
