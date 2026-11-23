@@ -4,7 +4,7 @@ Use this workflow after [preparing the draft](prepare-spec.md), including when r
 
 Maintain decision points and dependencies in temporary GraphML for the interview. Persist user decisions, sourced facts, consequences and unresolved points in `shikomi.md`. When resuming, reconstruct the maps from the saved request, existing specification, Clarifications and limitations, preserving established decisions. Reopen a user-deferred point only when the user requests it or asks to resume that point. If the user identifies an area to examine, prioritize it subject to prerequisites and coverage of the other stated goals.
 
-Use English by default unless the user requests another language. Keep written decisions and questions in the language of an existing specification unless the user requests a change. Use relevant specifications, project instructions, code, and tests as evidence. When available, consult the relevant parts of the system overview (`designs/system-overview.md`) and program directory layout (`designs/repository-structure.md`). During clarification, `shikomi.md` is the only project artifact to edit. Set the review marker to `pending` when saving a material change to a confirmed specification or reopening an issue that blocks planning. Save that change and the marker together, or reset the marker before saving the change.
+Use English by default unless the user requests another language. Keep written decisions and questions in the language of an existing specification unless the user requests a change. Use relevant specifications, project instructions, code, and tests as evidence. When available, consult the relevant parts of the system overview (`designs/system-overview.md`) and program directory layout (`designs/repository-structure.md`). Set the review marker to `pending` when saving a material change to a confirmed specification or reopening an issue that blocks planning. Save that change and the marker together, or reset the marker before saving the change. Run `sync-spec` from the [index procedure](../../record-design-approval/references/index.md) when starting or resuming the interview and immediately after resetting the marker.
 
 When technical context affects behavior, scope, or constraints, read the relevant sections of `designs/technical-context.md` if available and record the assumptions and evidence the specification needs in `shikomi.md`. For example, identify the affected sign-in paths when changing an identity provider. Hand off confirmed technology decisions and their evidence for a targeted update with `define-system-context`.
 
@@ -94,7 +94,7 @@ Use an interactive question tool when available, or show the same choices in cha
 
 Run the final validation from Step 4C before changing the review marker. Set `<!-- shikomi-review: confirmed -->` only when the user explicitly confirms the current file and no unconfirmed point blocks the implementation approach or acceptance verification. Otherwise keep it at `<!-- shikomi-review: pending -->`. A terminal interview state does not establish an unresolved product rule or cover a missing acceptance scenario.
 
-Update the change specification's status in `oshinagaki.md` if present. Hand the confirmed specification to the user. If the project workflow calls for a basic design draft, direct them to `draft-basic-design`.
+After saving the review marker, run `sync-spec` and check the index. It shows “Complete” for a confirmed specification and “In progress” while confirmation is pending. Hand the confirmed specification to the user. If the project workflow calls for a basic design draft, direct them to `draft-basic-design`.
 
 ### Interrupted completion path
 
@@ -103,7 +103,7 @@ If the user asks to stop after the draft has been loaded, stop asking immediatel
 1. Preserve accepted, saved decisions. Leave unaccepted or contradictory answers unincorporated.
 2. Preserve existing deferrals and their reasons. If the stop request itself names a point to defer, record that point as user-deferred without adding a Q&A entry. Mark every other remaining Partial or Missing point Deferred with the reason for the interruption, including unasked or skipped questions, blocked descendants, unfinished investigation, and reopened conflicts. Empty the frontier and candidate pool, synchronize the decision tree and coverage map, and recompute the category summaries.
 3. Record the undecided points and relevant unasked situations in Out of Scope and Limitations using Step 4C. Preserve their distinction from agreed exclusions. Record any blocking point on its own line and identify the evidence or decision needed to resume. Keep the review marker pending. Record consequences already written as not yet confirmed at the satisfaction gate.
-4. Run the final validation in Step 4C and report interruption under Step 7. Omit the rescan and satisfaction gate.
+4. Run the final validation in Step 4C. After saving, run `sync-spec` and check that the index shows “In progress.” Report interruption under Step 7. Omit the rescan and satisfaction gate.
 
 ### Step 7. Completion report
 

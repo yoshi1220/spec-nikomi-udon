@@ -325,8 +325,10 @@ def install(root, work, action):
     else:
         if old is not None:
             raise ValueError(f"Restore missing project settings before retrying: {CONFIG}")
-        settings = dict(e2e_method=choose("E2E method / テスト方式", METHODS),
-                        design_approval=choose("Design approval / 設計承認", ("none", "operational", "pr"), "none"),
+        e2e_method = choose("E2E method / テスト方式", METHODS)
+        design_approval = choose("Design approval / 設計承認", ("off", "on"), "off")
+        settings = dict(e2e_method=e2e_method,
+                        design_approval="operational" if design_approval == "on" else "none",
                         screenshots=choose("Screenshots / 画面キャプチャ", ("off", "on"), "off") == "on",
                         screen_items=choose("Screen item definitions / 画面項目定義書", ("off", "on"), "off") == "on")
         write_json(stage / CONFIG, settings)

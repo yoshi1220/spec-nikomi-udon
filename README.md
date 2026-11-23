@@ -55,7 +55,7 @@ To change project settings, run `python3 .agents/skills/apply-basic-design/scrip
 
 If the installer cannot identify the dependency manager, use the project’s own tooling to prepare the runner and Chromium. If a Python project uses `requirements.txt` and needs a runner, accepting setup installs the listed dependencies together with `pytest-playwright` into `.venv`. Existing version pins and constraints apply. When adding the runner for the first time, record it in the project’s test requirements so teammates can recreate the environment.
 
-If you choose `pr` for design approval and use GitHub CLI to check reviews, install `gh` and authenticate with access to the target repository and pull request. [Recording design PR approval](english/skills/record-design-approval/SKILL.md)
+If you configure `pr` for design approval and use GitHub CLI to check reviews, install `gh` and authenticate with access to the target repository and pull request. [Recording design PR approval](english/skills/record-design-approval/SKILL.md)
 
 Start a session in the target project. To specify one change, use `$specify-spec` in Codex or `/specify-spec` in Claude Code. To run E2E tests, use `$run-feature-e2e` or `/run-feature-e2e`, respectively.
 
@@ -67,19 +67,26 @@ When you are still deciding what to change, `open-discussion` explores a real or
 
 ### Design approval before planning
 
-`plan-implementation` requires a confirmed `shikomi.md` and uses `shitagaki.md` when available. Choose the approval mode for the project. For example, to enable PR review in a Codex installation, run the following command in the target repository.
+`plan-implementation` requires a confirmed `shikomi.md` and uses `shitagaki.md` when available. In development version `0.0.8.dev0`, the design approval prompt in `init` asks whether approval must be recorded before planning.
+
+| `init` choice | Saved setting | Before planning |
+| --- | --- | --- |
+| `off` (default) | `none` | Proceed after confirming the specification. The index has no approval section. |
+| `on` | `operational` | Obtain approval through the project's process and give `record-design-approval` the approval date and approver. Proceed after the approval is recorded in the index. |
+
+In the `v0.0.7` release of `init`, select `none` for `off` or `operational` for `on`. To try the development version, run the following command in the target Git repository with `/path/to/spec-nikomi-udon` replaced by the path to your local development checkout. To update an existing installation, replace `init` with `update`.
+
+```sh
+uvx --from /path/to/spec-nikomi-udon spec-nikomi-udon init
+```
+
+If your project requires `record-design-approval` to verify the revision approved in a PR review, configure `pr` after installation. For a Codex installation, run the following command in the target repository.
 
 ```sh
 python3 .agents/skills/apply-basic-design/scripts/osameru.py setup --design-approval pr
 ```
 
-PBIs get a design approval section in `oshinagaki.md` when their project uses approval.
-
-| Initial setting | Before planning |
-| --- | --- |
-| `none` (default) | Proceed after confirming the specification. The index has no approval section. |
-| `operational` | Obtain approval through the project's process, then invoke e.g. `$record-design-approval The design lead approved on 2026-11-20`. Both the approval date and approver are required. |
-| `pr` | Once the design has PR approval, invoke `$record-design-approval`. It verifies the revision and records the approval date and reviewer in the index. |
+Once the design has PR approval, invoke `$record-design-approval`. It verifies the revision and records the approval date and reviewer in the index.
 
 In `operational` mode, the project decides whether the approver records approval personally or the implementer records it after receiving verbal approval. [Approval recording examples](english/docs/usage-guide.md#record-design-approval--record-design-approval)
 

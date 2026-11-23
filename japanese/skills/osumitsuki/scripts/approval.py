@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Read or update the design approval in one PBI's deliverable index."""
+"""Manage specification progress and design approval in a PBI's deliverable index."""
 
 import argparse
 from datetime import date
@@ -25,6 +25,43 @@ DATE, APPROVER, REASON = "承認日", "承認者", "省略理由"
 START = "<!-- design-approval -->"
 END = "<!-- /design-approval -->"
 BLOCK = re.compile(r"^" + START + r"\r?\n(.*?)^" + END + r"(?=\r?$)", re.M | re.S)
+INDEX_TEMPLATE = SKILLS / "shitagaki" / "assets" / "oshinagaki.template.md"
+SPEC_ROW = re.compile(
+    r"^(\|[ \t]*変更仕様[ \t]*\|[^|\r\n]*\|[ \t]*)"
+    r"[^|\r\n]*?([ \t]*\|[ \t]*)(?=\r?$)", re.M
+)
+SPEC_STATUSES = {"pending": "作成中", "confirmed": "作成済み"}
+
+
+def specification_review(change):
+    spec = managed_path(change, "shikomi.md")
+    first = spec.read_text(encoding="utf-8-sig").partition("\n")[0]
+    return "confirmed" if first == "<!-- shikomi-review: confirmed -->" else "pending"
+
+
+def specification_row(text, review):
+    rows = list(SPEC_ROW.finditer(text))
+    if len(rows) != 1:
+        raise WorkflowError("Expected one 変更仕様 row in oshinagaki.md")
+    row = rows[0]
+    return text[:row.start()] + row[1] + SPEC_STATUSES[review] + row[2] + text[row.end():]
+
+
+def save_index(path, original, updated):
+    if updated == original:
+        return
+    if (path.read_bytes() if path.exists() else None) != original:
+        raise WorkflowError("The deliverable index changed. Read the current index and retry.")
+    write_file(path, updated)
+
+
+def sync_specification(change):
+    path = managed_path(change, "oshinagaki.md")
+    original = path.read_bytes() if path.exists() else None
+    text = (INDEX_TEMPLATE.read_bytes() if original is None else original).decode("utf-8")
+    review = specification_review(change)
+    save_index(path, original, specification_row(text, review).encode("utf-8"))
+    return review
 
 
 def field(value, label):
@@ -151,18 +188,20 @@ def update_index(root, change, mode, args):
         set_plan_state(change, ready=True)
         return "ready"
 
-    template = SKILLS / "shitagaki" / "assets" / "oshinagaki.template.md"
     if mode == "none":
         if args.action in ("approve", "emergency", "migrate"):
             raise WorkflowError("Design approval is off for this project")
         if not exists and args.action in ("init", "redraft"):
-            write_file(path, template.read_bytes())
+            sync_specification(change)
         # Invalidate an older approval if the draft is redone while approval is off.
         if args.action != "redraft" or not exists:
             return "off"
 
     original = path.read_bytes() if exists else None
-    text = (original if exists else template.read_bytes()).decode("utf-8")
+    if original is None:
+        text = specification_row(INDEX_TEMPLATE.read_text(encoding="utf-8"), specification_review(change))
+    else:
+        text = original.decode("utf-8")
     block, state = current_record(text)
     if mode == "none" and block is None:
         return "off"
@@ -195,11 +234,7 @@ def update_index(root, change, mode, args):
         newline = "\r\n" if "\r\n" in text else "\n"
         separator = newline if text.endswith("\n") else newline * 2
         updated = text + separator + replacement + newline
-    if not exists or updated != text:
-        current = path.read_bytes() if path.exists() else None
-        if current != original:
-            raise WorkflowError("The deliverable index changed. Read the current index and retry.")
-        write_file(path, updated.encode("utf-8"))
+    save_index(path, original, updated.encode("utf-8"))
     return "off" if mode == "none" else state
 
 
@@ -207,7 +242,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--change", help="PBI directory relative to the repository root")
     actions = parser.add_subparsers(dest="action", required=True)
-    for name in ("status", "init", "redraft", "finish-plan"):
+    for name in ("status", "init", "redraft", "finish-plan", "sync-spec"):
         actions.add_parser(name)
     emergency = actions.add_parser("emergency")
     emergency.add_argument("--reason", required=True)
@@ -229,7 +264,10 @@ def main():
         root = Path(os.fsdecode(git(Path.cwd(), "rev-parse", "--show-toplevel").rstrip(b"\n"))).resolve()
         with lock(root):
             change = change_directory(root, args.change)
-            print(update_index(root, change, settings(root)["design_approval"], args))
+            if args.action == "sync-spec":
+                print(sync_specification(change))
+            else:
+                print(update_index(root, change, settings(root)["design_approval"], args))
     except (WorkflowError, OSError, ValueError) as error:
         parser.exit(1, f"osumitsuki: {error}\n")
 

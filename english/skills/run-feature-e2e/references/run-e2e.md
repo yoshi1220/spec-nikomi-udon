@@ -17,7 +17,7 @@ If the user chooses another method, run `python3 <osameru.py> setup --method <me
 
 ## Run tests and record the results
 
-1. Use the project's configured method, following the [settings and recording instructions](../../apply-basic-design/references/format.md). For a new run, prepare the environment, data, and tools. Run `start-e2e` immediately before testing and keep the run ID. If a prerequisite is unavailable, record the affected behavior IDs as unexecuted and report what is missing. If `oshinagaki.md` exists, keep its E2E row up to date with testing, confirmation, and recovery status.
+1. Use the project's configured method, following the [settings and recording instructions](../../apply-basic-design/references/format.md). For a new run, prepare the environment, data, and tools. Run `start-e2e` immediately before testing and keep the run ID. Once the command issues a run ID, mark the E2E row “Running” if the index exists. If a prerequisite is unavailable, record the affected behavior IDs as unexecuted and report what is missing.
 2. When collecting results later or resuming after an interruption or while awaiting confirmation, match the run ID to the `e2e-run` record in `e2e.md`. Use `check-e2e-run --tested <run-id>` to confirm that the inputs from the run still apply. If results are already recorded, continue with the outstanding tests or evaluate the results.
 3. When captures are enabled and checkpoints are specified, prepare the current PBI’s `evidence/<run-id>/` directory. For automated tests, pass its absolute path as documented in `dandori.md` (default `NIKOMI_E2E_EVIDENCE_DIR`). Unset the capture setting for runs without requested captures. Follow the [capture conditions](../../e2e-authoring/SKILL.md) and link only images written by this attempt to their case IDs. For a row listing multiple checkpoints, use the specified checkpoint names as the image link labels. If a required image cannot be saved, record the reason and leave its evidence unverified.
 
@@ -33,6 +33,8 @@ If the user chooses another method, run `python3 <osameru.py> setup --method <me
 6. Return recovery retest results to the [recovery completion check](recover.md#recover-and-retest-once). For normal runs, follow [the recovery procedure](recover.md) if the command or a case failed, or proceed to reviewer confirmation once all required cases pass. If only unexecuted or unverified cases remain, report their IDs and outstanding prerequisites.
 
 ## Record reviewer confirmation
+
+When requesting reviewer confirmation, mark the E2E row “Awaiting review” in the index. Mark it “Confirmed” after `verify-e2e` succeeds. If tests have not run, recovery is underway, or user action is needed, record the corresponding status from the run or recovery record.
 
 When the run completed successfully, all required cases are `OK`, and `check-e2e-run` succeeds, show the reviewer the steps and verdicts for that run. Once the reviewer explicitly confirms the execution and results, run `review-e2e` with the run ID and reviewer name. Reuse any existing confirmation for that run. Run `verify-e2e` before reporting completion. If validation fails, report the reason and any outstanding checks. If changed inputs require another recovery retest, record that it awaits user action.
 

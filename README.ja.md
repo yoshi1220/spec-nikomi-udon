@@ -61,7 +61,7 @@ v0.0.2 からの移行は手動です。v0.0.3 以降では、変更仕様に `s
 
 Playwright の依存管理方式が特定できない場合は、案件の管理ツールでランナーと Chromium を準備します。Python の `requirements.txt` を使う案件でランナーの導入が必要な場合は、環境構築を選ぶと、そのファイルの依存関係と `pytest-playwright` をまとめて `.venv` にインストールします。既存のバージョン指定や制約も適用されます。ランナーを新しく追加した場合は、ほかの開発者も再構築できるよう、案件のテスト依存一覧に記録してください。
 
-計画前の設計承認に `pr` を選び、GitHub CLI で照会する場合は、`gh` を用意し、対象リポジトリと PR を参照できるよう認証します。 [承認の記録手順](japanese/skills/osumitsuki/SKILL.md)
+設計承認を `pr` に設定し、GitHub CLI で承認を照会する場合は、`gh` を用意し、対象リポジトリと PR を参照できるよう認証します。 [承認の記録手順](japanese/skills/osumitsuki/SKILL.md)
 
 導入先のプロジェクトでセッションを始めます。一件の変更仕様を作るには、Codex では `$shikomi`、Claude Code では `/shikomi` と入力します。E2E テストでは `$ajimi` または `/ajimi` を使います。
 
@@ -73,19 +73,26 @@ Playwright の依存管理方式が特定できない場合は、案件の管理
 
 ### 計画前の設計承認
 
-`dandori` は確認済みの `shikomi.md` を必須とし、`shitagaki.md` があれば計画に使います。計画に進む前の承認方式はプロジェクト単位で選びます。たとえば、Codex の導入先で PR レビューを使うには、次のコマンドを実行します。
+`dandori` は確認済みの `shikomi.md` を必須とし、`shitagaki.md` があれば計画に使います。開発版 `0.0.8.dev0` の `init` では、計画前に承認の記録が必要かどうかを選びます。
+
+| `init` の選択肢 | 保存される設定 | 計画前の操作 |
+| --- | --- | --- |
+| `off`（既定） | `none` | 仕様を確認したら計画へ進みます。お品書きに承認欄は作りません。 |
+| `on` | `operational` | 案件の手続きで承認を得て、`osumitsuki` に承認日と承認者を伝えます。承認記録がお品書きに保存されたら計画へ進みます。 |
+
+公開タグ `v0.0.7` の `init` では、`off` に相当する選択肢は `none`、`on` に相当する選択肢は `operational` です。開発版を試すには、次のコマンドの `/path/to/spec-nikomi-udon` を開発版のソースがあるパスに置き換え、導入先の Git リポジトリで実行します。導入済みの案件を更新する場合は `init` を `update` に置き換えます。
+
+```sh
+uvx --from /path/to/spec-nikomi-udon spec-nikomi-udon init
+```
+
+PR レビューで承認した版を `osumitsuki` で照合する案件では、導入後に `pr` を設定します。Codex に導入した場合は、案件のリポジトリで次のコマンドを実行します。
 
 ```sh
 python3 .agents/skills/osameru/scripts/osameru.py setup --design-approval pr
 ```
 
-承認を使う案件の PBI にだけ `oshinagaki.md` の設計承認欄が作られます。
-
-| 初期設定 | 計画前の操作 |
-| --- | --- |
-| `none`（既定） | 承認欄を作らず、仕様を確認したら計画へ進みます。 |
-| `operational` | 案件の手続きで承認を得て、たとえば `$osumitsuki 2026-11-20 に設計責任者が承認` と伝えます。承認日と承認者の両方が必要です。 |
-| `pr` | PRで設計が承認されたら `$osumitsuki` を実行します。対象版を照合し、承認日と承認者をお品書きに記録します。 |
+PR で承認を得たら `$osumitsuki` を実行します。対象版を照合し、承認日と承認者をお品書きに記録します。
 
 案件の運用に応じて、`operational` では承認者本人が記録することも、口頭承認を受けた実装担当者が記録することもできます。 [承認の記録例](japanese/docs/usage-guide.md#設計承認を記録する--osumitsuki)
 

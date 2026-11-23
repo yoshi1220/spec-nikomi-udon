@@ -2,7 +2,7 @@
 
 | Deliverable | Reference | Status |
 | --- | --- | --- |
-| Change specification | [shikomi.md](shikomi.md) | Drafted |
+| Change specification | [shikomi.md](shikomi.md) | In progress |
 | Basic design draft | `shitagaki.md` | Pending |
 | Implementation plan | `dandori.md` | Pending |
 | E2E test specification and results | `e2e.md` | Pending |
