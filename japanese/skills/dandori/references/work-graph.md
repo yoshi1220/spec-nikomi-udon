@@ -1,6 +1,6 @@
 # 検討中の関係を照会する
 
-同梱の [work_graph.py](../scripts/work_graph.py) を Python 3.8 以降で実行する。実行ごとに作業ツリー外の OS 一時領域に専用ディレクトリを作る。対象案件のディレクトリで実行し、helper には導入されたスクリプトのパスを設定する。
+同梱の [work_graph.py](../scripts/work_graph.py) を Python 3.8 以降で使う。対象案件のディレクトリで、`helper` に導入済みのスクリプトのパスを設定してから実行する。検討を始めるたびに、作業ツリー外の OS 一時領域に専用ディレクトリを作る。
 
 ```sh
 helper=/path/to/dandori/scripts/work_graph.py
@@ -10,7 +10,7 @@ graph="$scratch/work.graphml"
 printf '%s\n' "$graph"
 ```
 
-最初の `update FILE` または `tasks FILE` で案件のデータを渡して作成する。以降の差分は `update FILE --existing` で反映する。ファイルが見つからない場合は、仕様・計画とそのセッションで確認した事実から全体を組み直してから照会する。
+最初に `update FILE` または `tasks FILE` に案件のデータを渡し、グラフを作成する。以降の差分は `update FILE --existing` で反映する。ファイルが見つからない場合は、仕様・計画とそのセッションで確認した事実をもとに、グラフ全体を作り直してから照会する。
 
 - 一度作ったパスを同じ検討中の呼び出しで使い回す。別のシェルでは、出力された絶対パスを `graph` に設定し、片付けには `scratch=${graph%/*}` を使う。以下の操作は GraphML のパスを最初の引数に取る。
 - `update` は標準入力の JSON 差分を反映する。ノードと辺はそれぞれ安定した空白なしの ID を持つ。作業・条件・振る舞いで元の ID が重なる場合は、追加するノードに `criterion/1` などの内部 ID を付け、元の ID は属性に保持する。依存関係を加える差分の例は `{"nodes":{"D1":{"kind":"decision","state":"Missing"},"D2":{"kind":"decision","state":"Partial"}},"edges":{"E1":{"source":"D1","target":"D2","kind":"requires"}}}`。各フィールドは文字列で、指定した項目だけを更新し、`null` で項目を外す。辺には `source`、`target`、`kind` が必要。根拠や適用条件も辺に付けられる。`drop_edges`・`drop_nodes` に削除する ID の配列を渡す。辺が残るノードの削除はエラーになる。書き込みエラーの後は照会を止め、入力を直して再実行する。
