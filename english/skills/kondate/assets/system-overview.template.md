@@ -1,5 +1,7 @@
 # System overview
 
+See the [technical context](technical-context.md) for adopted technologies and configuration by environment.
+
 ## Purpose and scope
 
 <!-- Describe what the system is for, who uses it, and the scope it covers. -->

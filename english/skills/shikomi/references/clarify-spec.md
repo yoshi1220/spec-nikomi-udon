@@ -6,6 +6,8 @@ Maintain decision points and dependencies in temporary GraphML for the interview
 
 Use English by default unless the user requests another language. Keep written decisions and questions in the language of an existing specification unless the user requests a change. Use relevant specifications, project instructions, code, and tests as evidence. When available, consult the relevant parts of the system overview (`designs/system-overview.md`) and program directory layout (`designs/repository-structure.md`). During clarification, `shikomi.md` is the only project artifact to edit. Set the review marker to `pending` when saving a material change to a confirmed specification or reopening an issue that blocks planning. Save that change and the marker together, or reset the marker before saving the change.
 
+When technical context affects behavior, scope, or constraints, read the relevant sections of `designs/technical-context.md` if available and record the assumptions and evidence the specification needs in `shikomi.md`. For example, identify the affected sign-in paths when changing an identity provider. Hand off confirmed technology decisions and their evidence for a targeted update with `kondate`.
+
 ### Step 1. Ambiguity scan
 
 At session start, record the number of saved Clarifications entries outside code blocks or comments. Use that baseline in the save checks and the completion report, even if this session accepts no new answers.

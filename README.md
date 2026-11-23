@@ -26,16 +26,16 @@ Move any manually installed skill directories with matching names out of the des
 
 ### Initialize the project
 
-Run this command in the target Git repository for a fresh installation of v0.0.5.
+Run this command in the target Git repository for a fresh installation of v0.0.6.
 
 ```sh
-uvx --from git+https://github.com/yoshi1220/spec-nikomi-udon.git@v0.0.5 spec-nikomi-udon init
+uvx --from git+https://github.com/yoshi1220/spec-nikomi-udon.git@v0.0.6 spec-nikomi-udon init
 ```
 
-To upgrade from v0.0.3 or v0.0.4 and retain the project settings, run the following command.
+To upgrade from v0.0.3, v0.0.4, or v0.0.5 and retain the project settings, run the following command.
 
 ```sh
-uvx --from git+https://github.com/yoshi1220/spec-nikomi-udon.git@v0.0.5 spec-nikomi-udon update
+uvx --from git+https://github.com/yoshi1220/spec-nikomi-udon.git@v0.0.6 spec-nikomi-udon update
 ```
 
 Migration from v0.0.2 is manual. In v0.0.3 and later, use `shikomi` and `shikomi.md` for the change specification and `nikomu` for implementation.
@@ -62,6 +62,8 @@ If you choose `pr` for design approval and use GitHub CLI to check reviews, inst
 Start a session in the target project. To specify one change, use `$shikomi` in Codex or `/shikomi` in Claude Code. To run E2E tests, use `$ajimi` or `/ajimi`, respectively.
 
 Use `kondate` to turn requirements documents or a short description into system-wide guidance. It records the purpose, main capabilities, and shared constraints in `designs/system-overview.md` and the program layout in `designs/repository-structure.md`.
+
+To document the technologies used in each environment, prepare `designs/technical-context.md` with `kondate` for a new project or `okosu` for an existing one. Start from a team draft, requirements, or the existing code and configuration, then resolve technical decisions one at a time. Consult the relevant sections during specification, planning, and verification. Use `kondate` with a specific section to record a technology decision or a confirmed rollout.
 
 When you are still deciding what to change, `saguru` explores a real or anticipated situation one question at a time and revisits unknowns that could change the direction. The recommended location for the summary is `saguri/<topic>/saguri.md` at the repository root. If the change already has a feature branch, you can also save it as `specs/<change>/saguri.md`. You can also keep it in the conversation. Only the target feature’s `saguri.md` is read automatically by `shikomi`. To use a top-level summary, supply its path or move it to the feature location.
 
@@ -142,4 +144,24 @@ PBI and root tests wait for the expected visible value, then save the specified 
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE).
+Starting with the v0.0.6 series, including development builds, this project is licensed under the [Apache License, Version 2.0](LICENSE). Releases through v0.0.5 carry the MIT license included with those releases.
+
+Individuals and companies may use the project free of charge, including for commercial purposes. You may modify it for internal use and keep those changes private.
+
+**Does a customer delivery need this license?**
+
+- **Delivering only your own application.** Using spec-nikomi-udon to develop the application does not require you to display this license, credit the framework in the application, or publish the application's source code.
+- **Delivering the framework with the application.** For example, if the repository you hand to a customer still contains the installed skills or scripts, you are distributing those files too. The conditions below apply to those files, including any copies you modified.
+
+**When you distribute the framework, any part of it, or a modified version (Section 4)**
+
+- Give recipients a copy of the full license, whether you distribute the original or a modified version.
+- Put a prominent notice in each file you changed stating that you changed it.
+- When distributing a derivative in source form, retain the copyright, patent, trademark, and attribution notices from the original source that apply to the parts you distribute.
+- Include a readable copy of the applicable attributions from [NOTICE](NOTICE) in your derivative. They can appear in a distributed `NOTICE` file, in accompanying source or documentation, or in a display where such notices normally appear.
+
+**If you publish a fork or modified version (optional)**
+
+- Please credit spec-nikomi-udon and link to the [original repository](https://github.com/yoshi1220/spec-nikomi-udon) in your README.
+- We encourage you to summarize the main additions, changes, and removals in your README or CHANGELOG.
+- Please identify who maintains your version so readers can distinguish it from an official or endorsed release.

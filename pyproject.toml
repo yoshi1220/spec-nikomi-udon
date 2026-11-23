@@ -4,8 +4,9 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "spec-nikomi-udon"
-version = "0.0.5"
+version = "0.0.6"
 description = "Project installer for Spec Nikomi Udon"
+license = { file = "LICENSE" }
 requires-python = ">=3.8"
 dependencies = ["tomli>=1.1; python_version < '3.11'"]
 
@@ -18,6 +19,7 @@ cache-keys = [
     { file = "setup.py" },
     { file = "MANIFEST.in" },
     { file = "LICENSE" },
+    { file = "NOTICE" },
     { file = "nikomi_installer/*.py" },
     { file = "english/skills/**/*.md" },
     { file = "english/skills/*/scripts/*.py" },

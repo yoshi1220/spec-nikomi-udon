@@ -6,6 +6,8 @@
 2. Read the relevant system guidance, current specifications, code, and tests. Identify where the change enters the system, where relevant constraints are enforced, and which implementations and checks are reusable. Follow existing approaches where they fit. Record why a departure is necessary.
 3. For each criterion, distinguish the work the change requires from existing behavior that only needs verification. Return to clarification if a decision would change the specification. Investigate technical unknowns using the implementation or tests. If the investigation could change the plan itself, identify what needs investigating and what result would let planning resume.
 
+When technical context affects implementation or verification, consult the relevant sections of `designs/technical-context.md` if available and compare the target environment's current configuration with the approved target. Cite the evidence in the plan and account for rollout or environment setup in task dependencies and checks.
+
 ## Define independently verifiable tasks
 
 Give each task an ID, the prerequisites it needs, the result it provides, its related acceptance criterion IDs, and a completion check. Tasks and criteria can map many-to-many. Represent shared work needed by several criteria as one task and reference it from each criterion. Keep criteria that require no implementation in the verification plan and link them to an existing test or manual check.
