@@ -20,6 +20,12 @@ As branches or relationships emerge, use the [temporary GraphML operations](../.
 - If the material explicitly places one capability in several groups, describe it once as shared and reference it from those groups. Add a primary parent only when the evidence establishes one.
 - If the hierarchy contains a cycle, check for different capabilities with the same name or confusion between containment and dependency. Mark unresolved branches as unconfirmed. Keep program directory placement grounded in separate evidence from the input.
 
+## Record the basic design layout
+
+- When a menu, capability list, or business document establishes groupings, use the [layout template](../assets/basic-design-hierarchy.template.md) to record the design hierarchy in `designs/basic-design-hierarchy.md`. Use business areas as groups and place independently designed and revised functions under them. Represent shortcuts and repeated menu entries for the same function as references so the design has one destination. Include APIs, batch jobs, and other non-menu functions when the sources establish where they belong.
+- Read any existing layout and canonical designs first and retain the ID and destination for each unchanged function. Assign unique fixed IDs to groups and functions. For new IDs, use lowercase letters, digits and hyphens, as in `order-entry`. Record the group directories and proposed document paths relative to `designs/specifications/`. Cite the source and location for each branch. When existing canonical documents may need to move or be reorganized, record the candidate change and its rationale as an open item.
+- List functions with unresolved parents and branches with conflicting evidence under open items. Create a layout for first application only where evidence supports the grouping. Keep any existing guidance and link to the saved layout from the overview.
+
 ## Build the relationship graph
 
 - Use capabilities or systems found in the material as nodes. Represent each edge as one row from source to target, with its relationship type and evidence. Point calls from caller to callee, data transfers from sender to recipient, and dependencies from the dependent to what it relies on. Include the data or applicable condition if known.

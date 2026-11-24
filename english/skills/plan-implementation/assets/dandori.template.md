@@ -15,8 +15,8 @@ Specification — [shikomi.md](./shikomi.md)
   - Depends on: IDs and reasons for direct prerequisites, or None
   - Related acceptance criteria
   - Completion check: how to verify the parent task as a whole
-  - [ ] T-01-01 Independently checkable step and how to verify it
-  - [ ] T-01-02 Next step and how to verify it
+  - [ ] ST-01-01 Independently checkable step and how to verify it
+  - [ ] ST-01-02 Next step and how to verify it
 
 For a parent task with several steps that can be checked separately, list its subtasks. Omit the example subtasks for a parent task that needs only one check.
 

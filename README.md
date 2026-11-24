@@ -36,6 +36,8 @@ uvx --from git+https://github.com/yoshi1220/spec-nikomi-udon.git@v0.0.8 spec-nik
 
 To refresh an English installation that already uses the v0.0.7 skill names, replace `init` with `update`.
 
+To try the initial basic design hierarchy and `ST-` subtask IDs, replace `@v0.0.8` with `@main` in the install or update command.
+
 The English edition renamed 14 skills in v0.0.7. If your project uses the old English names, first move the skill directories listed in `designs/nikomi-udon-install.json` and the installation record itself to a backup outside the project. Keep your project settings, design templates, specifications, and designs in place. Run the command above, select English and the agents you previously used, then update any project instructions that invoke the old names.
 
 Select English as the skill language, then choose Codex, Claude Code, or both. The installer puts the selected edition in `.agents/skills/` for Codex and `.claude/skills/` for Claude Code. For new projects, choose the E2E method, design approval mode, screenshots, and screen item definitions. Skills and settings are saved even if E2E preparation is pending. Rerun `init` with the same release to resume preparation or add the other agent.
@@ -60,6 +62,8 @@ If you configure `pr` for design approval and use GitHub CLI to check reviews, i
 Start a session in the target project. To specify one change, use `$specify-spec` in Codex or `/specify-spec` in Claude Code. To run E2E tests, use `$run-feature-e2e` or `/run-feature-e2e`, respectively.
 
 Use `define-system-context` to turn requirements documents or a short description into system-wide guidance. It records the purpose, main capabilities, and shared constraints in `designs/system-overview.md` and the program layout in `designs/repository-structure.md`.
+
+When a menu or similar source establishes capability groupings, the skill records the basic design layout in `designs/basic-design-hierarchy.md`. For a new project, the first `apply-basic-design` records the hierarchy together with the current design.
 
 To document the technologies used in each environment, prepare `designs/technical-context.md` with `define-system-context` for a new project or `document-existing-system` for an existing one. Start from a team draft, requirements, or the existing code and configuration, then resolve technical decisions one at a time. Consult the relevant sections during specification, planning, and verification. Use `define-system-context` with a specific section to record a technology decision or a confirmed rollout.
 

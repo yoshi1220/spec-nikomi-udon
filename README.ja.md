@@ -40,6 +40,8 @@ uvx --from git+https://github.com/yoshi1220/spec-nikomi-udon.git@v0.0.8 spec-nik
 uvx --from git+https://github.com/yoshi1220/spec-nikomi-udon.git@v0.0.8 spec-nikomi-udon update
 ```
 
+基本設計書の初期階層と子作業の `ST-` ID を試す場合は、導入・更新コマンドの `@v0.0.8` を `@main` に置き換えます。
+
 v0.0.2 からの移行は手動です。v0.0.3 以降では、変更仕様に `shikomi` と `shikomi.md`、実装に `nikomu` を使います。
 
 英語版では v0.0.7 で14件のスキル名が変わります。旧名を使う英語版からの再導入手順は英語の README にあります。 [英語版の導入手順](README.md#initialize-the-project)
@@ -66,6 +68,8 @@ Playwright の依存管理方式が特定できない場合は、案件の管理
 導入先のプロジェクトでセッションを始めます。一件の変更仕様を作るには、Codex では `$shikomi`、Claude Code では `/shikomi` と入力します。E2E テストでは `$ajimi` または `/ajimi` を使います。
 
 要件資料や説明からシステム全体を整理するときは `oukagai`（お伺い）を使います。目的・主要機能・共通の制約は `designs/system-overview.md` に、プログラムの配置は `designs/repository-structure.md` にまとめます。
+
+メニュー一覧などから機能の分類が分かる場合は、`designs/basic-design-hierarchy.md` に基本設計書の配置方針をまとめます。新規案件の初回の `osameru` で、階層と今回の設計書をまとめて反映します。
 
 新規案件は `oukagai`、既存案件は `okosu` で `designs/technical-context.md` を用意できます。担当者の下書きや要件資料、既存案件のコード・設定をもとに、技術上の判断を一問ずつ確認します。仕様・計画・検証では判断に関わる節を参照します。採用決定や環境への反映が確認できたら、`oukagai` に対象の節を指定して更新できます。
 

@@ -24,7 +24,7 @@ flowchart TD
 
 ## Before you start
 
-This guide covers v0.0.8. Use the skills in your project's Git repository. During setup, choose how to run end-to-end (E2E) tests that exercise the application and whether the project requires design approval before planning. [Installation instructions](../../README.md#initialize-the-project)
+This guide covers the `main` branch. Use the skills in your project's Git repository. During setup, choose how to run end-to-end (E2E) tests that exercise the application and whether the project requires design approval before planning. [Installation instructions](../../README.md#initialize-the-project) · [v0.0.8 usage guide](https://github.com/yoshi1220/spec-nikomi-udon/blob/v0.0.8/english/docs/usage-guide.md)
 
 Enter prompts such as `$specify-spec` in the **Codex conversation** for the target project. In Claude Code, replace the leading `$` with `/`. Review each skill's saved artifacts before moving to the next step. To resume an existing change, open the same work branch or specify the change directory.
 
@@ -46,6 +46,7 @@ If you have a requirements document, pass it with `$define-system-context --file
 | --- | --- |
 | `designs/system-overview.md` | System purpose, scope, main features, integrations, shared constraints, and supporting sources |
 | `designs/repository-structure.md` | Where the program's files go and what each directory is for, with a template to fill in if the layout is still open |
+| `designs/basic-design-hierarchy.md` | Capability hierarchy supported by menus or similar material, proposed design paths, and sources |
 | `designs/technical-context.md` | Technologies and decisions for environments such as development, test, and production, including unverified points and planned migrations |
 
 Review the initial scope and shared constraints. For example, agree that the list shows saved notes and that searching and editing belong in later PBIs. The next step uses that guidance to work out the details of the first change. [`define-system-context` procedure](../skills/define-system-context/SKILL.md)
@@ -121,6 +122,8 @@ $apply-basic-design
 ~~~
 
 The skill checks that `shikomi.md`, `shitagaki.md`, and `e2e.md` agree. It validates the required E2E passes and any required reviewer confirmation against the current change. Once those checks pass, it prepares the design, current structure, and revision history under `designs/specifications/` on the work branch. The change index, `oshinagaki.md`, links to the updated locations.
+
+For a new project with a basic design layout, the first application records the supported hierarchy together with the current basic design. Future functions appear as planned in the hierarchy, and their basic designs are added in their respective PBIs.
 
 Review the implementation, design, and test results in the PR. After the merge the shared branch holds the canonical design for note creation. The next PBI can use it to establish current behavior and determine what to add or change. [`apply-basic-design` procedure](../skills/apply-basic-design/SKILL.md) · [Canonical structure and history](../skills/apply-basic-design/references/structure.md)
 

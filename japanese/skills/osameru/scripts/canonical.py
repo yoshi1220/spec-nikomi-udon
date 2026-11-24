@@ -183,7 +183,7 @@ def node_notes(folder, nodes):
     return notes
 
 
-def render(nodes, edges, index, notes):
+def render(folder, nodes, edges, index, notes):
     children = {key: [] for key in nodes}
     parents = {}
     for key, edge in edges.items():
@@ -206,12 +206,19 @@ def render(nodes, edges, index, notes):
         label = node.get("label", "")
         require(label.strip() and "\n" not in label, "Missing single-line label: " + key)
         state = node.get("status", "documented")
-        require(state in ("documented", "undocumented", "group"), "Unknown documentation status: " + key)
+        require(state in ("documented", "undocumented", "group", "planned"), "Unknown documentation status: " + key)
         require(key in index or state != "documented", "Missing Markdown section: " + key)
-        require(key not in index or state != "undocumented", "Found a section marked undocumented: " + key)
+        require(key not in index or state not in ("undocumented", "planned"), "Found a section marked " + state + ": " + key)
         location = index.get(key)
         suffix = ("[" + location["path"] + "](../" + quote(location["path"], safe="/") + ") · " + location["heading"]
                   if location else state)
+        if state == "planned":
+            destination = node.get("planned_path")
+            require(destination, "Missing planned document path: " + key)
+            path = body_path(folder, destination)
+            require(not path.is_dir() and not path.name.endswith(".screen-items.md"),
+                    "Expected a planned basic design document: " + destination)
+            suffix += " · " + destination
         lines.append("  " * level + "- " + label + " (`" + key + "`) — " + suffix)
         if key in notes:
             lines.extend("  " * (level + 1) + part for part in notes[key].splitlines())
@@ -604,7 +611,7 @@ def execute(root, plan, drafts=None, preview=False, pbi=None, tested_snapshot=No
             notes[key] = desired.decode()
         updates[name] = desired if normalized != desired else current
         document_bases[name] = checksum(current)
-    tree = render(nodes, edges, index, notes)
+    tree = render(folder, nodes, edges, index, notes)
     revision = None
     if "revision" in plan:
         require(isinstance(plan["revision"], str) and re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", plan["revision"]),
@@ -655,7 +662,8 @@ def execute(root, plan, drafts=None, preview=False, pbi=None, tested_snapshot=No
                                "graph": checksum(current_graph)}
     history[0]["meta/head"]["history_sha256"] = history_digest(*history)
     updates.update({GRAPH: current_graph, EVENTS: graph_bytes(*history, readable=True), INDEX: current_index, TREE: tree})
-    check_destinations(folder, updates)
+    planned_paths = {node["planned_path"] for node in nodes.values() if node.get("status") == "planned"}
+    check_destinations(folder, updates.keys() | planned_paths)
     if preview:
         diff = []
         for name, data in sorted(updates.items()):
@@ -685,4 +693,4 @@ def check(root, pending=False):
     for key in nodes:
         expected = checksum(notes[key].encode()) if key in notes else None
         require(events[key].get("note_sha256") == expected, "Node note differs from its recorded revision: " + key)
-    require(render(nodes, edges, index, notes) == managed_path(folder, TREE).read_bytes().replace(b"\r\n", b"\n"), "Stale hierarchy")
+    require(render(folder, nodes, edges, index, notes) == managed_path(folder, TREE).read_bytes().replace(b"\r\n", b"\n"), "Stale hierarchy")
