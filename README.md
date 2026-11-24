@@ -36,7 +36,11 @@ uvx --from git+https://github.com/yoshi1220/spec-nikomi-udon.git@v0.0.8 spec-nik
 
 To refresh an English installation that already uses the v0.0.7 skill names, replace `init` with `update`.
 
-To try the initial basic design hierarchy and `ST-` subtask IDs, replace `@v0.0.8` with `@main` in the install or update command.
+To try the initial basic design hierarchy and `ST-` subtask IDs, install development version `v0.0.9.dev0`. When updating from v0.0.8, replace `init` with `update`.
+
+```sh
+uvx --from git+https://github.com/yoshi1220/spec-nikomi-udon.git@v0.0.9.dev0 spec-nikomi-udon init
+```
 
 The English edition renamed 14 skills in v0.0.7. If your project uses the old English names, first move the skill directories listed in `designs/nikomi-udon-install.json` and the installation record itself to a backup outside the project. Keep your project settings, design templates, specifications, and designs in place. Run the command above, select English and the agents you previously used, then update any project instructions that invoke the old names.
 

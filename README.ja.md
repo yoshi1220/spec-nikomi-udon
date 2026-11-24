@@ -40,7 +40,11 @@ uvx --from git+https://github.com/yoshi1220/spec-nikomi-udon.git@v0.0.8 spec-nik
 uvx --from git+https://github.com/yoshi1220/spec-nikomi-udon.git@v0.0.8 spec-nikomi-udon update
 ```
 
-基本設計書の初期階層と子作業の `ST-` ID を試す場合は、導入・更新コマンドの `@v0.0.8` を `@main` に置き換えます。
+基本設計書の初期階層と子作業の `ST-` ID を試すには、開発版 `v0.0.9.dev0` を導入します。v0.0.8 から更新するときは `init` を `update` に置き換えます。
+
+```sh
+uvx --from git+https://github.com/yoshi1220/spec-nikomi-udon.git@v0.0.9.dev0 spec-nikomi-udon init
+```
 
 v0.0.2 からの移行は手動です。v0.0.3 以降では、変更仕様に `shikomi` と `shikomi.md`、実装に `nikomu` を使います。
 

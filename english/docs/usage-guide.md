@@ -24,7 +24,7 @@ flowchart TD
 
 ## Before you start
 
-This guide covers the `main` branch. Use the skills in your project's Git repository. During setup, choose how to run end-to-end (E2E) tests that exercise the application and whether the project requires design approval before planning. [Installation instructions](../../README.md#initialize-the-project) · [v0.0.8 usage guide](https://github.com/yoshi1220/spec-nikomi-udon/blob/v0.0.8/english/docs/usage-guide.md)
+This guide covers development version `v0.0.9.dev0`. Use the skills in your project's Git repository. During setup, choose how to run end-to-end (E2E) tests that exercise the application and whether the project requires design approval before planning. [Installation instructions](../../README.md#initialize-the-project) · [v0.0.8 usage guide](https://github.com/yoshi1220/spec-nikomi-udon/blob/v0.0.8/english/docs/usage-guide.md)
 
 Enter prompts such as `$specify-spec` in the **Codex conversation** for the target project. In Claude Code, replace the leading `$` with `/`. Review each skill's saved artifacts before moving to the next step. To resume an existing change, open the same work branch or specify the change directory.
 
