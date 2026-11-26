@@ -8,6 +8,8 @@
 
 When technical context affects the work, read the relevant sections of `designs/technical-context.md` if available and check the implementation and verification assumptions. If a difference changes task scope or how a check must run, cite the affected IDs and evidence and return to planning.
 
+Read the planned changes in `dandori.md` and the relevant parts of `designs/repository-structure.md` if it exists. Compare them with the actual layout. If a planned path or directory responsibility needs to change, cite the affected task IDs and evidence and return to `plan-implementation`. [Update the structure document after verification](recover-and-finish.md#record-the-verified-directory-structure) for planned additions or changes to the layout.
+
 If subtasks are present, check their ID format and placement under the parent against the [plan format](../../plan-implementation/references/write-plan.md#record-the-execution-list). For example, `ST-01-01` belongs directly under `T-01`. If the format or parent is wrong, or an ID is duplicated, identify the affected IDs and return to planning. A parent can be complete only after every subtask is verified. If a parent is checked off while a subtask is unfinished, review the parent and dependents using [Recover and finish](recover-and-finish.md).
 
 Load parent tasks from the current plan in recorded order with `tasks FILE --print-order` in the [temporary GraphML operations](../../plan-implementation/references/work-graph.md), then compare its output with the plan order before adding other nodes. Add acceptance criteria from the verification table and link each required task to its criterion with `verifies`. Rebuild from the current plan and verification table on resume.

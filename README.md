@@ -10,7 +10,7 @@ It is intended for systems integrators and teams at established Japanese compani
 
 1. **Clarify the specification.** Use `specify-spec` for requirements or a product backlog item (PBI) and `import-requirements` for existing documents. Agree on scope, behavior, and acceptance criteria one question at a time, and record them in `shikomi.md`.
 2. **Draft the basic design.** Review `shikomi.md` and make any needed edits. Use `draft-basic-design` to turn the saved specification into a functional basic design in `shitagaki.md`. If the project requires design approval, record it with `record-design-approval` before planning.
-3. **Plan implementation and testing.** Use `plan-implementation` to record tasks and verification methods in `dandori.md`. For changed behavior and existing behavior the change could affect, pair each input with an expected result that would reveal a defect. Use `e2e.md` to record E2E steps and expected results for each behavior under test.
+3. **Plan implementation and testing.** Use `plan-implementation` to consult the directory structure document and list the paths to create or change near the top of `dandori.md`. Follow them with tasks in execution order and verification methods. For changed behavior and existing behavior the change could affect, pair each input with an expected result that would reveal a defect. Use `e2e.md` to record E2E steps and expected results for each behavior under test.
 4. **Implement and verify.** Use `implement-plan` to implement the plan and check the acceptance criteria. Add or update unit tests for new or changed behavior. Verify that they fail as expected before implementation and pass afterward. Aim for at least 80% line coverage of the affected production code. Then use `run-feature-e2e` to run E2E tests and record the results in `e2e.md`. If a test fails, return to implementation or planning as needed and retest once. If the issue persists, ask the user to intervene.
 5. **Apply the canonical design.** Use `apply-basic-design` to verify the passes and any required reviewer confirmation and prepare the design and revision history under `designs/specifications/` on the work branch. Review the implementation and design in the same PR. The merge updates the canonical design.
 
@@ -44,6 +44,12 @@ uvx --from git+https://github.com/yoshi1220/spec-nikomi-udon.git@v0.0.9.dev0 spe
 
 The English edition renamed 14 skills in v0.0.7. If your project uses the old English names, first move the skill directories listed in `designs/nikomi-udon-install.json` and the installation record itself to a backup outside the project. Keep your project settings, design templates, specifications, and designs in place. Run the command above, select English and the agents you previously used, then update any project instructions that invoke the old names.
 
+The plan that lists affected paths before the tasks and the workflow for updating the directory structure after implementation were added after v0.0.9.dev0. To try them from a local copy that includes these changes, replace the path below with its absolute path and run the command in the target project. Use `init` for a new installation or `update` for an existing one that uses the current skill names.
+
+```sh
+uvx --from "/path/to/spec-nikomi-udon" spec-nikomi-udon init
+```
+
 Select English as the skill language, then choose Codex, Claude Code, or both. The installer puts the selected edition in `.agents/skills/` for Codex and `.claude/skills/` for Claude Code. For new projects, choose the E2E method, design approval mode, screenshots, and screen item definitions. Skills and settings are saved even if E2E preparation is pending. Rerun `init` with the same release to resume preparation or add the other agent.
 
 Track the installed skills, project settings (`designs/nikomi-udon.json`), and installation record (`designs/nikomi-udon-install.json`) together in the project repository. If Git ignores any of these files, the installer reports the count and an example path. Use `git check-ignore -v -- <path>` to find the rule and include the distribution files you intend to share. If you edited the distributed skills directly, save those edits, restore the installed files to their original state, and reapply the edits you need after updating.
@@ -65,7 +71,7 @@ If you configure `pr` for design approval and use GitHub CLI to check reviews, i
 
 Start a session in the target project. To specify one change, use `$specify-spec` in Codex or `/specify-spec` in Claude Code. To run E2E tests, use `$run-feature-e2e` or `/run-feature-e2e`, respectively.
 
-Use `define-system-context` to turn requirements documents or a short description into system-wide guidance. It records the purpose, main capabilities, and shared constraints in `designs/system-overview.md` and the program layout in `designs/repository-structure.md`.
+Use `define-system-context` to turn requirements documents or a short description into system-wide guidance. It records the purpose, main capabilities, and shared constraints in `designs/system-overview.md` and the program layout in `designs/repository-structure.md`. After verifying the implementation, `implement-plan` updates the structure document with added or changed locations and fills gaps in the layout relevant to the work.
 
 When a menu or similar source establishes capability groupings, the skill records the basic design layout in `designs/basic-design-hierarchy.md`. For a new project, the first `apply-basic-design` records the hierarchy together with the current design.
 
@@ -108,7 +114,7 @@ Existing designs use the new template the next time they are written or revised.
 
 In the existing repository, invoke `$document-existing-system` in Codex or `/document-existing-system` in Claude Code. New onboarding work starts from the current commit by default. You can also name a branch, tag, or commit to analyze. [document-existing-system workflow](english/skills/document-existing-system/SKILL.md)
 
-1. Review the system-wide function inventory and relationships in `designs/system-overview.md`. The same file records the confirmation state, selected scope, and analyzed commit so you can resume in another session.
+1. Review the system-wide function inventory and relationships in `designs/system-overview.md`. The same file records the confirmation state, selected scope, and analyzed commit so you can resume in another session. Record the directories and their responsibilities at that commit in `designs/repository-structure.md` to guide the first change.
 2. By default, document the entire system to the extent supported by the evidence. You can also select a narrower scope. Under `designs/specifications/`, `structure/` holds the current GraphML and section index. `history/` holds historical GraphML, revisions by node ID and retired text. [Structure and history](english/skills/apply-basic-design/references/structure.md)
 3. Review the documentation-only onboarding PR against the code, configuration, and existing tests at the analyzed revision. Points that can only be established at runtime remain marked as unverified. After the merge, use the designs on the shared branch as the canonical reference for the first change.
 
@@ -126,7 +132,8 @@ $specify-spec Save the title and body. List titles. If untitled, prompt for a ti
 # Draft the design for note creation in shitagaki.md from the agreed specification.
 $draft-basic-design
 
-# Put tasks in execution order in dandori.md and E2E steps and expectations in e2e.md.
+# In dandori.md, describe the approach and paths to change, then list tasks in execution order.
+# Record E2E steps and expected results in e2e.md.
 $plan-implementation
 
 # Implement the plan and record progress and verification results in dandori.md.

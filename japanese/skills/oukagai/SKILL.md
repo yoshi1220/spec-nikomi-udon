@@ -13,7 +13,7 @@ description: 要件資料や説明から機能ツリーと関係グラフを含�
 
 - [資料の分析手順](references/analyze-requirements.md) に従い、機能ツリーと関係グラフをそれぞれ、根拠のある範囲まで組み立てる。[全体指針のテンプレート](assets/system-overview.template.md) を使い、`designs/system-overview.md` に目的、対象範囲、主要機能、システム構成、外部連携、共通の制約と根拠をまとめる。
 - [基本設計書の配置方針](references/analyze-requirements.md#基本設計書の配置方針をまとめる) に従い、メニュー一覧などから機能の分類が分かる場合は `designs/basic-design-hierarchy.md` を作成・更新する。全体指針からリンクし、基本設計書の下書きと初回反映に引き継ぐ。
-- `designs/repository-structure.md` には [構成のテンプレート](assets/repository-structure.template.md) を使う。入力に記載があれば、記入案内をプログラムのディレクトリ構成と分かる範囲での役割に置き換える。記載がなく、新規作成する場合は、利用者向けの記入案内を残す。
+- `designs/repository-structure.md` には [構成のテンプレート](assets/repository-structure.template.md) を使う。入力に記載があれば、記入案内をプログラムのディレクトリ構成と分かる範囲での役割に置き換える。記載がなく、新規作成する場合は、利用者向けの記入案内を残す。`dandori` で配置を決める際にこの文書を使い、`nikomu` で実装を確認したあと、必要な変更を反映する。
 - [技術構成の手順](references/technical-context.md)に従い、`designs/technical-context.md` を用意し、全体指針からリンクする。資料や担当者の下書きがあれば初期記入に使い、ひな形の見出し順に担当者と未決事項を確認する。
 
 深掘りや判断の確認は一問ずつ行う。原則３つの案を推奨順に並べて最初の案を推す理由を添え、自由入力も受け付ける。案を提示できないときは、自由に答えられる質問にする。

@@ -1,4 +1,4 @@
-# Identify tasks and dependencies
+# Identify changed paths, tasks, and dependencies
 
 ## Compare the specification with the existing implementation
 
@@ -7,6 +7,16 @@
 3. For each criterion, distinguish the work the change requires from existing behavior that only needs verification. Return to clarification if a decision would change the specification. Investigate technical unknowns using the implementation or tests. If the investigation could change the plan itself, identify what needs investigating and what result would let planning resume.
 
 When technical context affects implementation or verification, consult the relevant sections of `designs/technical-context.md` if available and compare the target environment's current configuration with the approved target. Cite the evidence in the plan and account for rollout or environment setup in task dependencies and checks.
+
+## Identify the paths to change
+
+Use the directory tree and directory responsibilities in `designs/repository-structure.md` as the basis for placement, and compare them with the actual repository layout. If the document is missing or incomplete, plan from the project instructions and the layout you can verify. If the documented and actual layouts disagree and the difference affects this work, cite both and confirm which placement to use.
+
+Group the changes by area, such as frontend, backend, and infrastructure, using the project's structure. Record repository-relative paths for directories to create and for code, tests, and configuration files to create, modify, or delete. Map each change to its task. Note the paths and responsibilities to document when the plan uses an undocumented location, adds, moves, or removes a directory, or changes a directory's role.
+
+If a path needs investigation, record what is known and what would settle its location. If the investigation can run as a prerequisite task, connect it to the work that needs its result.
+
+If the structure document needs an addition or correction, plan a task to update it. Give it direct dependencies on the implementation and verification tasks that establish the layout or responsibilities. Its completion check compares the saved directory tree and responsibilities with the verified implementation.
 
 ## Define independently verifiable tasks
 

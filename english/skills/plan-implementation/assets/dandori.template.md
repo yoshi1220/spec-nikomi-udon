@@ -5,7 +5,14 @@ Specification — [shikomi.md](./shikomi.md)
 
 ## Implementation approach
 
-<!-- Describe the areas affected and what existing code or conventions the change will use. Explain any departure from an existing approach. -->
+<!-- Describe the areas affected and what existing code or conventions the change will use. Explain any departure from an existing approach. Link to designs/repository-structure.md when available. -->
+
+## Planned changes
+
+<!-- Use areas that match the project, such as frontend, backend, and infrastructure. Use repository-relative paths for directories to create and files to create, modify, or delete. Task IDs refer to parent tasks in the list below. If the structure document needs an addition or correction, include its path, the locations or responsibilities to record, and the update task ID. -->
+
+| Area | Path | Action | Planned change | Task ID |
+| --- | --- | --- | --- | --- |
 
 ## Tasks
 

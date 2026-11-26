@@ -88,7 +88,7 @@ $plan-implementation
 
 The skill derives tasks from the confirmed `shikomi.md` and design draft and uses a directed graph to check their dependencies. For example, implement storage and validation, connect the form and list, then verify saving and validation errors. The execution order puts prerequisites before the tasks that depend on them.
 
-- `dandori.md` records dependencies, execution order, completion criteria for tasks and subtasks, the unit-test plan, and how to verify each acceptance criterion.
+- `dandori.md` starts with the implementation approach and planned changes. Use `designs/repository-structure.md` to list directories and files to create or change by area, with their paths and task IDs. Then record the execution order derived from dependencies, completion criteria for tasks and subtasks, the unit-test plan, and how to verify each acceptance criterion.
 - `e2e.md` records test environments and data, steps, expected outcomes, and linked acceptance criterion IDs. When screenshots are enabled, it specifies what should be visible at each capture point.
 
 Check that each acceptance criterion has a verification method that can detect the intended failure. For `AC-02`, for example, verify both that the message appears and that the note is absent from the list. Proceed when the prerequisites are in place and the plan is ready to execute. [`plan-implementation` procedure](../skills/plan-implementation/SKILL.md)
@@ -100,6 +100,8 @@ $implement-plan
 ~~~
 
 The skill checks `shikomi.md` against the executable `dandori.md` and implements the tasks whose prerequisites are satisfied. In this example, it implements storage, validation, the entry form, and the list. A unit test checks that empty titles are rejected, with its failure before implementation and pass afterward recorded in the plan. The plan also records completed tasks and the check that passed for each acceptance criterion, so you can resume in a later session.
+
+After verifying the implementation, `implement-plan` updates `designs/repository-structure.md` with added or changed directory locations and responsibilities and fills gaps relevant to the work.
 
 For automated E2E, the skill creates or updates tests in `specs/<change>/e2e/` and runs them during implementation. Once the tasks are complete and the acceptance criteria have been verified, it hands the completed change and tests to `run-feature-e2e`. [`implement-plan` procedure](../skills/implement-plan/SKILL.md)
 
@@ -138,6 +140,8 @@ $document-existing-system Identify the current features and technical context, t
 ~~~
 
 By default, the skill inspects the current commit. Specify a tag or commit if you want to start from the version in use. It traces screens, APIs, configuration, code, and existing tests at that revision and records verified functions and relationships in `designs/system-overview.md`. When the team explicitly confirms the inventory, the skill saves the confirmation and analyzed revision. It uses the same revision to prepare `designs/technical-context.md`, including the environments and any points still to verify.
+
+The skill records the program directories and their responsibilities in `designs/repository-structure.md` using the code and configuration at the same commit. Use that document to decide where the first change belongs.
 
 By default, document the entire system as far as the evidence supports. You can limit the design text to note creation and listing, for example, if those are the functions the first change affects. The system structure still records all verified functions and relationships and shows where design text is pending. The saved revision and scope let you resume the investigation later. [`document-existing-system` procedure](../skills/document-existing-system/SKILL.md)
 
